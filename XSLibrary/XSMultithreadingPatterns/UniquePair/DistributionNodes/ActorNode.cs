@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace XSLibrary.MultithreadingPatterns.UniquePair.DistributionNodes
 {
-    public partial class ActorPool<PartType, GlobalDataType> : DistributionPool<PartType, GlobalDataType>
+    public partial class ActorPool<PartType, GlobalDataType> : SharedMemoryPool<PartType, GlobalDataType>
     {
         public class ActorNode : DistributionNode
         {

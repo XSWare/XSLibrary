@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using XSLibrary.MultithreadingPatterns.UniquePair;
 using XSLibrary.MultithreadingPatterns.UniquePair.DistributionNodes;
 
 namespace XSLibrary.MultithreadingPatterns.UniquePair
@@ -77,15 +76,10 @@ namespace XSLibrary.MultithreadingPatterns.UniquePair
 
         private void CalculateStep(int step)
         {
-            int subThreadCount = PairLogic.ThreadCount;
-
-            for (int i = 0; i < subThreadCount; i++)
+            for (int i = 0; i < PairLogic.ThreadCount; i++)
             {
                 m_distributionPool.DistributeCalculation(i, CreateCalculationPair(i, step));
-                //ThreadPool.QueueUserWorkItem(CreateCalculationPair(i, step).Calculate, finishEvents[i]);
             }
-
-            //CreateCalculationPair(0, step).Calculate();
 
             m_distributionPool.Synchronize();
         }
