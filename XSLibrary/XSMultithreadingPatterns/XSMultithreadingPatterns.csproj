@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{A336D0D3-5143-47F3-9589-EAA07A245475}</ProjectGuid>
+    <ProjectGuid>{983F5871-11EE-4879-B80E-4529816F0F38}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>XSLibrary.MultithreadingPatterns</RootNamespace>
@@ -50,9 +50,15 @@
   <ItemGroup>
     <Compile Include="Actor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UniquePair\Actorpool.cs" />
+    <Compile Include="UniquePair\DistributionNodes\ActorNode.cs" />
+    <Compile Include="UniquePair\DistributionNodes\ActorPool.cs" />
     <Compile Include="UniquePair\CalculationPair.cs" />
+    <Compile Include="UniquePair\DistributionNodes\DistributionNode.cs" />
+    <Compile Include="UniquePair\DistributionNodes\DistributionPool.cs" />
+    <Compile Include="UniquePair\DistributionNodes\LocalCoreNode.cs" />
     <Compile Include="UniquePair\PairingLogic.cs" />
+    <Compile Include="UniquePair\StackCalculationAlgorithms\SharedMemoryStackCalculation.cs" />
+    <Compile Include="UniquePair\UniquePairDistribution.cs" />
     <Compile Include="UniquePair\UniquePairThreading.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

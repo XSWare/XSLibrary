@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26206.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XSUtility", "XSLibrary\XSUtility\XSUtility.csproj", "{A37C8BF1-08E7-46BB-8F9E-536A82365FED}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XSThreadSafety", "XSLibrary\XSThreadSafety\XSThreadSafety.csproj", "{1364168D-0353-49F5-9DAC-2A501FD8055A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XSMultithreadingPatterns", "XSLibrary\XSMultithreadingPatterns\XSMultithreadingPatterns.csproj", "{983F5871-11EE-4879-B80E-4529816F0F38}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XSMultithreadingPatterns", "XSLibrary\XSMultithreadingPatterns\XSMultithreadingPatterns.csproj", "{A336D0D3-5143-47F3-9589-EAA07A245475}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XSNetwork", "XSLibrary\XSNetwork\XSNetwork.csproj", "{36A1D62E-EA81-4B77-AB0B-6753A7F394ED}"
 EndProject
@@ -27,10 +27,10 @@ Global
 		{1364168D-0353-49F5-9DAC-2A501FD8055A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1364168D-0353-49F5-9DAC-2A501FD8055A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1364168D-0353-49F5-9DAC-2A501FD8055A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{983F5871-11EE-4879-B80E-4529816F0F38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{983F5871-11EE-4879-B80E-4529816F0F38}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{983F5871-11EE-4879-B80E-4529816F0F38}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{983F5871-11EE-4879-B80E-4529816F0F38}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A336D0D3-5143-47F3-9589-EAA07A245475}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A336D0D3-5143-47F3-9589-EAA07A245475}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A336D0D3-5143-47F3-9589-EAA07A245475}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A336D0D3-5143-47F3-9589-EAA07A245475}.Release|Any CPU.Build.0 = Release|Any CPU
 		{36A1D62E-EA81-4B77-AB0B-6753A7F394ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{36A1D62E-EA81-4B77-AB0B-6753A7F394ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{36A1D62E-EA81-4B77-AB0B-6753A7F394ED}.Release|Any CPU.ActiveCfg = Release|Any CPU

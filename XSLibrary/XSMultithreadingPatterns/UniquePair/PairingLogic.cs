@@ -60,10 +60,7 @@
 
             for (int i = 0; i < StackCount; i++)
             {
-                //if(i < StackCount / 2)
-                    baseIDs[i] = i;
-                //else
-                //    baseIDs[i] = StackCount - i;
+                baseIDs[i] = i;
             }
 
             return baseIDs;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Threading;
+using XSLibrary.MultithreadingPatterns.UniquePair;
+using XSLibrary.MultithreadingPatterns.UniquePair.DistributionNodes;
 
 namespace XSLibrary.MultithreadingPatterns.UniquePair
 {
@@ -16,12 +17,8 @@ namespace XSLibrary.MultithreadingPatterns.UniquePair
         public int ID2;
     }
 
-    public partial class UniquePairThreading<PartType,GlobalDataType> : IDisposable
+    public partial class UniquePairThreading<PartType, GlobalDataType> : UniquePairDistribution<PartType, GlobalDataType>
     {
-        public delegate void PairCalculationFunction(PartType part1, PartType part2, GlobalDataType globalData);
-
-        public bool FixedCores { get; private set; }
-
         PairingLogic PairLogic { get; set; }
         public int ThreadCount { get { return PairLogic.ThreadCount; } }
         public int StepCount { get { return PairLogic.StepCount; } }
@@ -29,30 +26,18 @@ namespace XSLibrary.MultithreadingPatterns.UniquePair
 
         PartType[][] Stacks { get; set; }
         GlobalDataType GlobalData { get; set; }
-        PairCalculationFunction PairFunction { get; set; }
-        ActorPool Pool { get; set; }
 
-
-        public UniquePairThreading(int threadCount) : this(threadCount, false) { }
-        public UniquePairThreading(int threadCount, bool fixedCores)
+        public UniquePairThreading(DistributionPool<PartType, GlobalDataType> pool) : base(pool)
         {
-            FixedCores = fixedCores;
-            Initialize(threadCount);
-        }
-
-        private void Initialize(int threadCount)
-        {
-            PairLogic = new PairingLogic(threadCount); // needs to be initialized first so all the variables used are intiialized as well
+            PairLogic = new PairingLogic(pool.NodeCount); // needs to be initialized first so all the variables used are intiialized as well
 
             Stacks = new PartType[StackCount][];
-            Pool = new ActorPool(ThreadCount, FixedCores);
         }
 
-        public void Calculate(PartType[] parts, GlobalDataType globalData, PairCalculationFunction pairFunction)
+        public override void Calculate(PartType[] parts, GlobalDataType globalData)
         {
             CreateStacks(parts);
             GlobalData = globalData;
-            PairFunction = pairFunction;
 
             for (int i = 0; i < StepCount; i++)
             {
@@ -60,9 +45,9 @@ namespace XSLibrary.MultithreadingPatterns.UniquePair
             }
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
-            Pool.Close(true);
+            m_distributionPool.Dispose();
         }
 
         private void CreateStacks(PartType[] parts)
@@ -96,33 +81,30 @@ namespace XSLibrary.MultithreadingPatterns.UniquePair
 
             for (int i = 0; i < subThreadCount; i++)
             {
-                Pool.SendMessage(CreateCalculationPair(i, step), i);
+                m_distributionPool.DistributeCalculation(i, CreateCalculationPair(i, step));
                 //ThreadPool.QueueUserWorkItem(CreateCalculationPair(i, step).Calculate, finishEvents[i]);
             }
 
             //CreateCalculationPair(0, step).Calculate();
 
-            Pool.JoinThreads(subThreadCount);
+            m_distributionPool.Synchronize();
         }
 
-        private CalculationPair CreateCalculationPair(int threadID, int step)
+        private CalculationPair<PartType, GlobalDataType> CreateCalculationPair(int threadID, int step)
         {
             //int stackID1 = CircleInt(threadID + step);
             //int stackID2 = GetCalculationPartner(threadID, step, step >= ThreadCount);
 
-            CalculationPair data = new CalculationPair(
+            CalculationPair<PartType, GlobalDataType> data = new CalculationPair<PartType, GlobalDataType>(
                 Stacks[PairLogic.PairMatrix[step][threadID].ID1],
                 Stacks[PairLogic.PairMatrix[step][threadID].ID2],
                 GlobalData,
-                PairFunction
+                step == 0
                 );
 
-            data.Step = step;
-            data.ThreadID = threadID;
-            data.StackID = PairLogic.PairMatrix[step][threadID];
-
-            if (step == 0)
-                data.CalculateInternally = true;
+            //data.Step = step;
+            //data.ThreadID = threadID;
+            //data.StackID = PairLogic.PairMatrix[step][threadID];
 
             return data;
         }
