@@ -16,7 +16,7 @@ namespace XSLibrary.MultithreadingPatterns.UniquePair
         public int ID2;
     }
 
-    public partial class UniquePairThreading<PartType, GlobalDataType> : UniquePairDistribution<PartType, GlobalDataType>
+    public partial class RoundRobinTournamentDistribution<PartType, GlobalDataType> : UniquePairDistribution<PartType, GlobalDataType>
     {
         PairingLogic PairLogic { get; set; }
         public int ThreadCount { get { return PairLogic.ThreadCount; } }
@@ -26,7 +26,7 @@ namespace XSLibrary.MultithreadingPatterns.UniquePair
         PartType[][] Stacks { get; set; }
         GlobalDataType GlobalData { get; set; }
 
-        public UniquePairThreading(DistributionPool<PartType, GlobalDataType> pool) : base(pool)
+        public RoundRobinTournamentDistribution(DistributionPool<PartType, GlobalDataType> pool) : base(pool)
         {
             PairLogic = new PairingLogic(pool.NodeCount); // needs to be initialized first so all the variables used are intiialized as well
 
