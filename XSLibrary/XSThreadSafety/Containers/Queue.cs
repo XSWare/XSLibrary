@@ -15,7 +15,7 @@ namespace XSLibrary.ThreadSafety.Containers
             m_safeExecutor = safeExecutor;
         }
 
-        public void Add(T item)
+        public void Push(T item)
         {
             m_safeExecutor.Execute(() => m_list.AddLast(item));
         }

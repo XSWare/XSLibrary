@@ -29,4 +29,15 @@ namespace XSLibrary.Utility
             Console.Out.WriteLine(text);
         }
     }
+
+    public class LoggerConsolePeriodic : Logger
+    {
+        public string Prefix { get; set; } = "";
+        public string Suffix { get; set; } = "";
+
+        public override void Log(string text)
+        {
+            Console.Out.Write(Prefix + text + Suffix);
+        }
+    }
 }

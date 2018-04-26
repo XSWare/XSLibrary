@@ -2,7 +2,7 @@
 
 namespace XSLibrary.MultithreadingPatterns.UniquePair
 {
-    public class CalculationPair<PartType, GlobalDataType> : IDisposable
+    public class PairingData<PartType, GlobalDataType> : IDisposable
     {
         public PartType[] Stack1 { get; set; }
         public PartType[] Stack2 { get; set; }
@@ -10,10 +10,10 @@ namespace XSLibrary.MultithreadingPatterns.UniquePair
 
         public bool CalculateInternally { get; set; }
 
-        public CalculationPair(PartType[] part1, PartType[] part2, GlobalDataType globalData, bool calculateIntern)
+        public PairingData(PartType[] stack1, PartType[] stack2, GlobalDataType globalData, bool calculateIntern)
         {
-            Stack1 = part1;
-            Stack2 = part2;
+            Stack1 = stack1;
+            Stack2 = stack2;
             GlobalData = globalData;
 
             CalculateInternally = calculateIntern;

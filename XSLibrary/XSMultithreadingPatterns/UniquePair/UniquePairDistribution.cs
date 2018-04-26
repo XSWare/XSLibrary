@@ -1,19 +1,18 @@
 ﻿using System;
-using XSLibrary.MultithreadingPatterns.UniquePair.DistributionNodes;
 
 namespace XSLibrary.MultithreadingPatterns.UniquePair
 {
-    public abstract class UniquePairDistribution<PartType, GlobalDataType> : IDisposable
+    public abstract class UniquePairDistribution<ElementType, GlobalDataType> : IDisposable
     {
-        protected DistributionPool<PartType, GlobalDataType> m_distributionPool;
+        public delegate void PairCalculationFunction(ElementType element1, ElementType element2, GlobalDataType globalData);
 
-        public UniquePairDistribution(DistributionPool<PartType, GlobalDataType> pool)
+        public abstract int CoreCount { get; }
+
+        public abstract void SetCalculationFunction(PairCalculationFunction function);
+        public abstract void Calculate(ElementType[] elements, GlobalDataType globalData);
+
+        public virtual void Dispose()
         {
-            m_distributionPool = pool;
         }
-
-        public abstract void Calculate(PartType[] parts, GlobalDataType globalData);
-
-        public abstract void Dispose();
     }
 }

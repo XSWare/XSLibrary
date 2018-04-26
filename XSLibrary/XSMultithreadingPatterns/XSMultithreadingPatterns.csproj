@@ -38,30 +38,42 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="XSThreadSafety, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\bin\Debug\XSThreadSafety.dll</HintPath>
-    </Reference>
-    <Reference Include="XSUtility, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\bin\Debug\XSUtility.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Actor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UniquePair\DistributionNodes\ActorNode.cs" />
-    <Compile Include="UniquePair\DistributionNodes\ActorPool.cs" />
+    <Compile Include="UniquePair\CalculationNodes\ThreadSpawning.cs" />
+    <Compile Include="UniquePair\Distributions\LockingDistribution.cs" />
+    <Compile Include="UniquePair\StandaloneDistribution.cs" />
+    <Compile Include="UniquePair\CalculationNodes\ActorNode.cs" />
+    <Compile Include="UniquePair\CalculationNodes\ActorPool.cs" />
     <Compile Include="UniquePair\CalculationPair.cs" />
-    <Compile Include="UniquePair\DistributionNodes\DistributionNode.cs" />
-    <Compile Include="UniquePair\DistributionNodes\DistributionPool.cs" />
-    <Compile Include="UniquePair\DistributionNodes\LocalCoreNode.cs" />
-    <Compile Include="UniquePair\DistributionNodes\SharedMemoryPool.cs" />
-    <Compile Include="UniquePair\DistributionNodes\SystemHandledThreadPool.cs" />
-    <Compile Include="UniquePair\PairingLogic.cs" />
+    <Compile Include="UniquePair\CalculationNodes\DistributionNode.cs" />
+    <Compile Include="UniquePair\CalculationNodes\CorePoolBase.cs" />
+    <Compile Include="UniquePair\CalculationNodes\SharedMemoryCores.cs" />
+    <Compile Include="UniquePair\CalculationNodes\SystemHandledThreadPool.cs" />
+    <Compile Include="UniquePair\Distributions\EvenlyLockedDistribution.cs" />
+    <Compile Include="UniquePair\Distributions\LockedRoundRobinTournamentDistribution.cs" />
+    <Compile Include="UniquePair\Distributions\LockedResourceDistribution.cs" />
+    <Compile Include="UniquePair\Distributions\SingleThreadReference.cs" />
+    <Compile Include="UniquePair\RRTPairingLogic.cs" />
     <Compile Include="UniquePair\StackCalculationAlgorithms\SharedMemoryStackCalculation.cs" />
+    <Compile Include="UniquePair\CorePoolDistribution.cs" />
+    <Compile Include="UniquePair\Distributions\SynchronizedRoundRobinTournamentDistribution.cs" />
     <Compile Include="UniquePair\UniquePairDistribution.cs" />
-    <Compile Include="UniquePair\UniquePairThreading.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\XSThreadSafety\XSThreadSafety.csproj">
+      <Project>{1364168d-0353-49f5-9dac-2a501fd8055a}</Project>
+      <Name>XSThreadSafety</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\XSUtility\XSUtility.csproj">
+      <Project>{a37c8bf1-08e7-46bb-8f9e-536a82365fed}</Project>
+      <Name>XSUtility</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram1.cd" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
