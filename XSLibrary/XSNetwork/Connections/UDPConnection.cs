@@ -23,6 +23,11 @@ namespace XSLibrary.Network.Connections
                 ConnectionSocket.SendTo(data, remoteEndPoint);
         }
 
+        public void HolePunching(IPEndPoint remoteEndPoint)
+        {
+            Send(new byte[0], remoteEndPoint);
+        }
+
         protected override void PreReceiveSettings()
         {
             ConnectionSocket.Bind(ConnectionEndpoint);
@@ -35,7 +40,15 @@ namespace XSLibrary.Network.Connections
 
             int size = ConnectionSocket.ReceiveFrom(data, ref source);
 
+            if(IsHolePunching(size))
+                return;
+
             RaiseReceivedEvent(TrimData(data, size), source as IPEndPoint);    
+        }
+
+        private bool IsHolePunching(int size)
+        {
+            return size == 0;
         }
 
         private void RaiseReceivedEvent(byte[] data, IPEndPoint source)
