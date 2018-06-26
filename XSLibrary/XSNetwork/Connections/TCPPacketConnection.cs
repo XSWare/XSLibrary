@@ -77,6 +77,9 @@ namespace XSLibrary.Network.Connections
                     continue;
                 }
 
+                if (!IsPacket(data, currentPos))
+                    return packets;
+
                 int packetSize = ParseSize(data, currentPos);
                 if (packetSize < 0 || packetSize > MaxPacketSize || currentPos + Header_Size_PacketLength + packetSize > data.Length)
                     return packets;
@@ -105,6 +108,11 @@ namespace XSLibrary.Network.Connections
         private bool IsKeepAlive(byte[] data, int currentPos)
         {
             return data[currentPos] == Header_ID_KeepAlive;
+        }
+
+        private bool IsPacket(byte[] data, int currentPos)
+        {
+            return data[currentPos] == Header_ID_Packet;
         }
     }
 }
