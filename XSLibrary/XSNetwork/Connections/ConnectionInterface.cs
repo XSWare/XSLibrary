@@ -20,8 +20,10 @@ namespace XSLibrary.Network.Connections
 
     public abstract class ConnectionInterface
     {
-        public delegate void ReceiveErrorHandler(object sender, IPEndPoint endPoint);
         public event ReceiveErrorHandler ReceiveErrorEvent;
+        public event EventHandler OnDisconnect;     // can basically come from any thread so make your actions threadsafe
+
+        public delegate void ReceiveErrorHandler(object sender, IPEndPoint endPoint);
 
         public int MaxPacketSize { get; set; } = 8192;
 
@@ -203,6 +205,7 @@ namespace XSLibrary.Network.Connections
 
                 WaitForDisconnect();
                 Logger.Log("Disconnected.");
+                RaiseOnDisconnect();
             }
             else
                 m_lock.Release();
@@ -213,6 +216,12 @@ namespace XSLibrary.Network.Connections
             Thread threadCopy = ReceiveThread;
             if (threadCopy != null)
                 ReceiveThread.Join();
+        }
+
+        private void RaiseOnDisconnect()
+        {
+            EventHandler safeCopy = OnDisconnect;
+            safeCopy?.Invoke(this, new EventArgs());
         }
     }
 }
