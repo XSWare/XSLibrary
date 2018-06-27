@@ -29,7 +29,7 @@ namespace XSLibrary.Network.Connections
 
         public Logger Logger { get; set; }
 
-        protected SingleThreadExecutor m_lock;
+        protected SafeExecutor m_lock;
 
         public bool Connected
         {
