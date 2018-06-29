@@ -17,6 +17,12 @@ namespace XSLibrary.Utility
                 Restart();
         }
 
+        public float secondsPassed()
+        {
+            TimeSpan timePassed = new TimeSpan(DateTime.Now.Ticks - m_start.Ticks);
+            return (float)timePassed.TotalSeconds;
+        }
+
         public void TimerInterval(long microSeconds)
         {
             m_timerEnd = microSeconds;
