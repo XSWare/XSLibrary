@@ -9,7 +9,7 @@ namespace XSLibrary.Utility
         bool m_timerOverflow;
         long m_timerEnd;
 
-        public TimeSpan TimePassed { get { return DateTime.Now - m_start; } }
+        public TimeSpan TimePassed { get { return m_started ? DateTime.Now - m_start : new TimeSpan(0); } }
 
         public OneShotTimer(long microSeconds, bool start = true)
         {
