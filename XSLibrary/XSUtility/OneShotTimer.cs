@@ -9,6 +9,8 @@ namespace XSLibrary.Utility
         bool m_timerOverflow;
         long m_timerEnd;
 
+        public TimeSpan TimePassed { get { return DateTime.Now - m_start; } }
+
         public OneShotTimer(long microSeconds, bool start = true)
         {
             TimerInterval(microSeconds);
