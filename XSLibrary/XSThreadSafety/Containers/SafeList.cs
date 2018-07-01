@@ -31,6 +31,11 @@ namespace XSLibrary.ThreadSafety.Containers
             m_safeExecutor.Execute(() => m_internalList.Add(item));
         }
 
+        public bool Contains(T item)
+        {
+            return m_safeExecutor.Execute(() => m_internalList.Contains(item));
+        }
+
         public void Insert(int index, T element)
         {
             m_safeExecutor.Execute(() => m_internalList.Insert(index, element));
