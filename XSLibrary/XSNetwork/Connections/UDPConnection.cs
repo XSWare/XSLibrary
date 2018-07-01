@@ -8,8 +8,12 @@ namespace XSLibrary.Network.Connections
         public delegate void DataReceivedHandler(object sender, byte[] data, IPEndPoint endPoint);
         public event DataReceivedHandler DataReceivedEvent;
 
+        const int SIO_UDP_CONNRESET = -1744830452;
+
         public UDPConnection(IPEndPoint local) : base(new Socket(local.AddressFamily, SocketType.Dgram, ProtocolType.Udp), local)
         {
+            // do this so remote cant close socket https://docs.microsoft.com/en-us/windows/desktop/WinSock/winsock-ioctls
+            ConnectionSocket.IOControl((IOControlCode)SIO_UDP_CONNRESET, new byte[] { 0, 0, 0, 0 }, null);
         }
 
         public virtual void Send(byte[] data, IPEndPoint remoteEndPoint)

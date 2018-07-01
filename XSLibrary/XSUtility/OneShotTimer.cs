@@ -5,11 +5,11 @@ namespace XSLibrary.Utility
     public class OneShotTimer
     {
         DateTime m_start;
-        bool m_started = false;
+        public bool Started { get; private set; } = false;
         bool m_timerOverflow;
         long m_timerEnd;
 
-        public TimeSpan TimePassed { get { return DateTime.Now - m_start; } }
+        public TimeSpan TimePassed { get { return Started ? DateTime.Now - m_start : new TimeSpan(0); } }
 
         public OneShotTimer(long microSeconds, bool start = true)
         {
@@ -33,14 +33,25 @@ namespace XSLibrary.Utility
 
         public void Restart()
         {
-            m_start = DateTime.Now;
-            m_started = true;
+            Reset();
+            Start();
+        }
+
+        public void Reset()
+        {
             m_timerOverflow = false;
+            Started = false;
+        }
+
+        private void Start()
+        {
+            m_start = DateTime.Now;
+            Started = true;
         }
 
         private bool TimerOverflow()
         {
-            if (!m_started)
+            if (!Started)
                 return false;
 
             if (m_timerOverflow)
