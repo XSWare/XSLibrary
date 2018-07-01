@@ -115,6 +115,7 @@ namespace XSLibrary.Network.Connections
                 return;
 
             ReceiveThread = new Thread(ReceiveLoop);
+            ReceiveThread.Name = "Connection receive";
             ReceiveThread.Start();
         }
 
