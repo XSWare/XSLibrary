@@ -33,7 +33,7 @@ namespace XSLibrary.ThreadSafety.Containers
 
         public bool Contains(T item)
         {
-            return m_safeExecutor.Execute(() => m_internalList.Contains(item));
+            return m_safeExecutor.ExecuteReadonly(() => m_internalList.Contains(item));
         }
 
         public void Insert(int index, T element)
