@@ -31,18 +31,7 @@ namespace XSLibrary.Network.Connections
 
         protected SafeExecutor m_lock;
 
-        public bool Connected
-        {
-            get
-            {
-                try
-                {
-                    m_lock.Lock();
-                    return (!Disconnecting && ConnectionSocket.Connected);
-                }
-                finally { m_lock.Release(); }
-            }
-        }
+        public bool Connected { get { return m_lock.Execute(() => { return !Disconnecting && ConnectionSocket.Connected; }); } }
 
         volatile bool m_receiving = false;
         public bool Receiving
@@ -147,10 +136,7 @@ namespace XSLibrary.Network.Connections
         protected void ReceiveErrorHandling(IPEndPoint source)
         {
             Disconnect();
-
-            ReceiveErrorHandler threadCopy = ReceiveErrorEvent;
-            if(threadCopy != null)
-                ReceiveErrorEvent.Invoke(this, source);
+            ReceiveErrorEvent?.Invoke(this, source);
         }
 
         protected byte[] TrimData(byte[] data, int size)
@@ -180,8 +166,16 @@ namespace XSLibrary.Network.Connections
 
         public void Disconnect()
         {
-            m_lock.Lock();
+            if(m_lock.Execute(UnsafeDisconnect))
+            {
+                WaitForDisconnect();
+                Logger.Log("Disconnected.");
+                RaiseOnDisconnect();
+            }
+        }
 
+        private bool UnsafeDisconnect()
+        {
             if (!Disconnecting)
             {
                 Disconnecting = true;
@@ -199,30 +193,21 @@ namespace XSLibrary.Network.Connections
                 {
                     throw new ConnectionException("Exception while disconnecting! Exception message: " + ex.Message, ex);
                 }
-                finally
-                {
-                    m_lock.Release();
-                }
 
-                WaitForDisconnect();
-                Logger.Log("Disconnected.");
-                RaiseOnDisconnect();
+                return true;
             }
-            else
-                m_lock.Release();
+
+            return false;
         }
 
         protected virtual void WaitForDisconnect()
         {
-            Thread threadCopy = ReceiveThread;
-            if (threadCopy != null)
-                ReceiveThread.Join();
+            ReceiveThread?.Join();
         }
 
         private void RaiseOnDisconnect()
         {
-            EventHandler safeCopy = OnDisconnect;
-            safeCopy?.Invoke(this, new EventArgs());
+            OnDisconnect?.Invoke(this, new EventArgs());
         }
     }
 }

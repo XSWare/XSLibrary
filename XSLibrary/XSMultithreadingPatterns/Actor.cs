@@ -35,6 +35,7 @@ namespace XSLibrary.MultithreadingPatterns.Actor
         private void StartThread()
         {
             m_thread = new Thread(WorkLoop);
+            m_thread.Name = "Actor";
             m_thread.Start();
             Logger.Log("Thread started. {0} messages in queue.", m_queue.Count);
         }
