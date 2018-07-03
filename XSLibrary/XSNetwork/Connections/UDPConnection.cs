@@ -57,9 +57,7 @@ namespace XSLibrary.Network.Connections
 
         private void RaiseReceivedEvent(byte[] data, IPEndPoint source)
         {
-            DataReceivedHandler threadCopy = DataReceivedEvent;
-            if (threadCopy != null)
-                threadCopy.Invoke(this, data, source);
+            DataReceivedEvent?.Invoke(this, data, source);
         }
     }
 }

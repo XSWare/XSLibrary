@@ -70,9 +70,7 @@ namespace XSLibrary.Network.Accepters
 
         private void RaiseClientConnectedEvent(Socket acceptedSocket)
         {
-            ClientConnectedHandler safeCopy = ClientConnected;
-            if (safeCopy != null)
-                safeCopy.Invoke(this, acceptedSocket);
+            ClientConnected?.Invoke(this, acceptedSocket);
         }
 
         public void Stop()
