@@ -14,13 +14,10 @@ namespace XSLibrary.Network.Connections
         protected override IPEndPoint Local => _local;
 
         IPEndPoint _remote;
-        protected override IPEndPoint Remote => (_remote != null ? _remote : base.Remote);
-
-        IPEndPoint _sendTarget;
-        public IPEndPoint SendTarget
+        public IPEndPoint Remote
         {
-            get { return (_sendTarget != null ? _sendTarget : Remote); }
-            set { _sendTarget = value; }
+            get { return (_remote != null ? _remote : base.Remote); }
+            set { _remote = value; }
         }
 
         public UDPConnection(IPEndPoint local) : base(new Socket(local.AddressFamily, SocketType.Dgram, ProtocolType.Udp))
@@ -34,20 +31,18 @@ namespace XSLibrary.Network.Connections
         protected override void UnsafeSend(byte[] data)
         {
             if (!Disconnecting && Remote != null)
-                ConnectionSocket.SendTo(data, SendTarget);
+                ConnectionSocket.SendTo(data, Remote);
         }
 
         public void Send(byte[] data, IPEndPoint target)
         {
-            IPEndPoint temp = SendTarget;
             SetDefaultSend(target);
             Send(data);
-            SetDefaultSend(temp);
         }
 
-        public void SetDefaultSend(IPEndPoint target)
+        public void SetDefaultSend(IPEndPoint remote)
         {
-            SendTarget = target;
+            Remote = remote;
         }
 
         public void HolePunching(IPEndPoint remoteEndPoint)
