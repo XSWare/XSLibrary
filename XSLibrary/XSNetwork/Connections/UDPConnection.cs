@@ -39,7 +39,7 @@ namespace XSLibrary.Network.Connections
             return base.CanSend() && Remote != null;
         }
 
-        protected override void UnsafeSend(byte[] data)
+        protected override void SendSpecialized(byte[] data)
         {
                 ConnectionSocket.SendTo(data, Remote);
         }
