@@ -12,13 +12,15 @@ namespace XSLibrary.Network.Connections
 
         public UDPConnection(IPEndPoint local) : base(new Socket(local.AddressFamily, SocketType.Dgram, ProtocolType.Udp), local)
         {
+            _local = local;
             // do this so remote cant close socket https://docs.microsoft.com/en-us/windows/desktop/WinSock/winsock-ioctls
             ConnectionSocket.IOControl((IOControlCode)SIO_UDP_CONNRESET, new byte[] { 0, 0, 0, 0 }, null);
         }
 
-        public virtual void Send(byte[] data, IPEndPoint remoteEndPoint)
+        protected override void UnsafeSend(byte[] data)
         {
-            m_lock.Execute(() => UnsafeSend(data, remoteEndPoint));
+            if (!Disconnecting && Remote != null)
+                ConnectionSocket.SendTo(data, Remote);
         }
 
         private void UnsafeSend(byte[] data, IPEndPoint remoteEndPoint)
@@ -34,7 +36,7 @@ namespace XSLibrary.Network.Connections
 
         protected override void PreReceiveSettings()
         {
-            ConnectionSocket.Bind(ConnectionEndpoint);
+            ConnectionSocket.Bind(Local);
         }
 
         protected override void ReceiveFromSocket()
@@ -61,3 +63,37 @@ namespace XSLibrary.Network.Connections
         }
     }
 }
+
+        public event DataReceivedHandler DataReceivedEvent;
+
+        const int SIO_UDP_CONNRESET = -1744830452;
+
+        IPEndPoint _local;
+        protected override IPEndPoint Local { get { return _local; } }
+
+        IPEndPoint _remote;
+        protected override IPEndPoint Remote { get { return (_remote != null ? _remote : base.Remote); } }
+
+        public UDPConnection(IPEndPoint local) : base(new Socket(local.AddressFamily, SocketType.Dgram, ProtocolType.Udp))
+        public void Send(byte[] data, IPEndPoint target)
+        {
+            IPEndPoint temp = Remote;
+            SetPermanentSendTarget(target);
+            Send(data);
+            SetPermanentSendTarget(temp);
+        public void SetPermanentSendTarget(IPEndPoint target)
+        {
+            _remote = target;
+        }
+
+        public void HolePunching(IPEndPoint remoteEndPoint)
+        {
+            Send(new byte[0], remoteEndPoint);
+            byte[] data = new byte[MaxPacketSize];
+            EndPoint source = Local;
+
+            int size = ConnectionSocket.ReceiveFrom(data, ref source);
+
+            if(IsHolePunching(size))
+                return;
+

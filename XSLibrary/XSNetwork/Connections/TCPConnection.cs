@@ -54,9 +54,53 @@ namespace XSLibrary.Network.Connections
             RaiseReceivedEvent(TrimData(data, size));
         }
 
+            int size = ConnectionSocket.Receive(data, MaxPacketSize, SocketFlags.None);
+
+            if (size <= 0)
+            {
+                ReceiveThread = null;
+                ReceiveErrorHandling(ConnectionEndpoint);
+                return;
+            }
+
+            Logger.Log("Received data.");
+            ProcessReceivedData(data, size);
+        }
+
+        protected virtual void ProcessReceivedData(byte[] data, int size)
+        {
+            RaiseReceivedEvent(TrimData(data, size));
+        }
+
         protected void RaiseReceivedEvent(byte[] data)
         {
             DataReceivedEvent?.Invoke(this, data);
         }
     }
 }
+
+        protected override void UnsafeSend(byte[] data)
+        {
+            if (!Disconnecting)
+                ConnectionSocket.Send(data);
+        protected override void ReceiveFromSocket()
+        {
+            byte[] data = new byte[MaxPacketSize];
+
+            int size = ConnectionSocket.Receive(data, MaxPacketSize, SocketFlags.None);
+
+            if (size <= 0)
+            {
+                ReceiveThread = null;
+                ReceiveErrorHandling(Remote);
+                return;
+            }
+
+            Logger.Log("Received data.");
+            ProcessReceivedData(data, size);
+        }
+
+        protected virtual void ProcessReceivedData(byte[] data, int size)
+        {
+            RaiseReceivedEvent(TrimData(data, size));
+        }

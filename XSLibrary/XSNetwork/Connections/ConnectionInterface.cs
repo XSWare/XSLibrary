@@ -44,7 +44,8 @@ namespace XSLibrary.Network.Connections
         }
 
         protected Socket ConnectionSocket { get; set; }
-        protected IPEndPoint ConnectionEndpoint { get; set; }
+        protected virtual IPEndPoint Local { get { return ConnectionSocket.LocalEndPoint as IPEndPoint; } }
+        protected virtual IPEndPoint Remote { get { return ConnectionSocket.RemoteEndPoint as IPEndPoint; } }
 
         protected Thread ReceiveThread { get; set; }
 
@@ -55,15 +56,20 @@ namespace XSLibrary.Network.Connections
             set { m_disconnected = value; }
         }
 
-        public ConnectionInterface(Socket connectionSocket) : this(connectionSocket, connectionSocket.RemoteEndPoint as IPEndPoint) { }
-        public ConnectionInterface(Socket connectionSocket, IPEndPoint remote)
+        public ConnectionInterface(Socket connectionSocket)
         {
             Logger = new NoLog();
             m_lock = new SingleThreadExecutor();
 
-            ConnectionEndpoint = new IPEndPoint(remote.Address, remote.Port);
             InitializeSocket(connectionSocket);
         }
+
+        public void Send(byte[] data)
+        {
+            m_lock.Execute(() => UnsafeSend(data));
+        }
+
+        protected abstract void UnsafeSend(byte[] data);
 
         public void InitializeReceiving()
         {
@@ -119,12 +125,12 @@ namespace XSLibrary.Network.Connections
                 catch (SocketException)
                 {
                     ReceiveThread = null;
-                    ReceiveErrorHandling(ConnectionEndpoint);
+                    ReceiveErrorHandling(Remote);
                 }
                 catch (ObjectDisposedException)
                 {
                     ReceiveThread = null;
-                    ReceiveErrorHandling(ConnectionEndpoint);
+                    ReceiveErrorHandling(Remote);
                 }
             }
 
