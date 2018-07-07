@@ -11,13 +11,13 @@ namespace XSLibrary.Network.Connections
         const int SIO_UDP_CONNRESET = -1744830452;
 
         IPEndPoint _local;
-        protected override IPEndPoint Local => _local;
+        public override IPEndPoint Local => _local;
 
         IPEndPoint _remote;
-        public IPEndPoint Remote
+        public override IPEndPoint Remote
         {
             get { return (_remote != null ? _remote : base.Remote); }
-            set { _remote = value; }
+            protected set { _remote = value; }
         }
 
         public UDPConnection(IPEndPoint local) : base(new Socket(local.AddressFamily, SocketType.Dgram, ProtocolType.Udp))
@@ -28,16 +28,20 @@ namespace XSLibrary.Network.Connections
             ConnectionSocket.IOControl((IOControlCode)SIO_UDP_CONNRESET, new byte[] { 0, 0, 0, 0 }, null);
         }
 
-        protected override void UnsafeSend(byte[] data)
-        {
-            if (!Disconnecting && Remote != null)
-                ConnectionSocket.SendTo(data, Remote);
-        }
-
         public void Send(byte[] data, IPEndPoint remote)
         {
             SetDefaultSend(remote);
             Send(data);
+        }
+
+        protected override bool CanSend()
+        {
+            return base.CanSend() && Remote != null;
+        }
+
+        protected override void UnsafeSend(byte[] data)
+        {
+                ConnectionSocket.SendTo(data, Remote);
         }
 
         public void SetDefaultSend(IPEndPoint remote)
