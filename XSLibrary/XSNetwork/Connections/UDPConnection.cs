@@ -34,9 +34,9 @@ namespace XSLibrary.Network.Connections
                 ConnectionSocket.SendTo(data, Remote);
         }
 
-        public void Send(byte[] data, IPEndPoint target)
+        public void Send(byte[] data, IPEndPoint remote)
         {
-            SetDefaultSend(target);
+            SetDefaultSend(remote);
             Send(data);
         }
 
