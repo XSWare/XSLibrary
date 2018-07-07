@@ -94,10 +94,10 @@ namespace XSLibrary.Network.Connections
 
         protected abstract void SendSpecialized(byte[] data);
 
-        protected void SendErrorHandling(IPEndPoint source)
+        protected void SendErrorHandling(IPEndPoint remote)
         {
             Disconnect();
-            OnSendError?.Invoke(this, source);
+            OnSendError?.Invoke(this, remote);
         }
 
         public void InitializeReceiving()
@@ -168,10 +168,10 @@ namespace XSLibrary.Network.Connections
 
         protected abstract void ReceiveFromSocket();
 
-        protected void ReceiveErrorHandling(IPEndPoint source)
+        protected void ReceiveErrorHandling(IPEndPoint remote)
         {
             Disconnect();
-            OnReceiveError?.Invoke(this, source);
+            OnReceiveError?.Invoke(this, remote);
         }
 
         protected byte[] TrimData(byte[] data, int size)
