@@ -29,9 +29,9 @@ namespace XSLibrary.Network.Connections
 
         protected override void ReceiveFromSocket()
         {
-            byte[] data = new byte[MaxPacketSize];
+            byte[] data = new byte[MaxReceiveSize];
 
-            int size = ConnectionSocket.Receive(data, MaxPacketSize, SocketFlags.None);
+            int size = ConnectionSocket.Receive(data, MaxReceiveSize, SocketFlags.None);
 
             if (size <= 0)
             {

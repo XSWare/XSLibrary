@@ -81,7 +81,7 @@ namespace XSLibrary.Network.Connections
                     return packets;
 
                 int packetSize = ParseSize(data, currentPos);
-                if (packetSize < 0 || packetSize > MaxPacketSize || currentPos + Header_Size_PacketLength + packetSize > data.Length)
+                if (packetSize < 0 || packetSize > MaxReceiveSize || currentPos + Header_Size_PacketLength + packetSize > data.Length)
                     return packets;
 
                 byte[] packet = new byte[packetSize];

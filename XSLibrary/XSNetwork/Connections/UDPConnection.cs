@@ -51,7 +51,7 @@ namespace XSLibrary.Network.Connections
 
         protected override void ReceiveFromSocket()
         {
-            byte[] data = new byte[MaxPacketSize];
+            byte[] data = new byte[MaxReceiveSize];
             EndPoint source = new IPEndPoint(Local.Address, Local.Port);
 
             int size = ConnectionSocket.ReceiveFrom(data, ref source);

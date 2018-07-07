@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using XSLibrary.Network.ConnectionCryptos;
 using XSLibrary.ThreadSafety.Executors;
 using XSLibrary.Utility;
 
@@ -26,7 +27,7 @@ namespace XSLibrary.Network.Connections
 
         public delegate void CommunicationErrorHandler(object sender, IPEndPoint remote);
 
-        public int MaxPacketSize { get; set; } = 8192;
+        public int MaxReceiveSize { get; set; } = 8192;
 
         public Logger Logger { get; set; }
 
@@ -57,8 +58,13 @@ namespace XSLibrary.Network.Connections
             set { m_disconnected = value; }
         }
 
-        public ConnectionInterface(Socket connectionSocket)
+        IConnectionCrypto Crypto { get; set; }
+
+        public ConnectionInterface(Socket connectionSocket) : this(connectionSocket, new NoCrypto()) { }
+        public ConnectionInterface(Socket connectionSocket, IConnectionCrypto crypto)
         {
+            Crypto = crypto;
+
             Logger = new NoLog();
             m_lock = new SingleThreadExecutor();
 
