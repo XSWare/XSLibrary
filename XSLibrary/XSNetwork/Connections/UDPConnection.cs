@@ -10,19 +10,9 @@ namespace XSLibrary.Network.Connections
 
         const int SIO_UDP_CONNRESET = -1744830452;
 
-        IPEndPoint _local;
-        public override IPEndPoint Local => _local;
-
-        IPEndPoint _remote;
-        public override IPEndPoint Remote
-        {
-            get { return (_remote != null ? _remote : base.Remote); }
-            protected set { _remote = value; }
-        }
-
         public UDPConnection(IPEndPoint local) : base(new Socket(local.AddressFamily, SocketType.Dgram, ProtocolType.Udp))
         {
-            _local = local;
+            Local = local;
 
             // do this so remote cant close socket https://docs.microsoft.com/en-us/windows/desktop/WinSock/winsock-ioctls
             ConnectionSocket.IOControl((IOControlCode)SIO_UDP_CONNRESET, new byte[] { 0, 0, 0, 0 }, null);

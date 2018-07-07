@@ -9,11 +9,11 @@ namespace XSLibrary.Network.Connections
         public delegate void DataReceivedHandler(object sender, byte[] data);
         public event DataReceivedHandler DataReceivedEvent;
 
-        public IPEndPoint GetEndPoint { get { return ConnectionSocket.RemoteEndPoint as IPEndPoint; } }
-
         public TCPConnection(Socket socket) 
             : base(socket)
         {
+            Local = socket.LocalEndPoint as IPEndPoint;
+            Remote = socket.RemoteEndPoint as IPEndPoint;
         }
 
         protected override void SendSpecialized(byte[] data)

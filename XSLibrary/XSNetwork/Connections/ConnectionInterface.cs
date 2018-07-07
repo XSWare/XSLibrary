@@ -45,8 +45,8 @@ namespace XSLibrary.Network.Connections
         }
 
         protected Socket ConnectionSocket { get; set; }
-        public virtual IPEndPoint Local { get { return ConnectionSocket.LocalEndPoint as IPEndPoint; } protected set { } }
-        public virtual IPEndPoint Remote { get { return ConnectionSocket.RemoteEndPoint as IPEndPoint; } protected set { } }
+        public IPEndPoint Local { get; protected set; }
+        public IPEndPoint Remote { get; protected set; }
 
         protected Thread ReceiveThread { get; set; }
 
@@ -94,15 +94,15 @@ namespace XSLibrary.Network.Connections
 
         protected abstract void SendSpecialized(byte[] data);
 
-        public void InitializeReceiving()
-        {
-            m_lock.Execute(UnsafeInitializeReceiving);
-        }
-
         protected void SendErrorHandling(IPEndPoint source)
         {
             Disconnect();
             OnSendError?.Invoke(this, source);
+        }
+
+        public void InitializeReceiving()
+        {
+            m_lock.Execute(UnsafeInitializeReceiving);
         }
 
         private void UnsafeInitializeReceiving()
