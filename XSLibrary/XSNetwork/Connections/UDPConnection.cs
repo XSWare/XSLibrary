@@ -10,9 +10,23 @@ namespace XSLibrary.Network.Connections
 
         const int SIO_UDP_CONNRESET = -1744830452;
 
-        public UDPConnection(IPEndPoint local) : base(new Socket(local.AddressFamily, SocketType.Dgram, ProtocolType.Udp), local)
+        IPEndPoint _local;
+        protected override IPEndPoint Local => _local;
+
+        IPEndPoint _remote;
+        protected override IPEndPoint Remote => (_remote != null ? _remote : base.Remote);
+
+        IPEndPoint _sendTarget;
+        public IPEndPoint SendTarget
+        {
+            get { return (_sendTarget != null ? _sendTarget : Remote); }
+            set { _sendTarget = value; }
+        }
+
+        public UDPConnection(IPEndPoint local) : base(new Socket(local.AddressFamily, SocketType.Dgram, ProtocolType.Udp))
         {
             _local = local;
+
             // do this so remote cant close socket https://docs.microsoft.com/en-us/windows/desktop/WinSock/winsock-ioctls
             ConnectionSocket.IOControl((IOControlCode)SIO_UDP_CONNRESET, new byte[] { 0, 0, 0, 0 }, null);
         }
@@ -20,13 +34,20 @@ namespace XSLibrary.Network.Connections
         protected override void UnsafeSend(byte[] data)
         {
             if (!Disconnecting && Remote != null)
-                ConnectionSocket.SendTo(data, Remote);
+                ConnectionSocket.SendTo(data, SendTarget);
         }
 
-        private void UnsafeSend(byte[] data, IPEndPoint remoteEndPoint)
+        public void Send(byte[] data, IPEndPoint target)
         {
-            if (!Disconnecting)
-                ConnectionSocket.SendTo(data, remoteEndPoint);
+            IPEndPoint temp = SendTarget;
+            SetDefaultSend(target);
+            Send(data);
+            SetDefaultSend(temp);
+        }
+
+        public void SetDefaultSend(IPEndPoint target)
+        {
+            SendTarget = target;
         }
 
         public void HolePunching(IPEndPoint remoteEndPoint)
@@ -42,7 +63,7 @@ namespace XSLibrary.Network.Connections
         protected override void ReceiveFromSocket()
         {
             byte[] data = new byte[MaxPacketSize];
-            EndPoint source = new IPEndPoint(ConnectionEndpoint.Address, ConnectionEndpoint.Port);
+            EndPoint source = new IPEndPoint(Local.Address, Local.Port);
 
             int size = ConnectionSocket.ReceiveFrom(data, ref source);
 
@@ -63,37 +84,3 @@ namespace XSLibrary.Network.Connections
         }
     }
 }
-
-        public event DataReceivedHandler DataReceivedEvent;
-
-        const int SIO_UDP_CONNRESET = -1744830452;
-
-        IPEndPoint _local;
-        protected override IPEndPoint Local { get { return _local; } }
-
-        IPEndPoint _remote;
-        protected override IPEndPoint Remote { get { return (_remote != null ? _remote : base.Remote); } }
-
-        public UDPConnection(IPEndPoint local) : base(new Socket(local.AddressFamily, SocketType.Dgram, ProtocolType.Udp))
-        public void Send(byte[] data, IPEndPoint target)
-        {
-            IPEndPoint temp = Remote;
-            SetPermanentSendTarget(target);
-            Send(data);
-            SetPermanentSendTarget(temp);
-        public void SetPermanentSendTarget(IPEndPoint target)
-        {
-            _remote = target;
-        }
-
-        public void HolePunching(IPEndPoint remoteEndPoint)
-        {
-            Send(new byte[0], remoteEndPoint);
-            byte[] data = new byte[MaxPacketSize];
-            EndPoint source = Local;
-
-            int size = ConnectionSocket.ReceiveFrom(data, ref source);
-
-            if(IsHolePunching(size))
-                return;
-
