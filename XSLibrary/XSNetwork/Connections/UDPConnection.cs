@@ -10,21 +10,43 @@ namespace XSLibrary.Network.Connections
 
         const int SIO_UDP_CONNRESET = -1744830452;
 
-        public UDPConnection(IPEndPoint local) : base(new Socket(local.AddressFamily, SocketType.Dgram, ProtocolType.Udp), local)
+        IPEndPoint _local;
+        public override IPEndPoint Local => _local;
+
+        IPEndPoint _remote;
+        public override IPEndPoint Remote
         {
+            get { return (_remote != null ? _remote : base.Remote); }
+            protected set { _remote = value; }
+        }
+
+        public UDPConnection(IPEndPoint local) : base(new Socket(local.AddressFamily, SocketType.Dgram, ProtocolType.Udp))
+        {
+            _local = local;
+
             // do this so remote cant close socket https://docs.microsoft.com/en-us/windows/desktop/WinSock/winsock-ioctls
             ConnectionSocket.IOControl((IOControlCode)SIO_UDP_CONNRESET, new byte[] { 0, 0, 0, 0 }, null);
         }
 
-        public virtual void Send(byte[] data, IPEndPoint remoteEndPoint)
+        public void Send(byte[] data, IPEndPoint remote)
         {
-            m_lock.Execute(() => UnsafeSend(data, remoteEndPoint));
+            SetDefaultSend(remote);
+            Send(data);
         }
 
-        private void UnsafeSend(byte[] data, IPEndPoint remoteEndPoint)
+        protected override bool CanSend()
         {
-            if (!Disconnecting)
-                ConnectionSocket.SendTo(data, remoteEndPoint);
+            return base.CanSend() && Remote != null;
+        }
+
+        protected override void SendSpecialized(byte[] data)
+        {
+                ConnectionSocket.SendTo(data, Remote);
+        }
+
+        public void SetDefaultSend(IPEndPoint remote)
+        {
+            Remote = remote;
         }
 
         public void HolePunching(IPEndPoint remoteEndPoint)
@@ -34,13 +56,13 @@ namespace XSLibrary.Network.Connections
 
         protected override void PreReceiveSettings()
         {
-            ConnectionSocket.Bind(ConnectionEndpoint);
+            ConnectionSocket.Bind(Local);
         }
 
         protected override void ReceiveFromSocket()
         {
             byte[] data = new byte[MaxPacketSize];
-            EndPoint source = new IPEndPoint(ConnectionEndpoint.Address, ConnectionEndpoint.Port);
+            EndPoint source = new IPEndPoint(Local.Address, Local.Port);
 
             int size = ConnectionSocket.ReceiveFrom(data, ref source);
 

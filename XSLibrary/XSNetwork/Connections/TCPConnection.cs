@@ -16,12 +16,7 @@ namespace XSLibrary.Network.Connections
         {
         }
 
-        public void Send(byte[] data)
-        {
-            m_lock.Execute(() => UnsafeSend(data));
-        }
-
-        protected virtual void UnsafeSend(byte[] data)
+        protected override void SendSpecialized(byte[] data)
         {
             if (!Disconnecting)
                 ConnectionSocket.Send(data);
@@ -41,7 +36,7 @@ namespace XSLibrary.Network.Connections
             if (size <= 0)
             {
                 ReceiveThread = null;
-                ReceiveErrorHandling(ConnectionEndpoint);
+                ReceiveErrorHandling(Remote);
                 return;
             }
 

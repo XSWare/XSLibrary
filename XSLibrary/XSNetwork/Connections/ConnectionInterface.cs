@@ -20,10 +20,11 @@ namespace XSLibrary.Network.Connections
 
     public abstract class ConnectionInterface
     {
-        public event ReceiveErrorHandler ReceiveErrorEvent;
+        public event CommunicationErrorHandler OnSendError;
+        public event CommunicationErrorHandler OnReceiveError;
         public event EventHandler OnDisconnect;     // can basically come from any thread so make your actions threadsafe
 
-        public delegate void ReceiveErrorHandler(object sender, IPEndPoint endPoint);
+        public delegate void CommunicationErrorHandler(object sender, IPEndPoint remote);
 
         public int MaxPacketSize { get; set; } = 8192;
 
@@ -44,7 +45,8 @@ namespace XSLibrary.Network.Connections
         }
 
         protected Socket ConnectionSocket { get; set; }
-        protected IPEndPoint ConnectionEndpoint { get; set; }
+        public virtual IPEndPoint Local { get { return ConnectionSocket.LocalEndPoint as IPEndPoint; } protected set { } }
+        public virtual IPEndPoint Remote { get { return ConnectionSocket.RemoteEndPoint as IPEndPoint; } protected set { } }
 
         protected Thread ReceiveThread { get; set; }
 
@@ -55,19 +57,52 @@ namespace XSLibrary.Network.Connections
             set { m_disconnected = value; }
         }
 
-        public ConnectionInterface(Socket connectionSocket) : this(connectionSocket, connectionSocket.RemoteEndPoint as IPEndPoint) { }
-        public ConnectionInterface(Socket connectionSocket, IPEndPoint remote)
+        public ConnectionInterface(Socket connectionSocket)
         {
             Logger = new NoLog();
             m_lock = new SingleThreadExecutor();
 
-            ConnectionEndpoint = new IPEndPoint(remote.Address, remote.Port);
             InitializeSocket(connectionSocket);
         }
+
+        public void Send(byte[] data)
+        {
+            m_lock.Execute(() => UnsafeSend(data));
+        }
+
+        private void UnsafeSend(byte[] data)
+        {
+            try
+            {
+                if (CanSend())
+                    SendSpecialized(data);
+            }
+            catch (SocketException)
+            {
+                SendErrorHandling(Remote);
+            }
+            catch (ObjectDisposedException)
+            {
+                SendErrorHandling(Remote);
+            }
+        }
+
+        protected virtual bool CanSend()
+        {
+            return !Disconnecting;
+        }
+
+        protected abstract void SendSpecialized(byte[] data);
 
         public void InitializeReceiving()
         {
             m_lock.Execute(UnsafeInitializeReceiving);
+        }
+
+        protected void SendErrorHandling(IPEndPoint source)
+        {
+            Disconnect();
+            OnSendError?.Invoke(this, source);
         }
 
         private void UnsafeInitializeReceiving()
@@ -119,12 +154,12 @@ namespace XSLibrary.Network.Connections
                 catch (SocketException)
                 {
                     ReceiveThread = null;
-                    ReceiveErrorHandling(ConnectionEndpoint);
+                    ReceiveErrorHandling(Remote);
                 }
                 catch (ObjectDisposedException)
                 {
                     ReceiveThread = null;
-                    ReceiveErrorHandling(ConnectionEndpoint);
+                    ReceiveErrorHandling(Remote);
                 }
             }
 
@@ -136,7 +171,7 @@ namespace XSLibrary.Network.Connections
         protected void ReceiveErrorHandling(IPEndPoint source)
         {
             Disconnect();
-            ReceiveErrorEvent?.Invoke(this, source);
+            OnReceiveError?.Invoke(this, source);
         }
 
         protected byte[] TrimData(byte[] data, int size)

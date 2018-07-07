@@ -18,7 +18,7 @@ namespace XSLibrary.Network.Connections
         {
         }
 
-        protected override void UnsafeSend(byte[] data)
+        protected override void SendSpecialized(byte[] data)
         {
             if (!Disconnecting)
                 ConnectionSocket.Send(CreateDataPackage(data));
