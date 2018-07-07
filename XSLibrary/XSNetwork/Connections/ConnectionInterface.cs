@@ -22,7 +22,7 @@ namespace XSLibrary.Network.Connections
     {
         public event CommunicationErrorHandler OnSendError;
         public event CommunicationErrorHandler OnReceiveError;
-        public event EventHandler OnDisconnect;     // can basically come from any thread so make your actions threadsafe
+        public event CommunicationErrorHandler OnDisconnect;     // can basically come from any thread so make your actions threadsafe
 
         public delegate void CommunicationErrorHandler(object sender, IPEndPoint remote);
 
@@ -242,7 +242,7 @@ namespace XSLibrary.Network.Connections
 
         private void RaiseOnDisconnect()
         {
-            OnDisconnect?.Invoke(this, new EventArgs());
+            OnDisconnect?.Invoke(this, Remote);
         }
     }
 }
