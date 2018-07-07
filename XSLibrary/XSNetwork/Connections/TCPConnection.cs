@@ -16,12 +16,7 @@ namespace XSLibrary.Network.Connections
         {
         }
 
-        public void Send(byte[] data)
-        {
-            m_lock.Execute(() => UnsafeSend(data));
-        }
-
-        protected virtual void UnsafeSend(byte[] data)
+        protected override void UnsafeSend(byte[] data)
         {
             if (!Disconnecting)
                 ConnectionSocket.Send(data);
@@ -41,25 +36,7 @@ namespace XSLibrary.Network.Connections
             if (size <= 0)
             {
                 ReceiveThread = null;
-                ReceiveErrorHandling(ConnectionEndpoint);
-                return;
-            }
-
-            Logger.Log("Received data.");
-            ProcessReceivedData(data, size);
-        }
-
-        protected virtual void ProcessReceivedData(byte[] data, int size)
-        {
-            RaiseReceivedEvent(TrimData(data, size));
-        }
-
-            int size = ConnectionSocket.Receive(data, MaxPacketSize, SocketFlags.None);
-
-            if (size <= 0)
-            {
-                ReceiveThread = null;
-                ReceiveErrorHandling(ConnectionEndpoint);
+                ReceiveErrorHandling(Remote);
                 return;
             }
 
@@ -78,29 +55,3 @@ namespace XSLibrary.Network.Connections
         }
     }
 }
-
-        protected override void UnsafeSend(byte[] data)
-        {
-            if (!Disconnecting)
-                ConnectionSocket.Send(data);
-        protected override void ReceiveFromSocket()
-        {
-            byte[] data = new byte[MaxPacketSize];
-
-            int size = ConnectionSocket.Receive(data, MaxPacketSize, SocketFlags.None);
-
-            if (size <= 0)
-            {
-                ReceiveThread = null;
-                ReceiveErrorHandling(Remote);
-                return;
-            }
-
-            Logger.Log("Received data.");
-            ProcessReceivedData(data, size);
-        }
-
-        protected virtual void ProcessReceivedData(byte[] data, int size)
-        {
-            RaiseReceivedEvent(TrimData(data, size));
-        }
