@@ -31,6 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Curve25519, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\..\RemoteControlServer\packages\Curve25519.1.0.1\lib\net20\Curve25519.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -47,10 +50,14 @@
     <Compile Include="BitManipulation\Operators.cs" />
     <Compile Include="BitManipulation\Structure.cs" />
     <Compile Include="ConnectionCryptos\ConnectionCrypto.cs" />
+    <Compile Include="ConnectionCryptos\Curve25519Crypto.cs" />
     <Compile Include="ConnectionCryptos\ECCrypto.cs" />
     <Compile Include="ConnectionCryptos\NoCrypto.cs" />
+    <Compile Include="ConnectionCryptos\RSACrypto.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
