@@ -113,15 +113,7 @@ namespace XSLibrary.Network.Connections
         }
         public void InitializeReceiving(IConnectionCrypto crypto)
         {
-            if (!crypto.Active && !crypto.Handshake())
-                throw new ConnectionException("Crypto handshake failed!");
-
             m_lock.Execute(UnsafeInitializeReceiving);
-
-            if (crypto.Active && !crypto.Handshake())
-                throw new ConnectionException("Crypto handshake failed!");
-
-            Thread.Sleep(1000000);
         }
 
         private void UnsafeInitializeReceiving()

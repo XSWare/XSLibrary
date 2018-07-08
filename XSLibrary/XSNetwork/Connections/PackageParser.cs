@@ -62,7 +62,7 @@ namespace XSLibrary.Network.Connections
 
             private void FillPackage()
             {
-                int leftoverSize = currentData.Length - (currentPos + Header_Size_PacketLength + currentPackage.Length);
+                int leftoverSize = currentData.Length - (currentPos + currentPackage.Length);
 
                 if (leftoverSize >= 0)
                 {
@@ -88,6 +88,8 @@ namespace XSLibrary.Network.Connections
             private bool CreatePackage()
             {
                 ConsumeKeepAlives();
+                if (currentPos >= currentData.Length)
+                    return false;
 
                 if (!IsPacket())
                     return false;
