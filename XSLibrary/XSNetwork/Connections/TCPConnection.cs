@@ -38,7 +38,6 @@ namespace XSLibrary.Network.Connections
                 return false;
             }
 
-            Logger.Log("Received data.");
             data = TrimData(data, size);
             return true;
         }

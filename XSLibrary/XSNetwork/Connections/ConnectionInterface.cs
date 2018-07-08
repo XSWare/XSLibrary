@@ -107,26 +107,35 @@ namespace XSLibrary.Network.Connections
             OnSendError?.Invoke(this, remote);
         }
 
-        public void InitializeReceiving()
+        public bool InitializeCrypto(IConnectionCrypto crypto)
         {
-            InitializeReceiving(new NoCrypto());
-        }
-        public void InitializeReceiving(IConnectionCrypto crypto)
-        {
+            if (!Connected)
+                throw new ConnectionException("Cannot intitiate crypto after disconnect!");
+
+            if (Receiving)
+                throw new ConnectionException("Crypto cannot be initiated after receive loop was started!");
+
             if (!crypto.Handshake(Send, ReceiveFromSocket))
-                throw new ConnectionException("Crypto handshake failed!");
+            {
+                Logger.Log("Crypto handshake failed!");
+                Disconnect();
+                return false;
+            }
 
             Crypto = crypto;
+            return true;
 
+        }
+
+        public void InitializeReceiving()
+        {
             m_lock.Execute(UnsafeInitializeReceiving);
         }
 
         private void UnsafeInitializeReceiving()
         {
             if (Disconnecting)
-            {
                 throw new ConnectionException("Can not receive from a disconnected connection!");
-            }
 
             if (!Receiving)
             {
@@ -193,6 +202,7 @@ namespace XSLibrary.Network.Connections
 
         private void RaiseReceivedEvent(byte[] data, IPEndPoint source)
         {
+            Logger.Log("Received data.");
             DataReceivedEvent?.Invoke(this, Crypto.DecryptData(data), source);
         }
 
