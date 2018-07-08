@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace XSLibrary.Network.ConnectionCryptos
+namespace XSLibrary.Cryptography.ConnectionCryptos
 {
-    class NoCrypto : IConnectionCrypto
+    public class NoCrypto : IConnectionCrypto
     {
         public override bool Handshake(Action<byte[]> Send, ReceiveCall Receive) { return true; }
 

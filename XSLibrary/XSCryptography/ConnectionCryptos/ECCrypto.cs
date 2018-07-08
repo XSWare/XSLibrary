@@ -3,7 +3,7 @@ using System.IO;
 using System.Net;
 using System.Security.Cryptography;
 
-namespace XSLibrary.Network.ConnectionCryptos
+namespace XSLibrary.Cryptography.ConnectionCryptos
 {
     public class ECCrypto : IConnectionCrypto
     {

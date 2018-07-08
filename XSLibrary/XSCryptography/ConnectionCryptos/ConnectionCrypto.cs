@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net;
 
-namespace XSLibrary.Network.ConnectionCryptos
+namespace XSLibrary.Cryptography.ConnectionCryptos
 {
     public abstract class IConnectionCrypto
     {
