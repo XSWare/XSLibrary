@@ -6,9 +6,6 @@ namespace XSLibrary.Network.Connections
 {
     public class TCPConnection : ConnectionInterface
     {
-        public delegate void DataReceivedHandler(object sender, byte[] data);
-        public event DataReceivedHandler DataReceivedEvent;
-
         public TCPConnection(Socket socket) 
             : base(socket)
         {
@@ -46,12 +43,7 @@ namespace XSLibrary.Network.Connections
 
         protected virtual void ProcessReceivedData(byte[] data, int size)
         {
-            RaiseReceivedEvent(TrimData(data, size));
-        }
-
-        protected void RaiseReceivedEvent(byte[] data)
-        {
-            DataReceivedEvent?.Invoke(this, data);
+            RaiseReceivedEvent(TrimData(data, size), Remote);
         }
     }
 }

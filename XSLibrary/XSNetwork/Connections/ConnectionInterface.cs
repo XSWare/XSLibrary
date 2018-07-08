@@ -21,11 +21,13 @@ namespace XSLibrary.Network.Connections
 
     public abstract class ConnectionInterface
     {
+        public delegate void DataReceivedHandler(object sender, byte[] data, IPEndPoint source);
+        public event DataReceivedHandler DataReceivedEvent;
+
+        public delegate void CommunicationErrorHandler(object sender, IPEndPoint remote);
         public event CommunicationErrorHandler OnSendError;
         public event CommunicationErrorHandler OnReceiveError;
         public event CommunicationErrorHandler OnDisconnect;     // can basically come from any thread so make your actions threadsafe
-
-        public delegate void CommunicationErrorHandler(object sender, IPEndPoint remote);
 
         public int MaxReceiveSize { get; set; } = 8192;
 
@@ -60,10 +62,9 @@ namespace XSLibrary.Network.Connections
 
         IConnectionCrypto Crypto { get; set; }
 
-        public ConnectionInterface(Socket connectionSocket) : this(connectionSocket, new NoCrypto()) { }
-        public ConnectionInterface(Socket connectionSocket, IConnectionCrypto crypto)
+        public ConnectionInterface(Socket connectionSocket)
         {
-            Crypto = crypto;
+            Crypto = new NoCrypto();
 
             Logger = new NoLog();
             m_lock = new SingleThreadExecutor();
@@ -81,7 +82,7 @@ namespace XSLibrary.Network.Connections
             try
             {
                 if (CanSend())
-                    SendSpecialized(data);
+                    SendSpecialized(Crypto.EncryptData(data));
             }
             catch (SocketException)
             {
@@ -108,7 +109,19 @@ namespace XSLibrary.Network.Connections
 
         public void InitializeReceiving()
         {
+            InitializeReceiving(new NoCrypto());
+        }
+        public void InitializeReceiving(IConnectionCrypto crypto)
+        {
+            if (!crypto.Active && !crypto.Handshake())
+                throw new ConnectionException("Crypto handshake failed!");
+
             m_lock.Execute(UnsafeInitializeReceiving);
+
+            if (crypto.Active && !crypto.Handshake())
+                throw new ConnectionException("Crypto handshake failed!");
+
+            Thread.Sleep(1000000);
         }
 
         private void UnsafeInitializeReceiving()
@@ -178,6 +191,11 @@ namespace XSLibrary.Network.Connections
         {
             Disconnect();
             OnReceiveError?.Invoke(this, remote);
+        }
+
+        protected void RaiseReceivedEvent(byte[] data, IPEndPoint source)
+        {
+            DataReceivedEvent?.Invoke(this, Crypto.DecryptData(data), source);
         }
 
         protected byte[] TrimData(byte[] data, int size)

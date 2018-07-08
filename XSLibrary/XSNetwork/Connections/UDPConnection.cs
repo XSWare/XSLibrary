@@ -5,9 +5,6 @@ namespace XSLibrary.Network.Connections
 {
     public class UDPConnection: ConnectionInterface
     {
-        public delegate void DataReceivedHandler(object sender, byte[] data, IPEndPoint endPoint);
-        public event DataReceivedHandler DataReceivedEvent;
-
         const int SIO_UDP_CONNRESET = -1744830452;
 
         public UDPConnection(IPEndPoint local) : base(new Socket(local.AddressFamily, SocketType.Dgram, ProtocolType.Udp))
@@ -65,11 +62,6 @@ namespace XSLibrary.Network.Connections
         private bool IsHolePunching(int size)
         {
             return size == 0;
-        }
-
-        private void RaiseReceivedEvent(byte[] data, IPEndPoint source)
-        {
-            DataReceivedEvent?.Invoke(this, data, source);
         }
     }
 }

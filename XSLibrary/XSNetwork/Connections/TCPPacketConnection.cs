@@ -59,7 +59,7 @@ namespace XSLibrary.Network.Connections
             foreach (byte[] packet in packets)
             {
                 Logger.Log("Received data.");
-                RaiseReceivedEvent(packet);
+                RaiseReceivedEvent(packet, Remote);
             }
         }
 
