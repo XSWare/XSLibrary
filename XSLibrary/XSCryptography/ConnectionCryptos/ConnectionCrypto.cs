@@ -9,7 +9,21 @@ namespace XSLibrary.Cryptography.ConnectionCryptos
 
         bool Active { get; set; }
 
-        public abstract bool Handshake(Action<byte[]> Send, ReceiveCall Receive);
+        public IConnectionCrypto(bool active)
+        {
+            Active = active;
+        }
+
+        public bool Handshake(Action<byte[]> Send, ReceiveCall Receive)
+        {
+            if (Active)
+                return HandshakeActive(Send, Receive);
+            else
+                return HandshakePassive(Send, Receive);
+        }
+
+        protected abstract bool HandshakeActive(Action<byte[]> Send, ReceiveCall Receive);
+        protected abstract bool HandshakePassive(Action<byte[]> Send, ReceiveCall Receive);
 
         public abstract byte[] EncryptData(byte[] data);
         public abstract byte[] DecryptData(byte[] data);

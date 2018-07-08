@@ -9,14 +9,11 @@ namespace XSLibrary.Cryptography.ConnectionCryptos
     {
         ECDiffieHellmanCng KEXCrypto;
         AesCryptoServiceProvider DataCrypto;
-        public bool Active { get; set; }
 
         byte[] SECRET = new byte[16] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
 
-        public ECCrypto(bool active)
+        public ECCrypto(bool active) : base(active)
         {
-            Active = active;
-
             KEXCrypto = new ECDiffieHellmanCng(521);
             KEXCrypto.KeyDerivationFunction = ECDiffieHellmanKeyDerivationFunction.Hash;
             KEXCrypto.HashAlgorithm = CngAlgorithm.Sha256;
@@ -25,15 +22,7 @@ namespace XSLibrary.Cryptography.ConnectionCryptos
             DataCrypto.Padding = PaddingMode.PKCS7;
         }
 
-        public override bool Handshake(Action<byte[]> Send, ReceiveCall Receive)
-        {
-            if (Active)
-                return HandshakeActive(Send, Receive);
-            else
-                return HandshakePassive(Send, Receive);
-        }
-
-        public bool HandshakeActive(Action<byte[]> Send, ReceiveCall Receive)
+        protected override bool HandshakeActive(Action<byte[]> Send, ReceiveCall Receive)
         {
             Send(KEXCrypto.PublicKey.ToByteArray());
             if (!Receive(out byte[] data, out IPEndPoint source))
@@ -61,7 +50,7 @@ namespace XSLibrary.Cryptography.ConnectionCryptos
             return true;
         }
 
-        public bool HandshakePassive(Action<byte[]> Send, ReceiveCall Receive)
+        protected override bool HandshakePassive(Action<byte[]> Send, ReceiveCall Receive)
         {
             if (!Receive(out byte[] data, out IPEndPoint source))
                 return false;
