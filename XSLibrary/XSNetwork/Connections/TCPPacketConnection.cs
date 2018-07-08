@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Net;
 using System.Net.Sockets;
 using XSLibrary.Utility;
 
 namespace XSLibrary.Network.Connections
 {
-    public class TCPPacketConnection : TCPConnection
+    public partial class TCPPacketConnection : TCPConnection
     {
         const byte Header_ID_Packet = 0x00;
         const byte Header_ID_KeepAlive = 0x01;
@@ -13,9 +13,12 @@ namespace XSLibrary.Network.Connections
         const int Header_Size_PacketLength = 4;
         const int Header_Size_Total = Header_Size_ID + Header_Size_PacketLength;
 
-        public TCPPacketConnection(Socket socket)
+        PackageParser Parser;
+
+        public TCPPacketConnection(Socket socket, int maxPacketSize = 2048)
             : base(socket)
         {
+            Parser = new PackageParser(maxPacketSize);
         }
 
         protected override void SendSpecialized(byte[] data)
@@ -50,69 +53,21 @@ namespace XSLibrary.Network.Connections
             }
         }
 
-        protected override void ProcessReceivedData(byte[] data, int size)
+        protected override bool ReceiveFromSocket(out byte[] data, out IPEndPoint source)
         {
-            byte[] trimmedData = TrimData(data, size);
+            source = Remote;
 
-            List<byte[]> packets = ParseIntoPacket(trimmedData);
-
-            foreach (byte[] packet in packets)
+            while (Parser.NeedsFreshData)
             {
-                Logger.Log("Received data.");
-                RaiseReceivedEvent(packet, Remote);
-            }
-        }
+                if (!base.ReceiveFromSocket(out data, out source))
+                    return false;
 
-        private List<byte[]> ParseIntoPacket(byte[] data)
-        {
-            List<byte[]> packets = new List<byte[]>();
-
-            int currentPos = 0;
-
-            while (currentPos < data.Length)
-            {
-                if (IsKeepAlive(data, currentPos))
-                {
-                    currentPos += Header_Size_Total;
-                    continue;
-                }
-
-                if (!IsPacket(data, currentPos))
-                    return packets;
-
-                int packetSize = ParseSize(data, currentPos);
-                if (packetSize < 0 || packetSize > MaxReceiveSize || currentPos + Header_Size_PacketLength + packetSize > data.Length)
-                    return packets;
-
-                byte[] packet = new byte[packetSize];
-                Array.Copy(data, currentPos + Header_Size_Total, packet, 0, packetSize);
-                packets.Add(packet);
-
-                currentPos += Header_Size_Total + packetSize;
+                Parser.AddData(data);
+                Parser.ParsePackage();
             }
 
-            return packets;
-        }
-
-        int ParseSize(byte[] data, int currentPos)
-        {
-            if (currentPos + Header_Size_Total > data.Length)
-                return -1;
-
-            return data[currentPos + Header_Size_ID]
-                + (data[currentPos + Header_Size_ID + 1] << 8)
-                + (data[currentPos + Header_Size_ID + 2] << 16)
-                + (data[currentPos + Header_Size_ID + 3] << 24);
-        }
-
-        private bool IsKeepAlive(byte[] data, int currentPos)
-        {
-            return data[currentPos] == Header_ID_KeepAlive;
-        }
-
-        private bool IsPacket(byte[] data, int currentPos)
-        {
-            return data[currentPos] == Header_ID_Packet;
+            data = Parser.GetPackage();
+            return true;
         }
     }
 }

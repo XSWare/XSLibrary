@@ -168,7 +168,8 @@ namespace XSLibrary.Network.Connections
             {
                 try
                 {
-                    ReceiveFromSocket();
+                    if(ReceiveFromSocket(out byte[] data, out IPEndPoint source))
+                        RaiseReceivedEvent(data, source);
                 }
                 catch (SocketException)
                 {
@@ -185,7 +186,7 @@ namespace XSLibrary.Network.Connections
             Receiving = false;
         }
 
-        protected abstract void ReceiveFromSocket();
+        protected abstract bool ReceiveFromSocket(out byte[] data, out IPEndPoint source);
 
         protected void ReceiveErrorHandling(IPEndPoint remote)
         {
@@ -193,7 +194,7 @@ namespace XSLibrary.Network.Connections
             OnReceiveError?.Invoke(this, remote);
         }
 
-        protected void RaiseReceivedEvent(byte[] data, IPEndPoint source)
+        private void RaiseReceivedEvent(byte[] data, IPEndPoint source)
         {
             DataReceivedEvent?.Invoke(this, Crypto.DecryptData(data), source);
         }

@@ -24,9 +24,10 @@ namespace XSLibrary.Network.Connections
             return;
         }
 
-        protected override void ReceiveFromSocket()
+        protected override bool ReceiveFromSocket(out byte[] data, out IPEndPoint source)
         {
-            byte[] data = new byte[MaxReceiveSize];
+            data = new byte[MaxReceiveSize];
+            source = Remote;
 
             int size = ConnectionSocket.Receive(data, MaxReceiveSize, SocketFlags.None);
 
@@ -34,16 +35,12 @@ namespace XSLibrary.Network.Connections
             {
                 ReceiveThread = null;
                 ReceiveErrorHandling(Remote);
-                return;
+                return false;
             }
 
             Logger.Log("Received data.");
-            ProcessReceivedData(data, size);
-        }
-
-        protected virtual void ProcessReceivedData(byte[] data, int size)
-        {
-            RaiseReceivedEvent(TrimData(data, size), Remote);
+            data = TrimData(data, size);
+            return true;
         }
     }
 }
