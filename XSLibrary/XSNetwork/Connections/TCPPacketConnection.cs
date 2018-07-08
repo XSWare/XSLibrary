@@ -55,16 +55,20 @@ namespace XSLibrary.Network.Connections
 
         protected override bool ReceiveFromSocket(out byte[] data, out IPEndPoint source)
         {
+            data = null;
             source = Remote;
 
-            while (Parser.NeedsFreshData)
+            if(Parser.NeedsFreshData)
             {
                 if (!base.ReceiveFromSocket(out data, out source))
                     return false;
 
                 Parser.AddData(data);
-                Parser.ParsePackage();
             }
+
+            Parser.ParsePackage();
+            if (!Parser.PackageFinished)
+                return false;
 
             data = Parser.GetPackage();
             return true;
