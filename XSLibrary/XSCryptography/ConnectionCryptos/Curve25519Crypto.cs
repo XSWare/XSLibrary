@@ -1,10 +1,13 @@
-﻿using Elliptic;
+﻿using Chaos.NaCl;
+using Elliptic;
 using System;
 
 namespace XSLibrary.Cryptography.ConnectionCryptos
 {
     class Curve25519Crypto : IConnectionCrypto
     {
+        //Ed25519 KEXCrypto;
+
         byte[] privateKey;
         byte[] publicKey;
 
