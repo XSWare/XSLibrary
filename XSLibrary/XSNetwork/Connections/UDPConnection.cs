@@ -38,7 +38,16 @@ namespace XSLibrary.Network.Connections
 
         public void HolePunching(IPEndPoint remoteEndPoint)
         {
-            Send(new byte[0], remoteEndPoint);
+            m_lock.Execute(() => UnsafeHolePunching(remoteEndPoint));
+        }
+
+        private void UnsafeHolePunching(IPEndPoint remoteEndPoint)
+        {
+            if (CanSend())
+            {
+                ConnectionSocket.SendTo(new byte[0], remoteEndPoint);
+                Logger.Log("Sent hole punching.");
+            }
         }
 
         protected override void PreReceiveSettings()

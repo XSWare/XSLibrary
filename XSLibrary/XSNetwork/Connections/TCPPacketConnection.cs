@@ -46,7 +46,7 @@ namespace XSLibrary.Network.Connections
 
         private void UnsafeSendKeepAlive()
         {
-            if (!Disconnecting)
+            if (CanSend())
             {
                 ConnectionSocket.Send(new byte[] { Header_ID_KeepAlive, 0, 0, 0, 0 });
                 Logger.Log("Sent keepalive.");
