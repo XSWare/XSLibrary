@@ -74,7 +74,7 @@ namespace XSLibrary.Network.Connections
 
         public void Send(byte[] data)
         {
-            m_lock.Execute(() => UnsafeSend(data));
+            m_lock.Execute(() => UnsafeSend(Crypto.EncryptData(data)));
         }
 
         private void UnsafeSend(byte[] data)
@@ -82,7 +82,7 @@ namespace XSLibrary.Network.Connections
             try
             {
                 if (CanSend())
-                    SendSpecialized(Crypto.EncryptData(data));
+                    SendSpecialized(data);
             }
             catch (SocketException)
             {
@@ -113,6 +113,11 @@ namespace XSLibrary.Network.Connections
         }
         public void InitializeReceiving(IConnectionCrypto crypto)
         {
+            if (!crypto.Handshake(Send, ReceiveFromSocket))
+                throw new ConnectionException("Crypto handshake failed!");
+
+            Crypto = crypto;
+
             m_lock.Execute(UnsafeInitializeReceiving);
         }
 

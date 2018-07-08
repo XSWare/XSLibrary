@@ -1,12 +1,12 @@
-﻿namespace XSLibrary.Network.ConnectionCryptos
+﻿using System;
+
+namespace XSLibrary.Network.ConnectionCryptos
 {
     class NoCrypto : IConnectionCrypto
     {
-        public bool Active { get; set; } = true;
+        public override bool Handshake(Action<byte[]> Send, ReceiveCall Receive) { return true; }
 
-        public bool Handshake() { return true; }
-
-        public byte[] EncryptData(byte[] data) { return data; }
-        public byte[] DecryptData(byte[] data) { return data; }
+        public override byte[] EncryptData(byte[] data) { return data; }
+        public override byte[] DecryptData(byte[] data) { return data; }
     }
 }

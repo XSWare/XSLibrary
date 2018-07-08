@@ -1,29 +1,21 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Net;
 using System.Security.Cryptography;
-using System.Threading;
-using XSLibrary.Network.Connections;
 
 namespace XSLibrary.Network.ConnectionCryptos
 {
     public class ECCrypto : IConnectionCrypto
     {
-        ConnectionInterface Connection { get; set; }
-
         ECDiffieHellmanCng KEXCrypto;
         AesCryptoServiceProvider DataCrypto;
-        ManualResetEvent m_finishedEvent;
         public bool Active { get; set; }
 
         byte[] SECRET = new byte[16] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
-        int Timeout = 500000;
 
-        public ECCrypto(ConnectionInterface connection, bool active)
+        public ECCrypto(bool active)
         {
-            Connection = connection;
             Active = active;
-
-            m_finishedEvent = new ManualResetEvent(false);
 
             KEXCrypto = new ECDiffieHellmanCng(521);
             KEXCrypto.KeyDerivationFunction = ECDiffieHellmanKeyDerivationFunction.Hash;
@@ -33,67 +25,60 @@ namespace XSLibrary.Network.ConnectionCryptos
             DataCrypto.Padding = PaddingMode.PKCS7;
         }
 
-        public bool Handshake()
+        public override bool Handshake(Action<byte[]> Send, ReceiveCall Receive)
         {
             if (Active)
-                return HandshakeActive();
+                return HandshakeActive(Send, Receive);
             else
-                return HandshakePassive();
+                return HandshakePassive(Send, Receive);
         }
 
-        public bool HandshakeActive()
+        public bool HandshakeActive(Action<byte[]> Send, ReceiveCall Receive)
         {
-            Connection.DataReceivedEvent += ProcessPassivePublicKey;
-            Connection.Send(KEXCrypto.PublicKey.ToByteArray());
-            return m_finishedEvent.WaitOne(Timeout);
+            Send(KEXCrypto.PublicKey.ToByteArray());
+            if (!Receive(out byte[] data, out IPEndPoint source))
+                return false;
+
+            DataCrypto.Key = KEXCrypto.DeriveKeyMaterial(CngKey.Import(data, CngKeyBlobFormat.EccPublicBlob));
+            Send(DataCrypto.IV);
+
+            if (!Receive(out data, out source))
+                return false;
+
+            return DecryptSecret(data);
         }
 
-        private void ProcessPassivePublicKey(object sender, byte[] publicKey, IPEndPoint source)
+        private bool DecryptSecret(byte[] data)
         {
-            DataCrypto.Key = KEXCrypto.DeriveKeyMaterial(CngKey.Import(publicKey, CngKeyBlobFormat.EccPublicBlob));
-            Connection.DataReceivedEvent -= ProcessPassivePublicKey;
-            Connection.DataReceivedEvent += DecryptSecret;
-            Connection.Send(DataCrypto.IV);
-        }
+            byte[] decrypt = DecryptData(data);
 
-        private void DecryptSecret(object sender, byte[] secret, IPEndPoint source)
-        {
-            byte[] decrypt = DecryptData(secret);
-
-            for(int i = 0; i < SECRET.Length && i < decrypt.Length; i++)
+            for (int i = 0; i < SECRET.Length && i < decrypt.Length; i++)
             {
                 if (SECRET[i] != decrypt[i])
-                    return;
+                    return false;
             }
 
-            m_finishedEvent.Set();
-        }
-
-        public bool HandshakePassive()
-        {
-            Connection.DataReceivedEvent += ProcessActivePublicKey;
-            //return m_finishedEvent.WaitOne(Timeout);
             return true;
         }
 
-        private void ProcessActivePublicKey(object sender, byte[] publicKey, IPEndPoint source)
+        public bool HandshakePassive(Action<byte[]> Send, ReceiveCall Receive)
         {
-            Connection.DataReceivedEvent -= ProcessActivePublicKey;
-            CngKey key = CngKey.Import(publicKey, CngKeyBlobFormat.EccPublicBlob);
-            byte[] aesKey = KEXCrypto.DeriveKeyMaterial(key);
-            DataCrypto.Key = aesKey;
-            Connection.DataReceivedEvent += ProcessIV;
-            Connection.Send(KEXCrypto.PublicKey.ToByteArray());
+            if (!Receive(out byte[] data, out IPEndPoint source))
+                return false;
+
+            DataCrypto.Key = KEXCrypto.DeriveKeyMaterial(CngKey.Import(data, CngKeyBlobFormat.EccPublicBlob));
+            Send(KEXCrypto.PublicKey.ToByteArray());
+
+            if (!Receive(out data, out source))
+                return false;
+
+            DataCrypto.IV = data;
+            Send(EncryptData(SECRET));
+
+            return true;
         }
 
-        private void ProcessIV(object sender, byte[] IV, IPEndPoint source)
-        {
-            Connection.DataReceivedEvent -= ProcessIV;
-            DataCrypto.IV = IV;
-            Connection.Send(EncryptData(SECRET));
-        }
-
-        public byte[] EncryptData(byte[] data)
+        public override byte[] EncryptData(byte[] data)
         {
             using (MemoryStream stream = new MemoryStream())
             {
@@ -105,7 +90,7 @@ namespace XSLibrary.Network.ConnectionCryptos
                 }
             }
         }
-        public byte[] DecryptData(byte[] data)
+        public override byte[] DecryptData(byte[] data)
         {
             using (MemoryStream stream = new MemoryStream())
             {
