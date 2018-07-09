@@ -28,7 +28,7 @@ namespace XSLibrary.Cryptography.ConnectionCryptos.Wrappers
 
         public byte[] GetPublicKey()
         {
-            return _ecdh.PublicKey.GetBytes(_context, Point.Form.POINT_CONVERSION_UNCOMPRESSED);
+            return _ecdh.PublicKey.GetBytes(Point.Form.POINT_CONVERSION_UNCOMPRESSED, _context);
         }
 
         private byte[] SHA256(byte[] msg)

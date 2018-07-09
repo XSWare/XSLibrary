@@ -5,7 +5,7 @@ using XSLibrary.Cryptography.ConnectionCryptos.Wrappers;
 
 namespace XSLibrary.Cryptography.ConnectionCryptos
 {
-    class ECOpenSSLCrypto : IConnectionCrypto
+    public class ECOpenSSLCrypto : IConnectionCrypto
     {
         ECDHOpenSSL KEXCrypto;
         AESOpenSSL DataCrypto;

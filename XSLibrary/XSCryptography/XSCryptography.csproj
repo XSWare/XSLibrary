@@ -57,7 +57,6 @@
     <Compile Include="ConnectionCryptos\RSACrypto.cs" />
     <Compile Include="ConnectionCryptos\Wrappers\AESOpenSSL.cs" />
     <Compile Include="ConnectionCryptos\Wrappers\ECDHOpenSSL.cs" />
-    <Compile Include="ConnectionCryptos\Wrappers\PublicKeyOpenSSL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
