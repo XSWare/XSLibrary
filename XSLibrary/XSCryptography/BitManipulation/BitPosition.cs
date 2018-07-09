@@ -74,6 +74,16 @@
             {
                 return "Array index: " + IntIndex + " - Bit: " + BitIndex; 
             }
+
+            public override int GetHashCode()
+            {
+                return base.GetHashCode();
+            }
+
+            public override bool Equals(object obj)
+            {
+                return base.Equals(obj);
+            }
         }
     }
 }
