@@ -177,16 +177,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\native\windows\x86\libeay32.dll">
-      <Link>libeay32.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\native\windows\x86\ssleay32.dll">
-      <Link>ssleay32.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
       <Visible>False</Visible>
       <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
@@ -211,6 +201,9 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="libeay32.dll" />
+    <Content Include="ssleay32.dll" />
+  </ItemGroup>
   <ItemGroup />
 </Project>
