@@ -1,5 +1,4 @@
-﻿using Chaos.NaCl;
-using Elliptic;
+﻿using Elliptic;
 using System;
 
 namespace XSLibrary.Cryptography.ConnectionCryptos
