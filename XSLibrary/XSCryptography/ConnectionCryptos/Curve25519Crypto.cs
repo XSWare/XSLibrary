@@ -1,5 +1,4 @@
-﻿using Elliptic;
-using System;
+﻿using System;
 
 namespace XSLibrary.Cryptography.ConnectionCryptos
 {
@@ -12,7 +11,7 @@ namespace XSLibrary.Cryptography.ConnectionCryptos
 
         public Curve25519Crypto(bool active) : base(active)
         {
-            privateKey = Curve25519.CreateRandomPrivateKey();
+            //privateKey = Curve25519.CreateRandomPrivateKey();
             //KEXCrypto.
         }
 
