@@ -1,0 +1,54 @@
+﻿using OpenSSL.Crypto;
+using System;
+
+namespace OpenSSL.CLI 
+{
+	class CmdDigest : ICommand
+	{
+		OptionParser options = new OptionParser();
+
+		public CmdDigest() 
+		{
+		}
+
+		void Usage() {
+			Console.Error.WriteLine(
+@"options are
+-c              to output the digest with separating colons
+-d              to output debug info
+-hex            output as hex dump
+-binary         output in binary form
+-sign   file    sign digest using private key in file
+-verify file    verify a signature using public key in file
+-prverify file  verify a signature using private key in file
+-keyform arg    key file format (PEM or ENGINE)
+-signature file signature to verify
+-binary         output in binary form
+-engine e       use engine e, possibly a hardware device.
+Message Digest Types");
+
+			var types = MessageDigest.AllNamesSorted;
+
+			for (var i = 0; i < types.Length; i++) {
+				var name = types[i];
+				
+				if (name == name.ToUpper())
+					continue;
+
+				Console.Error.Write("-{0}", name.PadRight(26));
+				if (i % 3 == 0)
+					Console.Error.WriteLine();
+			}
+			Console.Error.WriteLine();
+		}
+
+		#region ICommand Members
+
+		public void Execute(string[] args) 
+		{
+			Usage();
+		}
+
+		#endregion
+	}
+}
