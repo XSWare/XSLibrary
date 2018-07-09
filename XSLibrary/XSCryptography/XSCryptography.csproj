@@ -52,17 +52,21 @@
     <Compile Include="ConnectionCryptos\ConnectionCrypto.cs" />
     <Compile Include="ConnectionCryptos\Curve25519Crypto.cs" />
     <Compile Include="ConnectionCryptos\ECCrypto.cs" />
+    <Compile Include="ConnectionCryptos\ECOpenSSLCrypto.cs" />
     <Compile Include="ConnectionCryptos\NoCrypto.cs" />
     <Compile Include="ConnectionCryptos\RSACrypto.cs" />
+    <Compile Include="ConnectionCryptos\Wrappers\AESOpenSSL.cs" />
+    <Compile Include="ConnectionCryptos\Wrappers\ECDHOpenSSL.cs" />
+    <Compile Include="ConnectionCryptos\Wrappers\PublicKeyOpenSSL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Chaos.NaCl\Chaos.NaCl\Chaos.NaCl.csproj">
-      <Project>{ae28fd14-7985-4707-a963-c94b8597ae50}</Project>
-      <Name>Chaos.NaCl</Name>
+    <ProjectReference Include="..\..\openssl-net\ManagedOpenSsl\ManagedOpenSsl.csproj">
+      <Project>{73dcc218-655b-485f-8eac-0ce5f2f7343d}</Project>
+      <Name>ManagedOpenSsl</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
