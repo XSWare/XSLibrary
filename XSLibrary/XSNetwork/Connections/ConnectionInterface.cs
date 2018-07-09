@@ -2,7 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using XSLibrary.Network.ConnectionCryptos;
+using XSLibrary.Cryptography.ConnectionCryptos;
 using XSLibrary.ThreadSafety.Executors;
 using XSLibrary.Utility;
 
@@ -21,11 +21,13 @@ namespace XSLibrary.Network.Connections
 
     public abstract class ConnectionInterface
     {
+        public delegate void DataReceivedHandler(object sender, byte[] data, IPEndPoint source);
+        public event DataReceivedHandler DataReceivedEvent;
+
+        public delegate void CommunicationErrorHandler(object sender, IPEndPoint remote);
         public event CommunicationErrorHandler OnSendError;
         public event CommunicationErrorHandler OnReceiveError;
         public event CommunicationErrorHandler OnDisconnect;     // can basically come from any thread so make your actions threadsafe
-
-        public delegate void CommunicationErrorHandler(object sender, IPEndPoint remote);
 
         public int MaxReceiveSize { get; set; } = 8192;
 
@@ -60,10 +62,9 @@ namespace XSLibrary.Network.Connections
 
         IConnectionCrypto Crypto { get; set; }
 
-        public ConnectionInterface(Socket connectionSocket) : this(connectionSocket, new NoCrypto()) { }
-        public ConnectionInterface(Socket connectionSocket, IConnectionCrypto crypto)
+        public ConnectionInterface(Socket connectionSocket)
         {
-            Crypto = crypto;
+            Crypto = new NoCrypto();
 
             Logger = new NoLog();
             m_lock = new SingleThreadExecutor();
@@ -73,7 +74,7 @@ namespace XSLibrary.Network.Connections
 
         public void Send(byte[] data)
         {
-            m_lock.Execute(() => UnsafeSend(data));
+            m_lock.Execute(() => UnsafeSend(Crypto.EncryptData(data)));
         }
 
         private void UnsafeSend(byte[] data)
@@ -106,6 +107,26 @@ namespace XSLibrary.Network.Connections
             OnSendError?.Invoke(this, remote);
         }
 
+        public bool InitializeCrypto(IConnectionCrypto crypto)
+        {
+            if (!Connected)
+                throw new ConnectionException("Cannot intitiate crypto after disconnect!");
+
+            if (Receiving)
+                throw new ConnectionException("Crypto cannot be initiated after receive loop was started!");
+
+            if (!crypto.Handshake(Send, ReceiveFromSocket))
+            {
+                Logger.Log("Crypto handshake failed!");
+                Disconnect();
+                return false;
+            }
+
+            Crypto = crypto;
+            return true;
+
+        }
+
         public void InitializeReceiving()
         {
             m_lock.Execute(UnsafeInitializeReceiving);
@@ -114,9 +135,7 @@ namespace XSLibrary.Network.Connections
         private void UnsafeInitializeReceiving()
         {
             if (Disconnecting)
-            {
                 throw new ConnectionException("Can not receive from a disconnected connection!");
-            }
 
             if (!Receiving)
             {
@@ -155,7 +174,8 @@ namespace XSLibrary.Network.Connections
             {
                 try
                 {
-                    ReceiveFromSocket();
+                    if(ReceiveFromSocket(out byte[] data, out IPEndPoint source))
+                        RaiseReceivedEvent(data, source);
                 }
                 catch (SocketException)
                 {
@@ -172,12 +192,18 @@ namespace XSLibrary.Network.Connections
             Receiving = false;
         }
 
-        protected abstract void ReceiveFromSocket();
+        protected abstract bool ReceiveFromSocket(out byte[] data, out IPEndPoint source);
 
         protected void ReceiveErrorHandling(IPEndPoint remote)
         {
             Disconnect();
             OnReceiveError?.Invoke(this, remote);
+        }
+
+        private void RaiseReceivedEvent(byte[] data, IPEndPoint source)
+        {
+            Logger.Log("Received data.");
+            DataReceivedEvent?.Invoke(this, Crypto.DecryptData(data), source);
         }
 
         protected byte[] TrimData(byte[] data, int size)

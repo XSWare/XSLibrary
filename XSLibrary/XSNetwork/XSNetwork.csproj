@@ -41,10 +41,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Accepter\TCPAccepter.cs" />
-    <Compile Include="ConnectionCryptos\ECCrypto.cs" />
-    <Compile Include="ConnectionCryptos\NoCrypto.cs" />
     <Compile Include="Connections\ConnectionInterface.cs" />
-    <Compile Include="ConnectionCryptos\ConnectionCrypto.cs" />
+    <Compile Include="Connections\PackageParser.cs" />
     <Compile Include="Connections\TCPPacketConnection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Session.cs" />
@@ -52,7 +50,7 @@
     <Compile Include="Connections\UDPConnection.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\PingPong\XSLibrary\XSLibrary\XSCryptography\XSCryptography.csproj">
+    <ProjectReference Include="..\XSCryptography\XSCryptography.csproj">
       <Project>{1b219104-b11e-49e4-861f-5200520fb9e9}</Project>
       <Name>XSCryptography</Name>
     </ProjectReference>

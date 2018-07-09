@@ -9,8 +9,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>XSLibrary.Cryptography</RootNamespace>
     <AssemblyName>XSCryptography</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -30,6 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Curve25519, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\..\RemoteControlServer\packages\Curve25519.1.0.1\lib\net20\Curve25519.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -45,7 +49,24 @@
     <Compile Include="BitManipulation\Bits.cs" />
     <Compile Include="BitManipulation\Operators.cs" />
     <Compile Include="BitManipulation\Structure.cs" />
+    <Compile Include="ConnectionCryptos\ConnectionCrypto.cs" />
+    <Compile Include="ConnectionCryptos\Curve25519Crypto.cs" />
+    <Compile Include="ConnectionCryptos\ECCrypto.cs" />
+    <Compile Include="ConnectionCryptos\ECOpenSSLCrypto.cs" />
+    <Compile Include="ConnectionCryptos\NoCrypto.cs" />
+    <Compile Include="ConnectionCryptos\RSACrypto.cs" />
+    <Compile Include="ConnectionCryptos\Wrappers\AESOpenSSL.cs" />
+    <Compile Include="ConnectionCryptos\Wrappers\ECDHOpenSSL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\openssl-net\ManagedOpenSsl\ManagedOpenSsl.csproj">
+      <Project>{73dcc218-655b-485f-8eac-0ce5f2f7343d}</Project>
+      <Name>ManagedOpenSsl</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

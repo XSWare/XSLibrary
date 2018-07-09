@@ -35,6 +35,16 @@
                 return new BitPosition(position.RealBitIndex + 1);
             }
 
+            public static bool operator ==(BitPosition position, BitPosition other)
+            {
+                return position.RealBitIndex == other.RealBitIndex;
+            }
+
+            public static bool operator !=(BitPosition position, BitPosition other)
+            {
+                return !(position.RealBitIndex == other.RealBitIndex);
+            }
+
             public static bool operator ==(BitPosition position, int value)
             {
                 return position.RealBitIndex == value;
@@ -73,6 +83,20 @@
             public override string ToString()
             {
                 return "Array index: " + IntIndex + " - Bit: " + BitIndex; 
+            }
+
+            public override int GetHashCode()
+            {
+                return base.GetHashCode();
+            }
+
+            public override bool Equals(object obj)
+            {
+                BitPosition bitPos = obj as BitPosition;
+                if (bitPos == null)
+                    return false;
+
+                return this == bitPos;
             }
         }
     }

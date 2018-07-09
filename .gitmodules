@@ -1,0 +1,3 @@
+[submodule "openssl-net"]
+	path = openssl-net
+	url = https://github.com/openssl-net/openssl-net

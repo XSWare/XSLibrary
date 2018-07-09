@@ -5,9 +5,6 @@ namespace XSLibrary.Network.Connections
 {
     public class UDPConnection: ConnectionInterface
     {
-        public delegate void DataReceivedHandler(object sender, byte[] data, IPEndPoint endPoint);
-        public event DataReceivedHandler DataReceivedEvent;
-
         const int SIO_UDP_CONNRESET = -1744830452;
 
         public UDPConnection(IPEndPoint local) : base(new Socket(local.AddressFamily, SocketType.Dgram, ProtocolType.Udp))
@@ -31,7 +28,7 @@ namespace XSLibrary.Network.Connections
 
         protected override void SendSpecialized(byte[] data)
         {
-                ConnectionSocket.SendTo(data, Remote);
+            ConnectionSocket.SendTo(data, Remote);
         }
 
         public void SetDefaultSend(IPEndPoint remote)
@@ -41,7 +38,16 @@ namespace XSLibrary.Network.Connections
 
         public void HolePunching(IPEndPoint remoteEndPoint)
         {
-            Send(new byte[0], remoteEndPoint);
+            m_lock.Execute(() => UnsafeHolePunching(remoteEndPoint));
+        }
+
+        private void UnsafeHolePunching(IPEndPoint remoteEndPoint)
+        {
+            if (CanSend())
+            {
+                ConnectionSocket.SendTo(new byte[0], remoteEndPoint);
+                Logger.Log("Sent hole punching.");
+            }
         }
 
         protected override void PreReceiveSettings()
@@ -49,27 +55,25 @@ namespace XSLibrary.Network.Connections
             ConnectionSocket.Bind(Local);
         }
 
-        protected override void ReceiveFromSocket()
+        protected override bool ReceiveFromSocket(out byte[] data, out IPEndPoint source)
         {
-            byte[] data = new byte[MaxReceiveSize];
-            EndPoint source = new IPEndPoint(Local.Address, Local.Port);
+            data = new byte[MaxReceiveSize];
+            EndPoint bufSource = new IPEndPoint(Local.Address, Local.Port);
 
-            int size = ConnectionSocket.ReceiveFrom(data, ref source);
+            int size = ConnectionSocket.ReceiveFrom(data, ref bufSource);
+            source = bufSource as IPEndPoint;
 
-            if(IsHolePunching(size))
-                return;
+            if (IsHolePunching(size))
+                return false;
 
-            RaiseReceivedEvent(TrimData(data, size), source as IPEndPoint);    
+            data = TrimData(data, size);
+
+            return true;
         }
 
         private bool IsHolePunching(int size)
         {
             return size == 0;
-        }
-
-        private void RaiseReceivedEvent(byte[] data, IPEndPoint source)
-        {
-            DataReceivedEvent?.Invoke(this, data, source);
         }
     }
 }
