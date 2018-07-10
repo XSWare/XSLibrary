@@ -22,7 +22,7 @@ namespace XSLibrary.Cryptography.ConnectionCryptos
             DataCrypto.Padding = PaddingMode.PKCS7;
         }
 
-        protected override bool HandshakeActive(Action<byte[]> Send, ReceiveCall Receive)
+        protected override bool HandshakeActive(SendCall Send, ReceiveCall Receive)
         {
             Send(KEXCrypto.PublicKey.ToByteArray());
             if (!Receive(out byte[] data, out IPEndPoint source))
@@ -50,7 +50,7 @@ namespace XSLibrary.Cryptography.ConnectionCryptos
             return true;
         }
 
-        protected override bool HandshakePassive(Action<byte[]> Send, ReceiveCall Receive)
+        protected override bool HandshakePassive(SendCall Send, ReceiveCall Receive)
         {
             if (!Receive(out byte[] data, out IPEndPoint source))
                 return false;

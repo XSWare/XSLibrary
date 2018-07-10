@@ -1,10 +1,10 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 
 namespace XSLibrary.Cryptography.ConnectionCryptos
 {
     public abstract class IConnectionCrypto
     {
+        public delegate void SendCall(byte[] data);
         public delegate bool ReceiveCall(out byte[] data, out IPEndPoint source);
 
         bool Active { get; set; }
@@ -14,7 +14,7 @@ namespace XSLibrary.Cryptography.ConnectionCryptos
             Active = active;
         }
 
-        public bool Handshake(Action<byte[]> Send, ReceiveCall Receive)
+        public bool Handshake(SendCall Send, ReceiveCall Receive)
         {
             if (Active)
                 return HandshakeActive(Send, Receive);
@@ -22,8 +22,8 @@ namespace XSLibrary.Cryptography.ConnectionCryptos
                 return HandshakePassive(Send, Receive);
         }
 
-        protected abstract bool HandshakeActive(Action<byte[]> Send, ReceiveCall Receive);
-        protected abstract bool HandshakePassive(Action<byte[]> Send, ReceiveCall Receive);
+        protected abstract bool HandshakeActive(SendCall Send, ReceiveCall Receive);
+        protected abstract bool HandshakePassive(SendCall Send, ReceiveCall Receive);
 
         public abstract byte[] EncryptData(byte[] data);
         public abstract byte[] DecryptData(byte[] data);

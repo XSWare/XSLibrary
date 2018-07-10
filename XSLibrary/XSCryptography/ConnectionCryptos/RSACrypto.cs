@@ -14,12 +14,12 @@ namespace XSLibrary.Cryptography.ConnectionCryptos
             //KEXCrypto.
         }
 
-        protected override bool HandshakeActive(Action<byte[]> Send, ReceiveCall Receive)
+        protected override bool HandshakeActive(SendCall Send, ReceiveCall Receive)
         {
             throw new NotImplementedException();
         }
 
-        protected override bool HandshakePassive(Action<byte[]> Send, ReceiveCall Receive)
+        protected override bool HandshakePassive(SendCall Send, ReceiveCall Receive)
         {
             throw new NotImplementedException();
         }
