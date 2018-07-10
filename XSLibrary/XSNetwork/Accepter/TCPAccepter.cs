@@ -64,7 +64,10 @@ namespace XSLibrary.Network.Accepters
                 catch { continue; }
 
                 Logger.Log("Accepted connection from {0}", acceptedSocket.RemoteEndPoint.ToString());
-                RaiseClientConnectedEvent(acceptedSocket);
+
+                m_acceptThread = new Thread(() => RaiseClientConnectedEvent(acceptedSocket));
+                m_acceptThread.Name = "Socket init routine";
+                m_acceptThread.Start();
             }
         }
 
