@@ -6,20 +6,18 @@ namespace XSLibrary.Network.Connections
     {
         class PackageParser
         {
+            public int MaxPackageSize { get; set; } = 2048;
+
+            public bool NeedsFreshData { get; private set; }
+            public bool PackageFinished { get; private set; }
+
             byte[] currentPackage;
             int currentPackagePos;
             byte[] currentData;
             int currentPos;
 
-            public int MaxPackageSize { get; private set; }
-
-            public bool NeedsFreshData { get; private set; }
-            public bool PackageFinished { get; private set; }
-
-            public PackageParser(int maxPackageSize)
+            public PackageParser()
             {
-                MaxPackageSize = maxPackageSize;
-
                 NeedsFreshData = true;
                 PackageFinished = false;
             }
