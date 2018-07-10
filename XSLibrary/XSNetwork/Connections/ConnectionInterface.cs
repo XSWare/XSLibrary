@@ -25,6 +25,8 @@ namespace XSLibrary.Network.Connections
         public event CommunicationErrorHandler OnDisconnect;     // can basically come from any thread so make your actions threadsafe
 
         public int MaxReceiveSize { get; set; } = 2048;     // MTU usually limits this to ~1450
+        // timeout in milliseconds
+        public int HandshakeTimeout { get; set; } = 5000;   
 
         public Logger Logger { get; set; }
 
@@ -128,20 +130,22 @@ namespace XSLibrary.Network.Connections
 
         private bool ExecuteCryptoHandshake(IConnectionCrypto crypto)
         {
-            if (Disconnecting)
-            {
-                Logger.Log("Cannot intitiate crypto after disconnect!");
-                return false;
-            }
-
-            if (Receiving)
-            {
-                Logger.Log("Crypto cannot be initiated after receive loop was started!");
-                return false;
-            }
+            int previousTimeout = ConnectionSocket.ReceiveTimeout;
+            ConnectionSocket.ReceiveTimeout = HandshakeTimeout;
 
             try
             {
+                if (Disconnecting)
+                {
+                    Logger.Log("Cannot intitiate crypto after disconnect!");
+                    return false;
+                }
+
+                if (Receiving)
+                {
+                    Logger.Log("Crypto cannot be initiated after receive loop was started!");
+                    return false;
+                }
                 if (!crypto.Handshake(SendSpecialized, ReceiveSpecialized))
                     return false;
 
@@ -150,6 +154,7 @@ namespace XSLibrary.Network.Connections
                 return true;
             }
             catch { return false; }
+            finally { ConnectionSocket.ReceiveTimeout = previousTimeout; }
         }
 
         private void HandleHandshakeFailure()
