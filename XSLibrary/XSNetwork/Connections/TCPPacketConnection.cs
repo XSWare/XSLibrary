@@ -23,8 +23,7 @@ namespace XSLibrary.Network.Connections
 
         protected override void SendSpecialized(byte[] data)
         {
-            if (!Disconnecting)
-                ConnectionSocket.Send(CreateDataPackage(data));
+            ConnectionSocket.Send(CreateDataPackage(data));
         }
 
         private byte[] CreateDataPackage(byte[] data)
@@ -41,34 +40,27 @@ namespace XSLibrary.Network.Connections
 
         public void SendKeepAlive()
         {
-            m_lock.Execute(UnsafeSendKeepAlive);
+            SafeSend(() => ConnectionSocket.Send(new byte[] { Header_ID_KeepAlive, 0, 0, 0, 0 }));
+            Logger.Log("Sent keepalive.");
         }
 
-        private void UnsafeSendKeepAlive()
-        {
-            if (CanSend())
-            {
-                ConnectionSocket.Send(new byte[] { Header_ID_KeepAlive, 0, 0, 0, 0 });
-                Logger.Log("Sent keepalive.");
-            }
-        }
-
-        protected override bool ReceiveFromSocket(out byte[] data, out IPEndPoint source)
+        protected override bool ReceiveSpecialized(out byte[] data, out IPEndPoint source)
         {
             data = null;
             source = Remote;
 
-            if(Parser.NeedsFreshData)
+            while(!Parser.PackageFinished)
             {
-                if (!base.ReceiveFromSocket(out data, out source))
-                    return false;
+                if(Parser.NeedsFreshData)
+                {
+                    if (!base.ReceiveSpecialized(out data, out source))
+                        return false;
 
-                Parser.AddData(data);
+                    Parser.AddData(data);
+                }
+
+                Parser.ParsePackage();
             }
-
-            Parser.ParsePackage();
-            if (!Parser.PackageFinished)
-                return false;
 
             data = Parser.GetPackage();
             return true;

@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Net.Sockets;
-using XSLibrary.Utility;
 
 namespace XSLibrary.Network.Connections
 {
@@ -15,8 +14,7 @@ namespace XSLibrary.Network.Connections
 
         protected override void SendSpecialized(byte[] data)
         {
-            if (!Disconnecting)
-                ConnectionSocket.Send(data);
+            ConnectionSocket.Send(data);
         }
 
         protected override void PreReceiveSettings()
@@ -24,7 +22,7 @@ namespace XSLibrary.Network.Connections
             return;
         }
 
-        protected override bool ReceiveFromSocket(out byte[] data, out IPEndPoint source)
+        protected override bool ReceiveSpecialized(out byte[] data, out IPEndPoint source)
         {
             data = new byte[MaxReceiveSize];
             source = Remote;

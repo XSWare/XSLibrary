@@ -17,8 +17,7 @@ namespace XSLibrary.Network.Connections
 
         public void Send(byte[] data, IPEndPoint remote)
         {
-            SetDefaultSend(remote);
-            Send(data);
+            SafeSend(() => ConnectionSocket.SendTo(Crypto.EncryptData(data), remote));
         }
 
         protected override bool CanSend()
@@ -38,16 +37,8 @@ namespace XSLibrary.Network.Connections
 
         public void HolePunching(IPEndPoint remoteEndPoint)
         {
-            m_lock.Execute(() => UnsafeHolePunching(remoteEndPoint));
-        }
-
-        private void UnsafeHolePunching(IPEndPoint remoteEndPoint)
-        {
-            if (CanSend())
-            {
-                ConnectionSocket.SendTo(new byte[0], remoteEndPoint);
-                Logger.Log("Sent hole punching.");
-            }
+            SafeSend(() => ConnectionSocket.SendTo(new byte[0], remoteEndPoint));
+            Logger.Log("Sent hole punching.");
         }
 
         protected override void PreReceiveSettings()
@@ -55,19 +46,20 @@ namespace XSLibrary.Network.Connections
             ConnectionSocket.Bind(Local);
         }
 
-        protected override bool ReceiveFromSocket(out byte[] data, out IPEndPoint source)
+        protected override bool ReceiveSpecialized(out byte[] data, out IPEndPoint source)
         {
             data = new byte[MaxReceiveSize];
             EndPoint bufSource = new IPEndPoint(Local.Address, Local.Port);
 
-            int size = ConnectionSocket.ReceiveFrom(data, ref bufSource);
-            source = bufSource as IPEndPoint;
-
-            if (IsHolePunching(size))
-                return false;
+            int size;
+            do
+            {
+                size = ConnectionSocket.ReceiveFrom(data, ref bufSource);
+                source = bufSource as IPEndPoint;
+            }
+            while (IsHolePunching(size));
 
             data = TrimData(data, size);
-
             return true;
         }
 

@@ -10,13 +10,8 @@ namespace XSLibrary.Network.Connections
 {
     public class ConnectionException : Exception
     {
-        public ConnectionException(string exceptionMessage) : this (exceptionMessage, null)
-        {
-        }
-
-        public ConnectionException(string exceptionMessage, Exception innerException) : base(exceptionMessage, innerException)
-        {
-        }
+        public ConnectionException(string exceptionMessage) : this(exceptionMessage, null) { }
+        public ConnectionException(string exceptionMessage, Exception innerException) : base(exceptionMessage, innerException) { }
     }
 
     public abstract class ConnectionInterface
@@ -29,11 +24,11 @@ namespace XSLibrary.Network.Connections
         public event CommunicationErrorHandler OnReceiveError;
         public event CommunicationErrorHandler OnDisconnect;     // can basically come from any thread so make your actions threadsafe
 
-        public int MaxReceiveSize { get; set; } = 8192;
+        public int MaxReceiveSize { get; set; } = 2048;     // MTU usually limits this to ~1450
 
         public Logger Logger { get; set; }
 
-        protected SafeExecutor m_lock;
+        private SafeExecutor m_lock;
 
         public bool Connected { get { return m_lock.Execute(() => { return !Disconnecting && ConnectionSocket.Connected; }); } }
 
@@ -53,6 +48,7 @@ namespace XSLibrary.Network.Connections
 
         protected Thread ReceiveThread { get; set; }
 
+        volatile bool m_sendEnabled;
         private volatile bool m_disconnected;
         protected bool Disconnecting
         {
@@ -60,7 +56,7 @@ namespace XSLibrary.Network.Connections
             set { m_disconnected = value; }
         }
 
-        IConnectionCrypto Crypto { get; set; }
+        protected IConnectionCrypto Crypto { get; set; }
 
         public ConnectionInterface(Socket connectionSocket)
         {
@@ -69,29 +65,41 @@ namespace XSLibrary.Network.Connections
             Logger = new NoLog();
             m_lock = new SingleThreadExecutor();
 
+            m_sendEnabled = true;
+
             InitializeSocket(connectionSocket);
         }
 
         public void Send(byte[] data)
         {
-            m_lock.Execute(() => UnsafeSend(Crypto.EncryptData(data)));
+            SafeSend(() => SendSpecialized(Crypto.EncryptData(data)));
         }
 
-        private void UnsafeSend(byte[] data)
+        protected void SafeSend(Action SendFunction)
         {
-            try
+            bool error = false;
+            m_lock.Execute(() =>
             {
-                if (CanSend())
-                    SendSpecialized(data);
-            }
-            catch (SocketException)
-            {
+                try
+                {
+                    if (m_sendEnabled && CanSend())
+                        SendFunction();
+                }
+                catch (SocketException)
+                {
+                    m_sendEnabled = false;
+                    error = true;
+                }
+                catch (ObjectDisposedException)
+                {
+                    m_sendEnabled = false;
+                    error = true;
+                }
+            });
+
+            // this should only occure once, even if multiple sends fail from different threads
+            if(error)
                 SendErrorHandling(Remote);
-            }
-            catch (ObjectDisposedException)
-            {
-                SendErrorHandling(Remote);
-            }
         }
 
         protected virtual bool CanSend()
@@ -109,22 +117,44 @@ namespace XSLibrary.Network.Connections
 
         public bool InitializeCrypto(IConnectionCrypto crypto)
         {
-            if (!Connected)
-                throw new ConnectionException("Cannot intitiate crypto after disconnect!");
-
-            if (Receiving)
-                throw new ConnectionException("Crypto cannot be initiated after receive loop was started!");
-
-            if (!crypto.Handshake(Send, ReceiveFromSocket))
+            if (!m_lock.Execute(() => ExecuteCryptoHandshake(crypto)))
             {
-                Logger.Log("Crypto handshake failed!");
-                Disconnect();
+                HandleHandshakeFailure();
                 return false;
             }
 
-            Crypto = crypto;
             return true;
+        }
 
+        private bool ExecuteCryptoHandshake(IConnectionCrypto crypto)
+        {
+            if (Disconnecting)
+            {
+                Logger.Log("Cannot intitiate crypto after disconnect!");
+                return false;
+            }
+
+            if (Receiving)
+            {
+                Logger.Log("Crypto cannot be initiated after receive loop was started!");
+                return false;
+            }
+
+            try
+            {
+                if (!crypto.Handshake(SendSpecialized, ReceiveSpecialized))
+                    return false;
+
+                Crypto = crypto;
+                return true;
+            }
+            catch { return false; }
+        }
+
+        private void HandleHandshakeFailure()
+        {
+            Logger.Log("Crypto handshake failed!");
+            Disconnect();
         }
 
         public void InitializeReceiving()
@@ -135,7 +165,10 @@ namespace XSLibrary.Network.Connections
         private void UnsafeInitializeReceiving()
         {
             if (Disconnecting)
-                throw new ConnectionException("Can not receive from a disconnected connection!");
+            {
+                Logger.Log("Can not start receiving from a disconnected connection!");
+                return;
+            }
 
             if (!Receiving)
             {
@@ -174,7 +207,7 @@ namespace XSLibrary.Network.Connections
             {
                 try
                 {
-                    if(ReceiveFromSocket(out byte[] data, out IPEndPoint source))
+                    if(ReceiveSpecialized(out byte[] data, out IPEndPoint source))
                         RaiseReceivedEvent(data, source);
                 }
                 catch (SocketException)
@@ -192,7 +225,7 @@ namespace XSLibrary.Network.Connections
             Receiving = false;
         }
 
-        protected abstract bool ReceiveFromSocket(out byte[] data, out IPEndPoint source);
+        protected abstract bool ReceiveSpecialized(out byte[] data, out IPEndPoint source);
 
         protected void ReceiveErrorHandling(IPEndPoint remote)
         {
@@ -214,21 +247,6 @@ namespace XSLibrary.Network.Connections
             byte[] returnData = new byte[size];
             Array.Copy(data, 0, returnData, 0, size);
             return returnData;
-        }
-        
-        public bool ConnectionPolling()
-        {
-            if (Disconnecting)
-                return false;
-
-            bool connected = false;
-            if (ConnectionSocket.Poll(0, SelectMode.SelectRead))
-            {
-                byte[] data = new byte[1];
-                connected = ConnectionSocket.Receive(data, SocketFlags.Peek) != 0;
-            }
-
-            return connected;
         }
 
         public void Disconnect()
