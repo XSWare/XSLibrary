@@ -60,25 +60,26 @@ namespace XSLibrary.Network.Connections
 
             private void FillPackage()
             {
-                int leftoverSize = currentData.Length - (currentPos + currentPackage.Length);
+                int spacePackage = currentPackage.Length - currentPackagePos;
+                int currentDataLeft = currentData.Length - currentPos;
+                int leftoverDataSize = currentDataLeft - spacePackage;
 
-                if (leftoverSize >= 0)
+                if (leftoverDataSize >= 0)  // enough data to fill the package
                 {
-                    Array.Copy(currentData, currentPos, currentPackage, 0, currentPackage.Length);
+                    Array.Copy(currentData, currentPos, currentPackage, currentPackagePos, spacePackage);
                     PackageFinished = true;
 
                     currentPos += currentPackage.Length;
 
-                    if (currentPos >= currentData.Length)
+                    if (currentPos == currentData.Length)   // package is full and data is empty -> get more data for next
                         NeedsFreshData = true;
                 }
-                else
+                else    // not enough data to fill package
                 {
                     // insert rest of data into package and wait for fresh data
-                    int currentDataLength = currentData.Length - currentPos;
-                    currentPackagePos += currentDataLength;
+                    Array.Copy(currentData, currentPos, currentPackage, currentPackagePos, currentDataLeft);
+                    currentPackagePos += currentDataLeft;
 
-                    Array.Copy(currentData, currentPos, currentPackage, currentPackagePos, currentDataLength);
                     NeedsFreshData = true;
                 }
             }
