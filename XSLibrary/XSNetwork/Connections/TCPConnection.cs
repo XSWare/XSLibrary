@@ -32,7 +32,6 @@ namespace XSLibrary.Network.Connections
             if (size <= 0)
             {
                 ReceiveThread = null;
-                ReceiveErrorHandling(Remote);
                 return false;
             }
 
