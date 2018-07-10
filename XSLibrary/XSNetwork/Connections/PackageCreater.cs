@@ -24,9 +24,12 @@ namespace XSLibrary.Network.Connections
 
                 byte[][] packages = new byte[GetPackageCount()][];
 
-                for (int i= 0; i < packages.Length; i++)
+                for (int i = 0; i < packages.Length; i++)
                 {
-                    packages[i] = CreateDataPackage();
+                    if (i == 0)
+                        packages[i] = CreateHeaderPackage();
+                    else
+                        packages[i] = CreateDataPackage();
                 }
 
                 if (currentPos != data.Length)
@@ -40,20 +43,36 @@ namespace XSLibrary.Network.Connections
                 return currentData.Length / MaxPackageSize + (currentData.Length % MaxPackageSize != 0 ? 1 : 0);
             }
 
+            private byte[] CreateHeaderPackage()
+            {
+                int dataLength = Math.Min(currentData.Length - currentPos, MaxPackageSize);
+
+                byte[] header = new byte[Header_Size_ID + Header_Size_PacketLength + dataLength];
+                byte[] lengthHeader = BitConverter.GetBytes(currentData.Length);
+
+                header[0] = Header_ID_Packet;
+                Array.Copy(lengthHeader, 0, header, Header_Size_ID, Header_Size_PacketLength);
+
+                FillPackage(header, Header_Size_Total, dataLength);
+
+                return header;
+            }
+
             private byte[] CreateDataPackage()
             {
                 int length = Math.Min(currentData.Length - currentPos, MaxPackageSize);
 
-                byte[] packet = new byte[Header_Size_ID + Header_Size_PacketLength + length];
-                byte[] lengthHeader = BitConverter.GetBytes(length);
+                byte[] packet = new byte[length];
 
-                packet[0] = Header_ID_Packet;
-                Array.Copy(lengthHeader, 0, packet, Header_Size_ID, Header_Size_PacketLength);
-                Array.Copy(currentData, currentPos, packet, Header_Size_Total, length);
-
-                currentPos += length;
+                FillPackage(packet, 0, length);
 
                 return packet;
+            }
+
+            private void FillPackage(byte[] package, int offset, int length)
+            {
+                Array.Copy(currentData, currentPos, package, offset, length);
+                currentPos += length;
             }
         }
     }
