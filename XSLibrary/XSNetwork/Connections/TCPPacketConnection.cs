@@ -17,6 +17,7 @@ namespace XSLibrary.Network.Connections
             set { m_sendLock.Execute(() => Creater.MaxPackageSize = value); }
         }
 
+        // this includes any cryptographic overhead as well so consider this while deciding its value
         public int MaxPackageReceiveSize
         {
             get { return Parser.MaxPackageSize; }
