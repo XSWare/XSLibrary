@@ -146,6 +146,7 @@ namespace XSLibrary.Network.Connections
                     return false;
 
                 Crypto = crypto;
+                Logger.Log("Crypto handshake successful.");
                 return true;
             }
             catch { return false; }
