@@ -20,14 +20,10 @@ namespace XSLibrary.Network.Connections
             SafeSend(() => ConnectionSocket.SendTo(Crypto.EncryptData(data), remote));
         }
 
-        protected override bool CanSend()
-        {
-            return base.CanSend() && Remote != null;
-        }
-
         protected override void SendSpecialized(byte[] data)
         {
-            ConnectionSocket.SendTo(data, Remote);
+            if(Remote != null)
+                ConnectionSocket.SendTo(data, Remote);
         }
 
         public void SetDefaultSend(IPEndPoint remote)
