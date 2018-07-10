@@ -207,8 +207,10 @@ namespace XSLibrary.Network.Connections
             {
                 try
                 {
-                    if(ReceiveSpecialized(out byte[] data, out IPEndPoint source))
+                    if (ReceiveSpecialized(out byte[] data, out IPEndPoint source))
                         RaiseReceivedEvent(data, source);
+                    else
+                        Disconnect();
                 }
                 catch (SocketException)
                 {
