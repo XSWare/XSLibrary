@@ -11,12 +11,6 @@ namespace XSLibrary.Network.Connections
         SafeExecutor m_sendLock;
         SafeExecutor m_receiveLock;
 
-        public int MaxPackageSendSize
-        {
-            get { return Creater.MaxPackageSize; }
-            set { m_sendLock.Execute(() => Creater.MaxPackageSize = value); }
-        }
-
         // this includes any cryptographic overhead as well so consider this while deciding its value
         public int MaxPackageReceiveSize
         {
