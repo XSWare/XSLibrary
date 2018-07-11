@@ -52,6 +52,8 @@ namespace XSLibrary.Network.Connections
 
         volatile bool m_sendEnabled;
         private volatile bool m_disconnected;
+        private volatile bool m_preReceiveDone;
+
         protected bool Disconnecting
         {
             get { return m_disconnected; }
@@ -68,6 +70,7 @@ namespace XSLibrary.Network.Connections
             m_lock = new SingleThreadExecutor();
 
             m_sendEnabled = true;
+            m_preReceiveDone = false;
 
             InitializeSocket(connectionSocket);
         }
@@ -146,6 +149,9 @@ namespace XSLibrary.Network.Connections
                     Logger.Log("Crypto cannot be initiated after receive loop was started!");
                     return false;
                 }
+
+                ExecutePreReceiveActions();
+
                 if (!crypto.Handshake(SendSpecialized, ReceiveSpecialized))
                     return false;
 
@@ -179,8 +185,17 @@ namespace XSLibrary.Network.Connections
             if (!Receiving)
             {
                 Receiving = true;
-                PreReceiveSettings();
+                ExecutePreReceiveActions();
                 StartReceiving();
+            }
+        }
+
+        private void ExecutePreReceiveActions()
+        {
+            if (!m_preReceiveDone)
+            {
+                m_preReceiveDone = true;
+                PreReceiveSettings();
             }
         }
 
