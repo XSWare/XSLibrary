@@ -30,7 +30,6 @@ namespace XSLibrary.Network.Connections
         const int Header_Size_PacketLength = 4;
         const int Header_Size_Total = Header_Size_ID + Header_Size_PacketLength;
 
-        PackageCreater Creater;
         PackageParser Parser;
 
         public TCPPacketConnection(Socket socket)
@@ -39,7 +38,6 @@ namespace XSLibrary.Network.Connections
             m_sendLock = new SingleThreadExecutor();
             m_receiveLock = new SingleThreadExecutor();
 
-            Creater = new PackageCreater();
             Parser = new PackageParser();
         }
 
@@ -47,9 +45,19 @@ namespace XSLibrary.Network.Connections
         {
             m_sendLock.Execute(() =>
             {
-                foreach (byte[] package in Creater.SplitIntoPackages(data))
-                    ConnectionSocket.Send(package);
+                ConnectionSocket.Send(CreateHeader(data.Length));
+                ConnectionSocket.Send(data);
             });
+        }
+
+        private byte[] CreateHeader(int length)
+        {
+            byte[] header = new byte[Header_Size_ID + Header_Size_PacketLength];
+            byte[] lengthHeader = BitConverter.GetBytes(length);
+
+            header[0] = Header_ID_Packet;
+            Array.Copy(lengthHeader, 0, header, Header_Size_ID, Header_Size_PacketLength);
+            return header;
         }
 
         public void SendKeepAlive()
