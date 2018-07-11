@@ -239,7 +239,10 @@ namespace XSLibrary.Network.Connections
                     if (ReceiveSpecialized(out byte[] data, out IPEndPoint source))
                         RaiseReceivedEvent(Crypto.DecryptData(data), source);
                     else
+                    {
+                        ReceiveThread = null;
                         Disconnect();
+                    }
                 }
                 catch (SocketException)
                 {

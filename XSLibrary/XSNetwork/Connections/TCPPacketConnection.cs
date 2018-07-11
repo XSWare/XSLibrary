@@ -8,7 +8,6 @@ namespace XSLibrary.Network.Connections
 {
     public partial class TCPPacketConnection : TCPConnection
     {
-        SafeExecutor m_sendLock;
         SafeExecutor m_receiveLock;
 
         // this includes any cryptographic overhead as well so consider this while deciding its value
@@ -29,7 +28,6 @@ namespace XSLibrary.Network.Connections
         public TCPPacketConnection(Socket socket)
             : base(socket)
         {
-            m_sendLock = new SingleThreadExecutor();
             m_receiveLock = new SingleThreadExecutor();
 
             Parser = new PackageParser();
@@ -37,11 +35,8 @@ namespace XSLibrary.Network.Connections
 
         protected override void SendSpecialized(byte[] data)
         {
-            m_sendLock.Execute(() =>
-            {
-                ConnectionSocket.Send(CreateHeader(data.Length));
-                ConnectionSocket.Send(data);
-            });
+            ConnectionSocket.Send(CreateHeader(data.Length));
+            ConnectionSocket.Send(data);
         }
 
         private byte[] CreateHeader(int length)
