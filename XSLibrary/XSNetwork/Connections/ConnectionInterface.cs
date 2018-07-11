@@ -79,6 +79,7 @@ namespace XSLibrary.Network.Connections
         public void Send(byte[] data)
         {
             SafeSend(() => SendSpecialized(Crypto.EncryptData(data)));
+            Logger.Log("Sent data to {0}.", Remote.ToString());
         }
 
         protected void SafeSend(Action SendFunction)
@@ -271,7 +272,7 @@ namespace XSLibrary.Network.Connections
 
         private void RaiseReceivedEvent(byte[] data, IPEndPoint source)
         {
-            Logger.Log("Received data.");
+            Logger.Log("Received data from {0}.", source.ToString());
             DataReceivedEvent?.Invoke(this, data, source);
         }
 
