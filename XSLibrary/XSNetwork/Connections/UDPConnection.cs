@@ -22,8 +22,10 @@ namespace XSLibrary.Network.Connections
 
         protected override void SendSpecialized(byte[] data)
         {
-            if(Remote != null)
-                ConnectionSocket.SendTo(data, Remote);
+            if (Remote == null)
+                new ConnectionException("Set default target before sending or choose a different send call!");
+
+            ConnectionSocket.SendTo(data, Remote);
         }
 
         public void SetDefaultSend(IPEndPoint remote)
