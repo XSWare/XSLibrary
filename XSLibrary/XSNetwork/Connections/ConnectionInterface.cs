@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using System.Threading;
 using XSLibrary.Cryptography.ConnectionCryptos;
 using XSLibrary.ThreadSafety.Executors;
@@ -97,6 +98,12 @@ namespace XSLibrary.Network.Connections
                 }
                 catch (ObjectDisposedException)
                 {
+                    m_sendEnabled = false;
+                    error = true;
+                }
+                catch (CryptographicException)
+                {
+                    Logger.Log("Encryption error!");
                     m_sendEnabled = false;
                     error = true;
                 }
@@ -229,7 +236,7 @@ namespace XSLibrary.Network.Connections
                 try
                 {
                     if (ReceiveSpecialized(out byte[] data, out IPEndPoint source))
-                        RaiseReceivedEvent(data, source);
+                        RaiseReceivedEvent(Crypto.DecryptData(data), source);
                     else
                         Disconnect();
                 }
@@ -240,6 +247,12 @@ namespace XSLibrary.Network.Connections
                 }
                 catch (ObjectDisposedException)
                 {
+                    ReceiveThread = null;
+                    ReceiveErrorHandling(Remote);
+                }
+                catch (CryptographicException)
+                {
+                    Logger.Log("Decryption error!");
                     ReceiveThread = null;
                     ReceiveErrorHandling(Remote);
                 }
@@ -259,7 +272,7 @@ namespace XSLibrary.Network.Connections
         private void RaiseReceivedEvent(byte[] data, IPEndPoint source)
         {
             Logger.Log("Received data.");
-            DataReceivedEvent?.Invoke(this, Crypto.DecryptData(data), source);
+            DataReceivedEvent?.Invoke(this, data, source);
         }
 
         protected byte[] TrimData(byte[] data, int size)
