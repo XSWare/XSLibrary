@@ -41,7 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Accepter\TCPAccepter.cs" />
-    <Compile Include="Connections\ConnectionInterface.cs" />
+    <Compile Include="Connections\IConnection.cs" />
     <Compile Include="Connections\PackageParser.cs" />
     <Compile Include="Connections\TCPPacketConnection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

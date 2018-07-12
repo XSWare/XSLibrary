@@ -25,7 +25,7 @@ namespace XSLibrary.Cryptography.ConnectionCryptos
         protected override bool HandshakeActive(SendCall Send, ReceiveCall Receive)
         {
             Send(KEXCrypto.PublicKey.ToByteArray());
-            if (!Receive(out byte[] data, out IPEndPoint source))
+            if (!Receive(out byte[] data, out EndPoint source))
                 return false;
 
             DataCrypto.Key = KEXCrypto.DeriveKeyMaterial(CngKey.Import(data, CngKeyBlobFormat.EccPublicBlob));
@@ -52,7 +52,7 @@ namespace XSLibrary.Cryptography.ConnectionCryptos
 
         protected override bool HandshakePassive(SendCall Send, ReceiveCall Receive)
         {
-            if (!Receive(out byte[] data, out IPEndPoint source))
+            if (!Receive(out byte[] data, out EndPoint source))
                 return false;
 
             DataCrypto.Key = KEXCrypto.DeriveKeyMaterial(CngKey.Import(data, CngKeyBlobFormat.EccPublicBlob));

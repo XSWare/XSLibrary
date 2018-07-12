@@ -1,21 +1,14 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
-using XSLibrary.ThreadSafety.Executors;
 using XSLibrary.Utility;
 
 namespace XSLibrary.Network.Connections
 {
     public partial class TCPPacketConnection : TCPConnection
     {
-        SafeExecutor m_receiveLock;
-
         // this includes any cryptographic overhead as well so consider this while deciding its value
-        public int MaxPackageReceiveSize
-        {
-            get { return Parser.MaxPackageSize; }
-            set { m_receiveLock.Execute(() => Parser.MaxPackageSize = value); }
-        }
+        public int MaxPackageReceiveSize { get; set; } = 2048;
 
         const byte Header_ID_Packet = 0x00;
         const byte Header_ID_KeepAlive = 0x01;
@@ -28,8 +21,6 @@ namespace XSLibrary.Network.Connections
         public TCPPacketConnection(Socket socket)
             : base(socket)
         {
-            m_receiveLock = new SingleThreadExecutor();
-
             Parser = new PackageParser();
         }
 
@@ -55,32 +46,28 @@ namespace XSLibrary.Network.Connections
             Logger.Log("Sent keepalive.");
         }
 
-        protected override bool ReceiveSpecialized(out byte[] data, out IPEndPoint source)
+        protected override bool ReceiveSpecialized(out byte[] data, out EndPoint source)
         {
-            m_receiveLock.Lock();
+            data = null;
+            source = Remote;
 
-            try
+            Parser.MaxPackageSize = MaxPackageReceiveSize;
+
+            while (!Parser.PackageFinished)
             {
-                data = null;
-                source = Remote;
-
-                while (!Parser.PackageFinished)
+                if (Parser.NeedsFreshData)
                 {
-                    if (Parser.NeedsFreshData)
-                    {
-                        if (!base.ReceiveSpecialized(out data, out source))
-                            return false;
+                    if (!base.ReceiveSpecialized(out data, out source))
+                        return false;
 
-                        Parser.AddData(data);
-                    }
-
-                    Parser.ParsePackage();
+                    Parser.AddData(data);
                 }
 
-                data = Parser.GetPackage();
-                return true;
+                Parser.ParsePackage();
             }
-            finally { m_receiveLock.Release(); }
+
+            data = Parser.GetPackage();
+            return true;
         }
     }
 }
