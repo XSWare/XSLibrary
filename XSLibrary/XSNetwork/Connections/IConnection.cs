@@ -36,6 +36,7 @@ namespace XSLibrary.Network.Connections
         private SafeExecutor m_connectLock;
         private SafeExecutor m_sendLock;
         private SafeExecutor m_receiveLock;
+        private SafeExecutor m_handshakeLock;
 
         public bool Connected { get { return m_connectLock.Execute(() => { return !m_disconnecting && ConnectionSocket.Connected; }); } }
 
@@ -68,6 +69,7 @@ namespace XSLibrary.Network.Connections
             m_connectLock = new SingleThreadExecutor();
             m_sendLock = new SingleThreadExecutor();
             m_receiveLock = new SingleThreadExecutor();
+            m_handshakeLock = new SingleThreadExecutor();
 
             m_preReceiveDone = false;
 
@@ -145,7 +147,7 @@ namespace XSLibrary.Network.Connections
 
         public bool InitializeCrypto(IConnectionCrypto crypto)
         {
-            if (!m_connectLock.Execute(() => ExecuteCryptoHandshake(crypto)))
+            if (!m_handshakeLock.Execute(() => ExecuteCryptoHandshake(crypto)))
             {
                 HandleHandshakeFailure();
                 return false;
@@ -161,12 +163,6 @@ namespace XSLibrary.Network.Connections
 
             try
             {
-                if (m_disconnecting)
-                {
-                    Logger.Log("Cannot intitiate crypto after disconnect!");
-                    return false;
-                }
-
                 if (Receiving)
                 {
                     Logger.Log("Crypto cannot be initiated after receive loop was started!");
@@ -175,14 +171,14 @@ namespace XSLibrary.Network.Connections
 
                 ExecutePreReceiveActions();
 
-                if (!crypto.Handshake(SendSpecialized, ReceiveSpecialized))
+                if (!crypto.Handshake((data) => SafeSend(() => SendSpecialized(data)), SafeReceive))
                     return false;
 
                 Crypto = crypto;
                 Logger.Log("Crypto handshake successful.");
                 return true;
             }
-            catch { return false; }
+            catch (Exception ex) { return false; }
             finally { ConnectionSocket.ReceiveTimeout = previousTimeout; }
         }
 
