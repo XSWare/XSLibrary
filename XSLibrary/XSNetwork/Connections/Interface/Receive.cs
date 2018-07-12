@@ -3,11 +3,22 @@ using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Threading;
+using XSLibrary.ThreadSafety.Executors;
 
 namespace XSLibrary.Network.Connections
 {
     public abstract partial class IConnection
     {
+        public delegate void DataReceivedHandler(object sender, byte[] data, EndPoint source);
+        public event DataReceivedHandler DataReceivedEvent;
+
+        public int MaxReceiveSize { get; set; } = 2048;     // MTU usually limits this to ~1450
+        public int ReceiveTimeout => ConnectionSocket.ReceiveTimeout;
+
+        protected Thread ReceiveThread { get; set; }
+
+        private SafeExecutor m_receiveLock = new SingleThreadExecutor();
+
         public void InitializeReceiving()
         {
             m_connectLock.Execute(UnsafeInitializeReceiving);
@@ -123,6 +134,11 @@ namespace XSLibrary.Network.Connections
         {
             Logger.Log("Received data from {0}.", source.ToString());
             DataReceivedEvent?.Invoke(this, data, source);
+        }
+
+        protected virtual void WaitReceiveThread()
+        {
+            ReceiveThread?.Join();
         }
     }
 }

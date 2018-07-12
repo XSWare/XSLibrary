@@ -2,11 +2,16 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
+using XSLibrary.ThreadSafety.Executors;
 
 namespace XSLibrary.Network.Connections
 {
     public abstract partial class IConnection
     {
+        public int SendTimeout => ConnectionSocket.SendTimeout;
+
+        private SafeExecutor m_sendLock = new SingleThreadExecutor();
+
         public void Send(byte[] data)
         {
             if (SafeSend(() => SendSpecialized(Crypto.EncryptData(data))))

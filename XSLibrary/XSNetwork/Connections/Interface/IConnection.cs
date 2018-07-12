@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Security.Cryptography;
 using System.Threading;
 using XSLibrary.Cryptography.ConnectionCryptos;
 using XSLibrary.ThreadSafety.Executors;
@@ -17,26 +16,12 @@ namespace XSLibrary.Network.Connections
 
     public abstract partial class IConnection
     {
-        public delegate void DataReceivedHandler(object sender, byte[] data, EndPoint source);
-        public event DataReceivedHandler DataReceivedEvent;
-
         public delegate void CommunicationErrorHandler(object sender, EndPoint remote);
         public event CommunicationErrorHandler OnSendError;
         public event CommunicationErrorHandler OnReceiveError;
         public event CommunicationErrorHandler OnDisconnect;     // can basically come from any thread so make your actions threadsafe
 
-        public int MaxReceiveSize { get; set; } = 2048;     // MTU usually limits this to ~1450
-        // timeout in milliseconds
-        public int HandshakeTimeout { get; set; } = 5000;
-        public int SendTimeout => ConnectionSocket.SendTimeout;
-        public int ReceiveTimeout => ConnectionSocket.ReceiveTimeout;
-
         public Logger Logger { get; set; }
-
-        private SafeReadWriteExecutor m_connectLock;
-        private SafeExecutor m_sendLock;
-        private SafeExecutor m_receiveLock;
-        private SafeExecutor m_handshakeLock;
 
         public bool Connected { get { return m_connectLock.ExecuteReadonly(() => { return !m_disconnecting && ConnectionSocket.Connected; }); } }
 
@@ -54,8 +39,7 @@ namespace XSLibrary.Network.Connections
         public EndPoint Local { get; protected set; }
         public EndPoint Remote { get; protected set; }
 
-        protected Thread ReceiveThread { get; set; }
-
+        private SafeReadWriteExecutor m_connectLock = new RWExecutorWinNative();
         volatile bool m_preReceiveDone;
         volatile bool m_disconnecting;
 
@@ -64,12 +48,7 @@ namespace XSLibrary.Network.Connections
         public IConnection(Socket connectionSocket)
         {
             Crypto = new NoCrypto();
-
             Logger = new NoLog();
-            m_connectLock = new RWExecutorWinNative();
-            m_sendLock = new SingleThreadExecutor();
-            m_receiveLock = new SingleThreadExecutor();
-            m_handshakeLock = new SingleThreadExecutor();
 
             m_preReceiveDone = false;
 
@@ -99,7 +78,7 @@ namespace XSLibrary.Network.Connections
         {
             if(m_connectLock.Execute(CloseSocket))
             {
-                WaitForDisconnect();
+                WaitReceiveThread();
                 Logger.Log("Disconnected.");
                 RaiseOnDisconnect();
             }
@@ -129,11 +108,6 @@ namespace XSLibrary.Network.Connections
             }
 
             return false;
-        }
-
-        protected virtual void WaitForDisconnect()
-        {
-            ReceiveThread?.Join();
         }
 
         private void RaiseOnDisconnect()

@@ -1,10 +1,16 @@
 ﻿using System;
 using XSLibrary.Cryptography.ConnectionCryptos;
+using XSLibrary.ThreadSafety.Executors;
 
 namespace XSLibrary.Network.Connections
 {
     public abstract partial class IConnection
     {
+        // timeout in milliseconds
+        public int HandshakeTimeout { get; set; } = 5000;
+
+        private SafeExecutor m_handshakeLock = new SingleThreadExecutor();
+
         public bool InitializeCrypto(IConnectionCrypto crypto)
         {
             if (!m_handshakeLock.Execute(() => ExecuteCryptoHandshake(crypto)))
