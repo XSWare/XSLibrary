@@ -40,18 +40,18 @@ namespace XSLibrary.Network.Connections
                 if (!crypto.Handshake((data) => SafeSend(() => SendSpecialized(data)), SafeReceive))
                     return false;
 
+                ConnectionSocket.ReceiveTimeout = previousTimeout;
                 Crypto = crypto;
                 Logger.Log("Crypto handshake successful.");
                 return true;
             }
             catch (Exception ex) { return false; }
-            finally { ConnectionSocket.ReceiveTimeout = previousTimeout; }
         }
 
         private void HandleHandshakeFailure()
         {
             Logger.Log("Crypto handshake failed!");
-            Disconnect();
+            Disconnect();   // in case it is not already disconnected
         }
     }
 }

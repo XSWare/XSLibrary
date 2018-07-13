@@ -70,7 +70,7 @@ namespace XSLibrary.Cryptography.ConnectionCryptos
             DataCrypto.IV = data;
             Send(EncryptData(SECRET));
 
-            return false;
+            return true;
         }
 
         public override byte[] EncryptData(byte[] data)
