@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AccountManagement\UserData.cs" />
     <Compile Include="BitManipulation\BitManipulation.cs" />
     <Compile Include="BitManipulation\BitPosition.cs" />
     <Compile Include="BitManipulation\Bits.cs" />
@@ -68,5 +69,6 @@
       <Name>ManagedOpenSsl</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
