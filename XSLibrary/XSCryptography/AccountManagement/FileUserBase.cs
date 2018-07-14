@@ -12,11 +12,15 @@ namespace XSLibrary.Cryptography.AccountManagement
 
         SHA512Cng HashAlgorithm = new SHA512Cng();
 
+        public string Directory { get; private set; }
+        public string FileName { get; private set; }
         public string FilePath { get; private set; }
 
-        public FileUserBase(string filePath)
+        public FileUserBase(string directory, string fileName)
         {
-            FilePath = filePath;
+            Directory = directory;
+            FileName = fileName;
+            FilePath = directory + fileName;
         }
 
         protected override void AddUserData(UserData userData)
@@ -30,8 +34,13 @@ namespace XSLibrary.Cryptography.AccountManagement
             //}
 
             //byte[] userByte = GetBytes(userData);
+            System.IO.Directory.CreateDirectory(Directory);
 
-            File.AppendText(UserToString(userData) + "\n");
+            using (StreamWriter file = File.AppendText(FilePath))
+            {
+                file.WriteLine(UserToString(userData));
+                file.Flush();
+            }
             //FileStream stream = File.Open(FilePath, FileMode.Append);
             //stream.Write(userByte, stream.Length, userByte.Length);
         }
@@ -58,6 +67,11 @@ namespace XSLibrary.Cryptography.AccountManagement
 
         protected override UserData GetAccount(string userName)
         {
+            System.IO.Directory.CreateDirectory(Directory);
+
+            if (!File.Exists(FilePath))
+                return null;
+
             string[] lines = File.ReadAllLines(FilePath);
 
             foreach(string userString in lines)

@@ -2,10 +2,15 @@
 {
     public abstract class IUserDataBase
     {
-        public void AddAccount(string userName, byte[] password)
+        public bool AddAccount(string userName, byte[] password)
         {
+            if (GetAccount(userName) != null)
+                return false;
+
             byte[] salt = GenerateSalt();
             AddUserData(new UserData(userName, Hash(password, salt), salt));
+
+            return true;
         }
 
         protected abstract void AddUserData(UserData userData);
