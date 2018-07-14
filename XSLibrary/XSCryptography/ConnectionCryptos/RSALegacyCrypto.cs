@@ -14,7 +14,7 @@ namespace XSLibrary.Cryptography.ConnectionCryptos
 
         public RSALegacyCrypto(bool active) : base(active)
         {
-            KEXCrypto = new RSACryptoServiceProvider(2048);
+            KEXCrypto = new RSACryptoServiceProvider(1024);
             DataCrypto = new AesCryptoServiceProvider();
         }
 
@@ -50,7 +50,7 @@ namespace XSLibrary.Cryptography.ConnectionCryptos
             if (!Receive(out byte[] data, out EndPoint source))
                 return false;
 
-            DataCrypto.Key = KEXCrypto.Decrypt(data, RSAEncryptionPadding.OaepSHA256);
+            DataCrypto.Key = KEXCrypto.Decrypt(data, RSAEncryptionPadding.Pkcs1);
             Send(DataCrypto.IV);
 
             if (!Receive(out data, out source))
@@ -80,12 +80,11 @@ namespace XSLibrary.Cryptography.ConnectionCryptos
 
             KEXCrypto.FromXmlString(Encoding.ASCII.GetString(data));
 
-
             byte[] key = new byte[32];
             RandomNumberGenerator.Create().GetBytes(key);
 
             DataCrypto.Key = key;
-            Send(KEXCrypto.Encrypt(key, RSAEncryptionPadding.OaepSHA256));
+            Send(KEXCrypto.Encrypt(key, RSAEncryptionPadding.Pkcs1));
 
             if (!Receive(out data, out source))
                 return false;
