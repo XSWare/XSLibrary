@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>XSLibrary.Network</RootNamespace>
     <AssemblyName>XSNetwork</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,6 +30,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -41,8 +43,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Accepter\TCPAccepter.cs" />
-    <Compile Include="Connections\ConnectionInterface.cs" />
+    <Compile Include="Connections\Interface\Handshake.cs" />
+    <Compile Include="Connections\Interface\IConnection.cs" />
     <Compile Include="Connections\PackageParser.cs" />
+    <Compile Include="Connections\Interface\Send.cs" />
+    <Compile Include="Connections\Interface\Receive.cs" />
     <Compile Include="Connections\TCPPacketConnection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Session.cs" />

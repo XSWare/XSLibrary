@@ -31,7 +31,7 @@ namespace XSLibrary.Cryptography.ConnectionCryptos
         protected override bool HandshakeActive(SendCall Send, ReceiveCall Receive)
         {
             Send(KEXCrypto.GetPublicKey());
-            if (!Receive(out byte[] data, out IPEndPoint source))
+            if (!Receive(out byte[] data, out EndPoint source))
                 return false;
 
             DataCrypto.SetSharedSecret(KEXCrypto.GenerateSharedSecret(data));
@@ -41,7 +41,7 @@ namespace XSLibrary.Cryptography.ConnectionCryptos
 
         protected override bool HandshakePassive(SendCall Send, ReceiveCall Receive)
         {
-            if (!Receive(out byte[] data, out IPEndPoint source))
+            if (!Receive(out byte[] data, out EndPoint source))
                 return false;
 
             DataCrypto.SetSharedSecret(KEXCrypto.GenerateSharedSecret(data));

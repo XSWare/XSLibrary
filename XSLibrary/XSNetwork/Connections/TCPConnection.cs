@@ -3,7 +3,7 @@ using System.Net.Sockets;
 
 namespace XSLibrary.Network.Connections
 {
-    public class TCPConnection : ConnectionInterface
+    public class TCPConnection : IConnection
     {
         public TCPConnection(Socket socket) 
             : base(socket)
@@ -22,7 +22,7 @@ namespace XSLibrary.Network.Connections
             return;
         }
 
-        protected override bool ReceiveSpecialized(out byte[] data, out IPEndPoint source)
+        protected override bool ReceiveSpecialized(out byte[] data, out EndPoint source)
         {
             data = new byte[MaxReceiveSize];
             source = Remote;
