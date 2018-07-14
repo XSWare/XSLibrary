@@ -8,7 +8,11 @@ namespace XSLibrary.Network.Connections
 {
     public abstract partial class IConnection
     {
-        public int SendTimeout => ConnectionSocket.SendTimeout;
+        public int SendTimeout
+        {
+            get { return ConnectionSocket.SendTimeout; }
+            set { ConnectionSocket.SendTimeout = value; }
+        }
 
         private SafeExecutor m_sendLock = new SingleThreadExecutor();
 

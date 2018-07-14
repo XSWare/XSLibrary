@@ -51,6 +51,8 @@ namespace XSLibrary.Network.Connections
             data = null;
             source = Remote;
 
+            OneShotTimer timeout = new OneShotTimer(ConnectionSocket.ReceiveTimeout * 1000);
+
             Parser.MaxPackageSize = MaxPackageReceiveSize;
 
             while (!Parser.PackageFinished)
@@ -62,6 +64,9 @@ namespace XSLibrary.Network.Connections
 
                     Parser.AddData(data);
                 }
+
+                if (timeout == true)
+                    return false;
 
                 Parser.ParsePackage();
             }
