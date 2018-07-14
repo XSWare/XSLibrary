@@ -42,8 +42,8 @@ namespace XSLibrary.Network.Connections
 
         public void SendKeepAlive()
         {
-            SafeSend(() => ConnectionSocket.Send(new byte[] { Header_ID_KeepAlive, 0, 0, 0, 0 }));
-            Logger.Log("Sent keepalive.");
+            if(SafeSend(() => ConnectionSocket.Send(new byte[] { Header_ID_KeepAlive, 0, 0, 0, 0 })))
+                Logger.Log("Sent keepalive.");
         }
 
         protected override bool ReceiveSpecialized(out byte[] data, out EndPoint source)

@@ -6,8 +6,8 @@ namespace XSLibrary.Cryptography.ConnectionCryptos
     {
         //Ed25519 KEXCrypto;
 
-        byte[] privateKey;
-        byte[] publicKey;
+        //byte[] privateKey;
+        //byte[] publicKey;
 
         public Curve25519Crypto(bool active) : base(active)
         {
