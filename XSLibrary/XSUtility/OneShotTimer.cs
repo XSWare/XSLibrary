@@ -10,6 +10,7 @@ namespace XSLibrary.Utility
         long m_timerEnd;
 
         public TimeSpan TimePassed { get { return Started ? DateTime.Now - m_start : new TimeSpan(0); } }
+        public TimeSpan TimeLeft { get { return new TimeSpan(m_timerEnd * 10 - TimePassed.Ticks); } }
 
         public OneShotTimer(long microSeconds, bool start = true)
         {
