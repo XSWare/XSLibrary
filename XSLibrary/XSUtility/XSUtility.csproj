@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="HexStringConverter.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="OneShotTimer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

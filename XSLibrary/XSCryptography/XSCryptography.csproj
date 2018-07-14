@@ -43,6 +43,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AccountManagement\FileUserBase.cs" />
+    <Compile Include="AccountManagement\IUserDataBase.cs" />
     <Compile Include="AccountManagement\UserData.cs" />
     <Compile Include="BitManipulation\BitManipulation.cs" />
     <Compile Include="BitManipulation\BitPosition.cs" />
@@ -67,6 +69,10 @@
     <ProjectReference Include="..\..\openssl-net\ManagedOpenSsl\ManagedOpenSsl.csproj">
       <Project>{73dcc218-655b-485f-8eac-0ce5f2f7343d}</Project>
       <Name>ManagedOpenSsl</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\XSUtility\XSUtility.csproj">
+      <Project>{A37C8BF1-08E7-46BB-8F9E-536A82365FED}</Project>
+      <Name>XSUtility</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

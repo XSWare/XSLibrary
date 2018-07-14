@@ -1,6 +1,6 @@
 ﻿namespace XSLibrary.Cryptography.AccountManagement
 {
-    class UserData
+    public class UserData
     {
         public string Username { get; private set; }
         public byte[] PasswordHash { get; private set; }
