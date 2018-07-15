@@ -70,9 +70,9 @@ namespace XSLibrary.Network.Accepters
         protected virtual void HandleAcceptedSocket(Socket acceptedSocket)
         {
             Logger.Log("Accepted connection from {0}", acceptedSocket.RemoteEndPoint.ToString());
-            m_acceptThread = new Thread(() => RaiseClientConnectedEvent(acceptedSocket));
-            m_acceptThread.Name = "Socket init routine";
-            m_acceptThread.Start();
+            Thread initThread = new Thread(() => RaiseClientConnectedEvent(acceptedSocket));
+            initThread.Name = "Socket init routine";
+            initThread.Start();
         }
 
         private void RaiseClientConnectedEvent(Socket acceptedSocket)
