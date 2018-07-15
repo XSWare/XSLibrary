@@ -101,8 +101,8 @@ namespace XSLibrary.Network.Connections
                 }
                 else
                 {
-                    Disconnect();
                     ReceiveThread = null;
+                    Disconnect();
                 }
             }
             catch (SocketException)
