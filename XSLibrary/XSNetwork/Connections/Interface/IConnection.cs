@@ -13,7 +13,7 @@ namespace XSLibrary.Network.Connections
         public ConnectionException(string exceptionMessage, Exception innerException) : base(exceptionMessage, innerException) { }
     }
 
-    public abstract partial class IConnection
+    public abstract partial class IConnection : IDisposable
     {
         public delegate void CommunicationErrorHandler(object sender, EndPoint remote);
         public event CommunicationErrorHandler OnSendError;
@@ -113,6 +113,11 @@ namespace XSLibrary.Network.Connections
         private void RaiseOnDisconnect()
         {
             OnDisconnect?.Invoke(this, Remote);
+        }
+
+        public void Dispose()
+        {
+            Disconnect();
         }
     }
 }
