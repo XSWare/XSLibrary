@@ -45,7 +45,7 @@ namespace XSLibrary.Network.Connections
                 Logger.Log("Crypto handshake successful.");
                 return true;
             }
-            catch (Exception ex) { return false; }
+            catch (Exception) { return false; }
         }
 
         private void HandleHandshakeFailure()
