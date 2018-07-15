@@ -81,12 +81,13 @@ namespace XSLibrary.Cryptography.AccountManagement
             return userString.Split(' ')[0];
         }
 
-        public override void EraseAccount(string username)
+        public override bool EraseAccount(string username)
         {
             System.IO.Directory.CreateDirectory(Directory);
             if (!File.Exists(FilePath))
-                return;
+                return false;
 
+            bool erased = false;
             string[] lines = File.ReadAllLines(FilePath);
 
             List<string> writeBack = new List<string>();
@@ -94,9 +95,12 @@ namespace XSLibrary.Cryptography.AccountManagement
             {
                 if (StringToUsername(userString) != username)
                     writeBack.Add(userString);
+                else
+                    erased = true;
             }
 
             File.WriteAllLines(FilePath, writeBack.ToArray());
+            return erased;
         }
 
         protected override byte[] GenerateSalt()

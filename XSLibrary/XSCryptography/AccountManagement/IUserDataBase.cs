@@ -21,7 +21,7 @@
 
         protected abstract UserData GetAccount(string username);
 
-        public abstract void EraseAccount(string username);
+        public abstract bool EraseAccount(string username);
 
         public bool ChangePassword(string username, byte[] oldPassword, byte[] newPassword)
         {
