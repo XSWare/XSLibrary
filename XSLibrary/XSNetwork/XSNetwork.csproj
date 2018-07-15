@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Accepter\GuardedAccepter.cs" />
     <Compile Include="Accepter\TCPAccepter.cs" />
     <Compile Include="Connections\Interface\Handshake.cs" />
     <Compile Include="Connections\Interface\IConnection.cs" />

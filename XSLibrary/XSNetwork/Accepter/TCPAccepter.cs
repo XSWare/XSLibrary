@@ -17,8 +17,8 @@ namespace XSLibrary.Network.Accepters
         public int MaxPendingConnections { get; private set; }
 
         private bool m_running;
-        public bool Running { get { return m_running && !m_abort; } }
-        bool m_abort;
+        public bool Running { get { return m_running && !Abort; } }
+        protected bool Abort { get; private set; }
 
         Socket m_listeningSocket;
         Thread m_acceptThread;
@@ -29,7 +29,7 @@ namespace XSLibrary.Network.Accepters
             MaxPendingConnections = maxPendingConnections;
 
             m_running = false;
-            m_abort = false;
+            Abort = false;
 
             Logger = new NoLog();
 
@@ -53,7 +53,7 @@ namespace XSLibrary.Network.Accepters
 
         private void AcceptLoop()
         {
-            while (!m_abort)
+            while (!Abort)
             {
                 Socket acceptedSocket;
 
@@ -63,12 +63,16 @@ namespace XSLibrary.Network.Accepters
                 }
                 catch { continue; }
 
-                Logger.Log("Accepted connection from {0}", acceptedSocket.RemoteEndPoint.ToString());
-
-                m_acceptThread = new Thread(() => RaiseClientConnectedEvent(acceptedSocket));
-                m_acceptThread.Name = "Socket init routine";
-                m_acceptThread.Start();
+                HandleAcceptedSocket(acceptedSocket);
             }
+        }
+
+        protected virtual void HandleAcceptedSocket(Socket acceptedSocket)
+        {
+            Logger.Log("Accepted connection from {0}", acceptedSocket.RemoteEndPoint.ToString());
+            m_acceptThread = new Thread(() => RaiseClientConnectedEvent(acceptedSocket));
+            m_acceptThread.Name = "Socket init routine";
+            m_acceptThread.Start();
         }
 
         private void RaiseClientConnectedEvent(Socket acceptedSocket)
@@ -83,7 +87,7 @@ namespace XSLibrary.Network.Accepters
 
         public void Dispose()
         {
-            m_abort = true;
+            Abort = true;
 
             try
             {
