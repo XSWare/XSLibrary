@@ -52,8 +52,9 @@ namespace XSLibrary.Network.Connections
             source = Remote;
 
             OneShotTimer timeout = null;
-            if(ConnectionSocket.ReceiveTimeout > 0)
-                timeout = new OneShotTimer(ConnectionSocket.ReceiveTimeout * 1000);
+            int receiveTimeout = ReceiveTimeout;   // copy to avoid race condition
+            if (receiveTimeout > 0)
+                timeout = new OneShotTimer(receiveTimeout * 1000);
 
             Parser.MaxPackageSize = MaxPackageReceiveSize;
 
@@ -61,20 +62,52 @@ namespace XSLibrary.Network.Connections
             {
                 if (Parser.NeedsFreshData)
                 {
-                    if (!base.ReceiveSpecialized(out data, out source))
-                        return false;
+                    if(timeout == null) // no timeout
+                    {
+                        if (!AsyncReceive(out data, 0))
+                            return false;
+                    }
+                    else                // with timeout
+                    {
+                        int timeLeft = (int)timeout.TimeLeft.TotalMilliseconds;
+                        if (timeLeft <= 0 || !AsyncReceive(out data, timeLeft))
+                            return false;
+                    }
 
                     Parser.AddData(data);
                 }
-
-                if (timeout != null && timeout == true)
-                    return false;
 
                 Parser.ParsePackage();
             }
 
             data = Parser.GetPackage();
             return true;
+        }
+
+        private bool AsyncReceive(out byte[] data, int timeout)
+        {
+            byte[] buffer = new byte[MaxReceiveSize];
+
+            IAsyncResult receiveResult = ConnectionSocket.BeginReceive(buffer, 0, MaxReceiveSize, SocketFlags.None, null, null);
+
+            bool success = false;
+            if (timeout > 0)
+                success = receiveResult.AsyncWaitHandle.WaitOne(timeout, true);
+            else if (timeout == 0)
+                success = receiveResult.AsyncWaitHandle.WaitOne();
+
+            if (!success)
+                ConnectionSocket.Dispose();
+
+            int size = ConnectionSocket.EndReceive(receiveResult);
+            success &= size > 0;
+
+            if (success)
+                data = TrimData(buffer, size);
+            else
+                data = null;
+
+            return success;
         }
     }
 }
