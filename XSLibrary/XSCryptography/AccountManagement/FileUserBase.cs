@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using System.Security.Cryptography;
@@ -23,17 +24,11 @@ namespace XSLibrary.Cryptography.AccountManagement
             FilePath = directory + fileName;
         }
 
-        protected override void AddUserData(UserData userData)
+        protected override bool AddUserData(UserData userData)
         {
             if (userData.Username.Contains(" ") || userData.Username.Contains("\n"))
-                return;
+                return false;
 
-            //if(!File.Exists(FilePath))
-            //{
-            //    File.Create(FilePath);
-            //}
-
-            //byte[] userByte = GetBytes(userData);
             System.IO.Directory.CreateDirectory(Directory);
 
             using (StreamWriter file = File.AppendText(FilePath))
@@ -41,8 +36,8 @@ namespace XSLibrary.Cryptography.AccountManagement
                 file.WriteLine(UserToString(userData));
                 file.Flush();
             }
-            //FileStream stream = File.Open(FilePath, FileMode.Append);
-            //stream.Write(userByte, stream.Length, userByte.Length);
+
+            return true;
         }
 
         private string UserToString(UserData user)
@@ -52,20 +47,7 @@ namespace XSLibrary.Cryptography.AccountManagement
             return string.Format("{0} {1} {2}", user.Username, passwordHash, salt);
         }
 
-        //private byte[] GetBytes(UserData userdata)
-        //{
-        //    byte[] username = Encoding.ASCII.GetBytes(userdata.Username);
-
-        //    byte[] output = new byte[userdata.Salt.Length + userdata.PasswordHash.Length + username.Length];
-
-        //    Array.Copy(userdata.Salt, 0, output, 0, userdata.Salt.Length);
-        //    Array.Copy(userdata.PasswordHash, 0, output, userdata.Salt.Length, userdata.PasswordHash.Length);
-        //    Array.Copy(username, 0, output, userdata.Salt.Length + userdata.PasswordHash.Length, username.Length);
-
-        //    return output;
-        //}
-
-        protected override UserData GetAccount(string userName)
+        protected override UserData GetAccount(string username)
         {
             System.IO.Directory.CreateDirectory(Directory);
 
@@ -77,7 +59,7 @@ namespace XSLibrary.Cryptography.AccountManagement
             foreach(string userString in lines)
             {
                 UserData user = StringToUser(userString);
-                if (user.Username == userName)
+                if (user.Username == username)
                     return user;
             }
 
@@ -92,6 +74,29 @@ namespace XSLibrary.Cryptography.AccountManagement
             byte[] salt = HexStringConverter.ToBytes(split[2]);
 
             return new UserData(username, passwordHash, salt);
+        }
+
+        private string StringToUsername(string userString)
+        {
+            return userString.Split(' ')[0];
+        }
+
+        public override void EraseAccount(string username)
+        {
+            System.IO.Directory.CreateDirectory(Directory);
+            if (!File.Exists(FilePath))
+                return;
+
+            string[] lines = File.ReadAllLines(FilePath);
+
+            List<string> writeBack = new List<string>();
+            foreach(string userString in lines)
+            {
+                if (StringToUsername(userString) != username)
+                    writeBack.Add(userString);
+            }
+
+            File.WriteAllLines(FilePath, writeBack.ToArray());
         }
 
         protected override byte[] GenerateSalt()
