@@ -12,8 +12,8 @@ namespace XSLibrary.Network.Accepters
         Dictionary<string, int> Filter { get; set; } = new Dictionary<string, int>();
         SafeExecutor m_lock;
 
-        public int ReduceInterval { get; set; } = 10000;
-        public int BlockCount { get; set; } = 3;
+        public int ReduceInterval { get; set; } = 5000;
+        public int AllowedRequestCount { get; set; } = 10;
 
         public GuardedAccepter(int port, int maxPendingConnection) : base(port, maxPendingConnection)
         {
@@ -35,9 +35,9 @@ namespace XSLibrary.Network.Accepters
                 if (!Filter.ContainsKey(key))
                     Filter.Add(key, 0);
 
-                Filter[key]++;
+                accept = Filter[key] < AllowedRequestCount;
 
-                accept = Filter[key] < BlockCount;
+                Filter[key] = Math.Min(Filter[key] + 1, AllowedRequestCount);
             });
 
             if (accept)
