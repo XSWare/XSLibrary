@@ -99,6 +99,7 @@ namespace XSLibrary.Network.Connections
                 {
                     Logger.Log(ex.Message);
                 }
+                catch (ObjectDisposedException) { }
                 catch (Exception ex)
                 {
                     throw new ConnectionException("Exception while disconnecting! Exception message: " + ex.Message, ex);
