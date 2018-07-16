@@ -57,6 +57,7 @@
     <Compile Include="Executors\SafeExecutor.cs" />
     <Compile Include="Executors\SingleThreadExecutor.cs" />
     <Compile Include="Containers\SafeList.cs" />
+    <Compile Include="OneShotCondition.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
