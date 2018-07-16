@@ -3,30 +3,40 @@ using XSLibrary.ThreadSafety.Executors;
 
 namespace XSLibrary.ThreadSafety
 {
-    // condition will only return true once, no matter how many threads access it
+    /// <summary>
+    /// Condition will only return true once, no matter how many threads access it
+    /// </summary>
     public class OneShotCondition
     {
         volatile bool m_fired = false;
         SafeExecutor m_lock = new SingleThreadExecutor();
 
-        Func<bool> m_externalCondition;
+        Func<bool> m_permanentCondition;
 
-        public OneShotCondition() : this(() => { return true; }) { }
-        public OneShotCondition(Func<bool> condition)
+        public OneShotCondition() : this(True) { }
+
+        /// <param name="permanentAdditionalCondition">Condition will be checked on every call before firing</param>
+        public OneShotCondition(Func<bool> permanentAdditionalCondition)
         {
-            m_externalCondition = condition;
+            m_permanentCondition = permanentAdditionalCondition;
         }
 
         public static implicit operator bool(OneShotCondition condition)
         {
-            return condition != null && condition.CheckCondition();
+            return condition != null && condition.Fire();
         }
 
-        bool CheckCondition()
+        public bool Fire()
+        {
+            return Fire(True);
+        }
+
+        /// <param name="temporaryAdditionalCondition">Condition will be checked as well on this call before firing</param>
+        public bool Fire(Func<bool> temporaryAdditionalCondition)
         {
             return m_lock.Execute(() =>
             {
-                if (m_externalCondition() || m_fired)
+                if (m_fired || !m_permanentCondition() || !temporaryAdditionalCondition())
                     return false;
                 else
                 {
@@ -34,6 +44,11 @@ namespace XSLibrary.ThreadSafety
                     return true;
                 }
             });
+        }
+
+        private static bool True()
+        {
+            return true;
         }
     }
 }
