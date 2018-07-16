@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CatchingThread.cs" />
     <Compile Include="Containers\DataContainer.cs" />
     <Compile Include="Containers\DataWrapper.cs" />
     <Compile Include="Containers\DoubleBuffer.cs" />

@@ -3,7 +3,7 @@ using XSLibrary.ThreadSafety.Executors;
 
 namespace XSLibrary.ThreadSafety.Containers
 {
-    public class SafeQueue<T>
+    public class SafeQueue<T> : DataContainer<T>
     {
         LinkedList<T> m_list;
         SafeReadWriteExecutor m_safeExecutor;
@@ -15,14 +15,14 @@ namespace XSLibrary.ThreadSafety.Containers
             m_safeExecutor = safeExecutor;
         }
 
-        public void Push(T item)
-        {
-            m_safeExecutor.Execute(() => m_list.AddLast(item));
-        }
-
-        public T Pop()
+        public override T Read()
         {
             return m_safeExecutor.Execute(() => PopUnsafe());
+        }
+
+        public override void Write(T data)
+        {
+            m_safeExecutor.Execute(() => m_list.AddLast(data));
         }
 
         private T PopUnsafe()
