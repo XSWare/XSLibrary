@@ -60,7 +60,7 @@ namespace XSLibrary.MultithreadingPatterns.Actor
 
         public void SendMessage(MessageType mes)
         {
-            m_queue.Push(mes);
+            m_queue.Write(mes);
             m_limit.Release();
         }
 
@@ -76,7 +76,7 @@ namespace XSLibrary.MultithreadingPatterns.Actor
                     return;
                 }
 
-                HandleMessage(m_queue.Pop());
+                HandleMessage(m_queue.Read());
             }
         }
 
