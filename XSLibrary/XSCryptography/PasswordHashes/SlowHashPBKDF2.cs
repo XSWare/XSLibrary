@@ -7,9 +7,10 @@ namespace XSLibrary.Cryptography.PasswordHashes
         public int HashLength { get; set; } = 64;
         public int Interations { get; set; } = 20000;
 
-        public override byte[] Hash(byte[] password, byte[] salt)
+        public override byte[] Hash(byte[] password, byte[] salt, int difficulty)
         {
-            return new Rfc2898DeriveBytes(password, salt, Interations).GetBytes(HashLength);
+            using (var PBKDF2 = new Rfc2898DeriveBytes(password, salt, Interations))
+                return PBKDF2.GetBytes(HashLength);
         }
     }
 }

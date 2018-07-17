@@ -2,6 +2,6 @@
 {
     public abstract class PasswordHash
     {
-        public abstract byte[] Hash(byte[] password, byte[] salt);
+        public abstract byte[] Hash(byte[] password, byte[] salt, int difficulty);
     }
 }

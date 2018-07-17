@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using System.Security.Cryptography;
@@ -40,7 +41,8 @@ namespace XSLibrary.Cryptography.AccountManagement
         {
             string passwordHash = HexStringConverter.ToString(user.PasswordHash);
             string salt = new SoapHexBinary(user.Salt).ToString();
-            return string.Format("{0} {1} {2}", user.Username, passwordHash, salt);
+            string difficulty = Convert.ToString(user.Difficulty);
+            return string.Format("{0} {1} {2} {3}", user.Username, passwordHash, salt, difficulty);
         }
 
         protected override UserData GetAccount(string username)
@@ -68,8 +70,9 @@ namespace XSLibrary.Cryptography.AccountManagement
             string username = split[0];
             byte[] passwordHash = HexStringConverter.ToBytes(split[1]);
             byte[] salt = HexStringConverter.ToBytes(split[2]);
+            int difficulty = Convert.ToInt32(split[3]);
 
-            return new UserData(username, passwordHash, salt);
+            return new UserData(username, passwordHash, salt, difficulty);
         }
 
         private string StringToUsername(string userString)

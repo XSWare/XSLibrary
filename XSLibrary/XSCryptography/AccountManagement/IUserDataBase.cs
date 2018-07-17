@@ -5,6 +5,8 @@ namespace XSLibrary.Cryptography.AccountManagement
     public abstract class IUserDataBase
     {
         public int SaltLenth { get; set; } = 64;
+        public int Difficulty { get; set; } = 10000;
+
         PasswordHash HashAlgorithm { get; set; }
 
         public IUserDataBase()
@@ -18,7 +20,7 @@ namespace XSLibrary.Cryptography.AccountManagement
                 return false;
 
             byte[] salt = GenerateSalt(SaltLenth);
-            return AddUserData(new UserData(username, Hash(password, salt), salt));
+            return AddUserData(new UserData(username, HashAlgorithm.Hash(password, salt, Difficulty), salt, Difficulty));
         }
 
         public void ReplaceAccount(string username, byte[] password)
@@ -53,17 +55,12 @@ namespace XSLibrary.Cryptography.AccountManagement
             if (user == null)
                 return false;
 
-            return AreHashesEqual(user.PasswordHash, Hash(password, user.Salt));
+            return AreHashesEqual(user.PasswordHash, HashAlgorithm.Hash(password, user.Salt, user.Difficulty));
         }
 
         protected abstract PasswordHash CreateHashAlgorithm();
 
         protected abstract byte[] GenerateSalt(int length);
-
-        protected byte[] Hash(byte[] password, byte[] salt)
-        {
-            return HashAlgorithm.Hash(password, salt);
-        }
 
         private bool AreHashesEqual(byte[] hash1, byte[] hash2)
         {
