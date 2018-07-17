@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using System.Security.Cryptography;
+using XSLibrary.Cryptography.PasswordHashes;
 using XSLibrary.Utility;
 
 namespace XSLibrary.Cryptography.AccountManagement
 {
     public class FileUserBase : IUserDataBase
     {
-        public int SaltLenth { get; set; } = 32;
-
-        SHA512Cng HashAlgorithm = new SHA512Cng();
-
         public string Directory { get; private set; }
         public string FileName { get; private set; }
         public string FilePath { get; private set; }
@@ -103,24 +99,16 @@ namespace XSLibrary.Cryptography.AccountManagement
             return erased;
         }
 
-        protected override byte[] GenerateSalt()
+        protected override byte[] GenerateSalt(int length)
         {
-            byte[] salt = new byte[SaltLenth];
+            byte[] salt = new byte[length];
             RandomNumberGenerator.Create().GetBytes(salt);
             return salt;
         }
 
-        protected override byte[] Hash(byte[] password, byte[] salt)
+        protected override PasswordHash CreateHashAlgorithm()
         {
-            return HashAlgorithm.ComputeHash(SaltPassword(password, salt));
-        }
-
-        private byte[] SaltPassword(byte[] password, byte[] salt)
-        {
-            byte[] saltedPassword = new byte[password.Length + salt.Length];
-            Array.Copy(salt, 0, saltedPassword, 0, salt.Length);
-            Array.Copy(password, 0, saltedPassword, salt.Length, password.Length);
-            return saltedPassword;
+            return new SlowHashPBKDF2();
         }
     }
 }
