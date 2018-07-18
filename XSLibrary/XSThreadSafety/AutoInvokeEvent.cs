@@ -28,18 +28,18 @@ namespace XSLibrary.ThreadSafety
         Sender m_sender;
         Args m_eventArgs;
 
-        public void Invoke(Sender sender, Args e)
+        public void Invoke(Sender sender, Args args)
         {
-            m_lock.Execute(() => GetEventHandle(sender, e))?.Invoke(m_sender, m_eventArgs);
+            m_lock.Execute(() => GetEventHandle(sender, args))?.Invoke(m_sender, m_eventArgs);
         }
 
-        private EventHandle GetEventHandle(Sender sender, Args e)
+        private EventHandle GetEventHandle(Sender sender, Args args)
         {
             if (m_invoked)
                 return null;
 
             m_sender = sender;
-            m_eventArgs = e;
+            m_eventArgs = args;
             m_invoked = true;
             EventHandle handle = InternalEvent;
             InternalEvent = null;
