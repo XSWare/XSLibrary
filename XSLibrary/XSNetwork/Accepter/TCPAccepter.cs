@@ -46,6 +46,11 @@ namespace XSLibrary.Network.Accepters
             m_listeningSocket.Bind(new IPEndPoint(IPAddress.Any, Port));
             m_listeningSocket.Listen(MaxPendingConnections);
 
+            StartParallelLoops();
+        }
+
+        protected virtual void StartParallelLoops()
+        {
             m_acceptThread = new Thread(AcceptLoop);
             m_acceptThread.Name = "Socket accept";
             m_acceptThread.Start();

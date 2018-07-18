@@ -18,6 +18,11 @@ namespace XSLibrary.Network.Accepters
         public GuardedAccepter(int port, int maxPendingConnection) : base(port, maxPendingConnection)
         {
             m_lock = new SingleThreadExecutor();
+        }
+
+        protected override void StartParallelLoops()
+        {
+            base.StartParallelLoops();
 
             Thread reduce = new Thread(ReduceLoop);
             reduce.Name = "Reduce loop";
