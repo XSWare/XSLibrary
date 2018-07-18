@@ -59,7 +59,7 @@
     <Compile Include="Executors\SingleThreadExecutor.cs" />
     <Compile Include="Containers\SafeList.cs" />
     <Compile Include="OneShotCondition.cs" />
-    <Compile Include="OneShotEvent.cs" />
+    <Compile Include="AutoInvokeEvent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
