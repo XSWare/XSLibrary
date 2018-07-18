@@ -14,13 +14,8 @@ namespace XSLibrary.ThreadSafety
         {
             add
             {
-                m_lock.Execute(() =>
-                {
-                    if (m_invoked)
-                        value(m_sender, m_eventArgs);
-                    else
-                        InternalEvent += value;
-                });
+                if (!Subscribe(value))
+                    value(m_sender, m_eventArgs);
             }
             remove { InternalEvent -= value; }
         }
@@ -35,16 +30,31 @@ namespace XSLibrary.ThreadSafety
 
         public void Invoke(Sender sender, Args e)
         {
-            m_lock.Execute(() =>
-            {
-                if (m_invoked)
-                    return;
+            m_lock.Execute(() => GetEventHandle(sender, e))?.Invoke(m_sender, m_eventArgs);
+        }
 
-                m_sender = sender;
-                m_eventArgs = e;
-                m_invoked = true;
-                InternalEvent?.Invoke(m_sender, m_eventArgs);
-                InternalEvent = null;
+        private EventHandle GetEventHandle(Sender sender, Args e)
+        {
+            if (m_invoked)
+                return null;
+
+            m_sender = sender;
+            m_eventArgs = e;
+            m_invoked = true;
+            EventHandle handle = InternalEvent;
+            InternalEvent = null;
+            return handle;
+        }
+
+        /// <returns>Returns true if subscription was successful and false if handle needs to be called immediately.</returns>
+        private bool Subscribe(EventHandle handle)
+        {
+            return m_lock.Execute(() =>
+            {
+                if (!m_invoked)
+                    InternalEvent += handle;
+
+                return !m_invoked;
             });
         }
     }
