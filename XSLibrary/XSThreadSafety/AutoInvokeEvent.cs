@@ -4,12 +4,16 @@ namespace XSLibrary.ThreadSafety
 {
     /// <summary>
     /// Triggers if the event is invoked or was invoked before subscribing to it.
-    /// Unsubscribing happens automatically after the invocation.
+    /// <para> Can be accessed safely by multiple threads.</para>
     /// </summary>
     public class AutoInvokeEvent<Sender, Args>
     {
         public delegate void EventHandle(Sender sender, Args arguments);
 
+        /// <summary>
+        /// Handle will be invoked if the event was triggered in the past.
+        /// <para>Unsubscribing happens automatically after the invocation and is redundant if done from the event handle.</para>
+        /// </summary>
         public event EventHandle Event
         {
             add
@@ -20,14 +24,18 @@ namespace XSLibrary.ThreadSafety
             remove { InternalEvent -= value; }
         }
 
+        private event EventHandle InternalEvent;
+
         private SafeExecutor m_lock = new SingleThreadExecutor();
         private volatile bool m_invoked = false;
-
-        private event EventHandle InternalEvent;
 
         Sender m_sender;
         Args m_eventArgs;
 
+        /// <summary>
+        /// Invokes all subscribed handles with the given parameters. 
+        /// <para>All calls after the first are ignored.</para>
+        /// </summary>
         public void Invoke(Sender sender, Args args)
         {
             GetEventHandle(sender, args)?.Invoke(m_sender, m_eventArgs);
@@ -49,7 +57,7 @@ namespace XSLibrary.ThreadSafety
             });
         }
 
-        /// <returns>Returns true if subscription was successful and false if handle needs to be called immediately.</returns>
+        /// <returns>Returns true if subscription was successful and false if handle needs to be invoked immediately.</returns>
         private bool Subscribe(EventHandle handle)
         {
             return m_lock.Execute(() =>
