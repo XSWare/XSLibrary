@@ -1,17 +1,16 @@
-﻿using System;
-using XSLibrary.ThreadSafety.Executors;
+﻿using XSLibrary.ThreadSafety.Executors;
 
 namespace XSLibrary.ThreadSafety
 {
     /// <summary>
-    /// Triggers once, if the event is invoked or was invoked before subscribing to it.
-    /// Do not unsubscribe from this event in the event handler, it happens automatically.
+    /// Triggers if the event is invoked or was invoked before subscribing to it.
+    /// Unsubscribing happens automatically after the invocation.
     /// </summary>
-    public class OneTimeEvent
+    public class AutoInvokeEvent<Sender, Args>
     {
-        public delegate void EventHandle(object sender, EventArgs e);
+        public delegate void EventHandle(Sender sender, Args arguments);
 
-        public event EventHandle OnEventRaise
+        public event EventHandle Event
         {
             add
             {
@@ -31,10 +30,10 @@ namespace XSLibrary.ThreadSafety
 
         private event EventHandle InternalEvent;
 
-        object m_sender;
-        EventArgs m_eventArgs;
+        Sender m_sender;
+        Args m_eventArgs;
 
-        public void Invoke(object sender, EventArgs e)
+        public void Invoke(Sender sender, Args e)
         {
             m_lock.Execute(() =>
             {
