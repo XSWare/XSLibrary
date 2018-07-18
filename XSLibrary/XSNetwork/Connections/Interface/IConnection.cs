@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 using XSLibrary.Cryptography.ConnectionCryptos;
+using XSLibrary.ThreadSafety;
 using XSLibrary.ThreadSafety.Executors;
 using XSLibrary.Utility;
 
@@ -13,12 +14,20 @@ namespace XSLibrary.Network.Connections
         public ConnectionException(string exceptionMessage, Exception innerException) : base(exceptionMessage, innerException) { }
     }
 
+    public class OnDisconnectEvent : AutoInvokeEvent<object, EndPoint> { }
+
     public abstract partial class IConnection : IDisposable
     {
-        public delegate void CommunicationErrorHandler(object sender, EndPoint remote);
-        public event CommunicationErrorHandler OnSendError;
-        public event CommunicationErrorHandler OnReceiveError;
-        public event CommunicationErrorHandler OnDisconnect;     // can basically come from any thread so make your actions threadsafe
+        /// <summary>
+        /// Can come from any thread so make your actions threadsafe
+        /// </summary>
+        public event OnDisconnectEvent.EventHandle OnDisconnect
+        {
+            add { DisconnectHandle.Event += value; }
+            remove { DisconnectHandle.Event -= value; }
+        }
+
+        private OnDisconnectEvent DisconnectHandle = new OnDisconnectEvent();
 
         public Logger Logger { get; set; }
 
@@ -112,7 +121,7 @@ namespace XSLibrary.Network.Connections
 
         private void RaiseOnDisconnect()
         {
-            OnDisconnect?.Invoke(this, Remote);
+            DisconnectHandle.Invoke(this, Remote);
         }
 
         public void Dispose()

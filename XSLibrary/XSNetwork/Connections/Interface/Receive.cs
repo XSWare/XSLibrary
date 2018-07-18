@@ -131,7 +131,6 @@ namespace XSLibrary.Network.Connections
         protected void ReceiveErrorHandling(EndPoint remote)
         {
             Disconnect();
-            OnReceiveError?.Invoke(this, remote);
         }
 
         private void RaiseReceivedEvent(byte[] data, EndPoint source)
