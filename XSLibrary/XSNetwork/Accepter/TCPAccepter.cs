@@ -31,7 +31,7 @@ namespace XSLibrary.Network.Accepters
             m_running = false;
             Abort = false;
 
-            Logger = new NoLog();
+            Logger = Logger.NoLog;
 
             m_listeningSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         }
@@ -74,7 +74,7 @@ namespace XSLibrary.Network.Accepters
 
         protected virtual void HandleAcceptedSocket(Socket acceptedSocket)
         {
-            Logger.Log("Accepted connection from {0}", acceptedSocket.RemoteEndPoint.ToString());
+            Logger.Log(LogLevel.Information, "Accepted connection from {0}", acceptedSocket.RemoteEndPoint.ToString());
             Thread initThread = new Thread(() => RaiseClientConnectedEvent(acceptedSocket));
             initThread.Name = "Socket init routine";
             initThread.Start();

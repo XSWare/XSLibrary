@@ -18,11 +18,11 @@ namespace XSLibrary.MultithreadingPatterns.Actor
         public Actor(Logger logger)
         {
             Logger = logger;
-            Logger.Log("Actor started.");
+            Logger.Log(LogLevel.Information, "Actor started.");
             Initialize();
             StartThread();
         }
-        public Actor() : this(new NoLog())
+        public Actor() : this(Logger.NoLog)
         {
         }
 
@@ -37,7 +37,7 @@ namespace XSLibrary.MultithreadingPatterns.Actor
             m_thread = new Thread(WorkLoop);
             m_thread.Name = "Actor";
             m_thread.Start();
-            Logger.Log("Thread started. {0} messages in queue.", m_queue.Count);
+            Logger.Log(LogLevel.Information, "Thread started. {0} messages in queue.", m_queue.Count);
         }
 
         public void Start(bool clearQueue = false)
@@ -72,7 +72,7 @@ namespace XSLibrary.MultithreadingPatterns.Actor
 
                 if(m_abort)
                 {
-                    Logger.Log("Thread aborted.");
+                    Logger.Log(LogLevel.Information, "Thread aborted.");
                     return;
                 }
 

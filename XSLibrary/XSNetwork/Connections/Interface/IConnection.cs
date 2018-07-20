@@ -56,7 +56,7 @@ namespace XSLibrary.Network.Connections
         public IConnection(Socket connectionSocket)
         {
             Crypto = new NoCrypto();
-            Logger = new NoLog();
+            Logger = Logger.NoLog;
 
             m_preReceiveDone = false;
 
@@ -87,7 +87,7 @@ namespace XSLibrary.Network.Connections
             if(m_connectLock.Execute(CloseSocket))
             {
                 WaitReceiveThread();
-                Logger.Log("Disconnected.");
+                Logger.Log(LogLevel.Warning, "Disconnected.");
                 RaiseOnDisconnect();
             }
         }
@@ -105,7 +105,7 @@ namespace XSLibrary.Network.Connections
                 }
                 catch (SocketException ex)
                 {
-                    Logger.Log(ex.Message);
+                    Logger.Log(LogLevel.Error, ex.Message);
                 }
                 catch (ObjectDisposedException) { }
                 catch (Exception ex)

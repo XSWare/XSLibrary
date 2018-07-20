@@ -12,7 +12,7 @@ namespace XSLibrary.Network.Connections
             public bool NeedsFreshData { get; private set; }
             public bool PackageFinished { get; private set; }
 
-            public Logger Logger { get; set; } = new NoLog();
+            public Logger Logger { get; set; } = Logger.NoLog;
 
             byte[] currentPackage;
             int currentPackagePos;
@@ -116,7 +116,7 @@ namespace XSLibrary.Network.Connections
                     if (IsKeepAlive())
                     {
                         currentPos += Header_Size_Total;
-                        Logger.Log("Received keep alive.");
+                        Logger.Log(LogLevel.Detail, "Received keep alive.");
                     }
                     else
                     {

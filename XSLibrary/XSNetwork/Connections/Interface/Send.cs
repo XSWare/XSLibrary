@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using XSLibrary.ThreadSafety.Executors;
+using XSLibrary.Utility;
 
 namespace XSLibrary.Network.Connections
 {
@@ -19,7 +20,7 @@ namespace XSLibrary.Network.Connections
         public void Send(byte[] data)
         {
             if (SafeSend(() => SendSpecialized(Crypto.EncryptData(data))))
-                Logger.Log("Sent data to {0}.", Remote.ToString());
+                Logger.Log(LogLevel.Information, "Sent data to {0}.", Remote.ToString());
         }
 
         protected bool SafeSend(Action SendFunction)
@@ -51,7 +52,7 @@ namespace XSLibrary.Network.Connections
                 }
                 catch (CryptographicException)
                 {
-                    Logger.Log("Encryption error!");
+                    Logger.Log(LogLevel.Error, "Encryption error!");
                     error = true;
                 }
 

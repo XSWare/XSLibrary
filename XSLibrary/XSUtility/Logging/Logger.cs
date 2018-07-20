@@ -2,29 +2,49 @@
 
 namespace XSLibrary.Utility
 {
-    public abstract class Logger
+    public enum LogLevel
     {
-        public void Log(string text, params object[] arg)
-        {
-            Log(String.Format(text, arg));
-        }
-        public void Log(string text, object arg0)
-        {
-            Log(String.Format(text, arg0));
-        }
-        public abstract void Log(string text);
+        Detail,
+        Information,
+        Warning,
+        Error,
+        Priority
     }
 
-    public class NoLog : Logger
+    public abstract class Logger
     {
-        public override void Log(string text)
+        public static LogLevel DefaultLogLevel { get; set; } = LogLevel.Warning;
+        public LogLevel LogLevel { get; set; } = DefaultLogLevel;
+        public static Logger NoLog { get; private set; } = new NoLog();
+
+        public void Log(LogLevel logLevel, string text, params object[] arg)
+        {
+            Log(logLevel, String.Format(text, arg));
+        }
+        public void Log(LogLevel logLevel, string text, object arg0)
+        {
+            Log(logLevel, String.Format(text, arg0));
+        }
+
+        public virtual void Log(LogLevel logLevel, string text)
+        {
+            if (logLevel >= LogLevel)
+                LogMessage(text);
+        }
+
+        protected virtual void LogMessage(string text) { }
+    }
+
+    class NoLog : Logger
+    {
+        protected override void LogMessage(string text)
         {
         }
     }
 
     public class LoggerConsole : Logger
     {
-        public override void Log(string text)
+        protected override void LogMessage(string text)
         {
             Console.Out.WriteLine(text);
         }
@@ -35,7 +55,7 @@ namespace XSLibrary.Utility
         public string Prefix { get; set; } = "";
         public string Suffix { get; set; } = "";
 
-        public override void Log(string text)
+        protected override void LogMessage(string text)
         {
             Console.Out.Write(Prefix + text + Suffix);
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using XSLibrary.Cryptography.ConnectionCryptos;
 using XSLibrary.ThreadSafety.Executors;
+using XSLibrary.Utility;
 
 namespace XSLibrary.Network.Connections
 {
@@ -31,7 +32,7 @@ namespace XSLibrary.Network.Connections
             {
                 if (Receiving)
                 {
-                    Logger.Log("Crypto cannot be initiated after receive loop was started!");
+                    Logger.Log(LogLevel.Error, "Crypto cannot be initiated after receive loop was started!");
                     return false;
                 }
 
@@ -42,7 +43,7 @@ namespace XSLibrary.Network.Connections
 
                 ConnectionSocket.ReceiveTimeout = previousTimeout;
                 Crypto = crypto;
-                Logger.Log("Crypto handshake successful.");
+                Logger.Log(LogLevel.Information, "Crypto handshake successful.");
                 return true;
             }
             catch (Exception) { return false; }
@@ -50,7 +51,7 @@ namespace XSLibrary.Network.Connections
 
         private void HandleHandshakeFailure()
         {
-            Logger.Log("Crypto handshake failed!");
+            Logger.Log(LogLevel.Warning, "Crypto handshake failed!");
             Disconnect();   // in case it is not already disconnected
         }
     }

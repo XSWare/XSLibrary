@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.Sockets;
+using XSLibrary.Utility;
 
 namespace XSLibrary.Network.Connections
 {
@@ -39,7 +40,7 @@ namespace XSLibrary.Network.Connections
         public void HolePunching(EndPoint remoteEndPoint)
         {
             SafeSend(() => ConnectionSocket.SendTo(new byte[0], remoteEndPoint));
-            Logger.Log("Sent hole punching.");
+            Logger.Log(LogLevel.Detail, "Sent hole punching.");
         }
 
         protected override void PreReceiveSettings()

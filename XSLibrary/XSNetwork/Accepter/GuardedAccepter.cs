@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using XSLibrary.ThreadSafety.Executors;
 using System.Collections.Generic;
+using XSLibrary.Utility;
 
 namespace XSLibrary.Network.Accepters
 {
@@ -49,7 +50,7 @@ namespace XSLibrary.Network.Accepters
                 base.HandleAcceptedSocket(acceptedSocket);
             else
             {
-                Logger.Log("Rejected connection from " + acceptedSocket.RemoteEndPoint.ToString());
+                Logger.Log(LogLevel.Warning, "Rejected connection from " + acceptedSocket.RemoteEndPoint.ToString());
                 acceptedSocket.Dispose();
             }
         }

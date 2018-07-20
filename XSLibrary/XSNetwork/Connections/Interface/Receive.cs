@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Threading;
 using XSLibrary.ThreadSafety.Executors;
+using XSLibrary.Utility;
 
 namespace XSLibrary.Network.Connections
 {
@@ -32,7 +33,7 @@ namespace XSLibrary.Network.Connections
         {
             if (m_disconnecting)
             {
-                Logger.Log("Can not start receiving from a disconnected connection!");
+                Logger.Log(Utility.LogLevel.Error, "Can not start receiving from a disconnected connection!");
                 return;
             }
 
@@ -117,7 +118,7 @@ namespace XSLibrary.Network.Connections
             }
             catch (CryptographicException)
             {
-                Logger.Log("Decryption error!");
+                Logger.Log(LogLevel.Error, "Decryption error!");
                 ReceiveThread = null;
                 ReceiveErrorHandling(Remote);
             }
@@ -135,7 +136,7 @@ namespace XSLibrary.Network.Connections
 
         private void RaiseReceivedEvent(byte[] data, EndPoint source)
         {
-            Logger.Log("Received data from {0}.", source.ToString());
+            Logger.Log(LogLevel.Information, "Received data from {0}.", source.ToString());
             DataReceivedEvent?.Invoke(this, data, source);
         }
 

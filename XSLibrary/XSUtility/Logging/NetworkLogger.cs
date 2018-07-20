@@ -2,7 +2,7 @@
 {
     class NetworkLogger : Logger
     {
-        public override void Log(string text)
+        protected override void LogMessage(string text)
         {
             throw new System.NotImplementedException();
         }
