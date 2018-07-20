@@ -103,7 +103,8 @@ namespace XSLibrary.Network.Accepters
                 m_listeningSocket.Dispose();
             }
 
-            m_acceptThread.Join();
+            if(m_acceptThread != null && m_acceptThread.ThreadState != ThreadState.Unstarted)
+                m_acceptThread.Join();
         }
     }
 }
