@@ -43,7 +43,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="HexStringConverter.cs" />
-    <Compile Include="Logger.cs" />
+    <Compile Include="Logging\Logger.cs" />
+    <Compile Include="Logging\MultiLogger.cs" />
+    <Compile Include="Logging\NetworkLogger.cs" />
     <Compile Include="OneShotTimer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReoccuringForLoop.cs" />
