@@ -16,12 +16,17 @@ namespace XSLibrary.Network.Connections
         const int Header_Size_PacketLength = 4;
         const int Header_Size_Total = Header_Size_ID + Header_Size_PacketLength;
 
-        PackageParser Parser;
+        public override Logger Logger
+        {
+            get { return Parser.Logger; }
+            set { Parser.Logger = value; }
+        }
+
+        PackageParser Parser = new PackageParser();
 
         public TCPPacketConnection(Socket socket)
             : base(socket)
         {
-            Parser = new PackageParser();
         }
 
         protected override void SendSpecialized(byte[] data)

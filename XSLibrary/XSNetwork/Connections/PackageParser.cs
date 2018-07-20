@@ -1,4 +1,5 @@
 ﻿using System;
+using XSLibrary.Utility;
 
 namespace XSLibrary.Network.Connections
 {
@@ -10,6 +11,8 @@ namespace XSLibrary.Network.Connections
 
             public bool NeedsFreshData { get; private set; }
             public bool PackageFinished { get; private set; }
+
+            public Logger Logger { get; set; } = new NoLog();
 
             byte[] currentPackage;
             int currentPackagePos;
@@ -113,6 +116,7 @@ namespace XSLibrary.Network.Connections
                     if (IsKeepAlive())
                     {
                         currentPos += Header_Size_Total;
+                        Logger.Log("Received keep alive.");
                     }
                     else
                     {

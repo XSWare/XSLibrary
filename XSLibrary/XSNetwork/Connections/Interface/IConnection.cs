@@ -20,7 +20,7 @@ namespace XSLibrary.Network.Connections
         public event CommunicationErrorHandler OnReceiveError;
         public event CommunicationErrorHandler OnDisconnect;     // can basically come from any thread so make your actions threadsafe
 
-        public Logger Logger { get; set; }
+        public virtual Logger Logger { get; set; }
 
         public bool Connected { get { return m_connectLock.ExecuteReadonly(() => { return !m_disconnecting && ConnectionSocket.Connected; }); } }
 
