@@ -46,12 +46,14 @@ namespace XSLibrary.Cryptography.ConnectionCryptos
 
         protected override bool HandshakeActive(SendCall Send, ReceiveCall Receive)
         {
-            Send(Encoding.ASCII.GetBytes(KEXCrypto.ToXmlString(false)));
+            if(!Send(Encoding.ASCII.GetBytes(KEXCrypto.ToXmlString(false))))
+                return false;
             if (!Receive(out byte[] data, out EndPoint source))
                 return false;
 
             DataCrypto.Key = KEXCrypto.Decrypt(data, RSAEncryptionPadding.Pkcs1);
-            Send(DataCrypto.IV);
+            if(!Send(DataCrypto.IV))
+                return false;
 
             if (!Receive(out data, out source))
                 return false;
@@ -80,17 +82,19 @@ namespace XSLibrary.Cryptography.ConnectionCryptos
 
             KEXCrypto.FromXmlString(Encoding.ASCII.GetString(data));
 
-            byte[] key = new byte[32];
+            byte[] key = new byte[DataCrypto.KeySize];
             RandomNumberGenerator.Create().GetBytes(key);
-
             DataCrypto.Key = key;
-            Send(KEXCrypto.Encrypt(key, RSAEncryptionPadding.Pkcs1));
+
+            if(!Send(KEXCrypto.Encrypt(key, RSAEncryptionPadding.Pkcs1)))
+                return false;
 
             if (!Receive(out data, out source))
                 return false;
 
             DataCrypto.IV = data;
-            Send(EncryptData(SECRET));
+            if(!Send(EncryptData(SECRET)))
+                return false;
 
             return true;
         }

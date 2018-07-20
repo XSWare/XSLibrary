@@ -4,7 +4,7 @@ namespace XSLibrary.Cryptography.ConnectionCryptos
 {
     public abstract class IConnectionCrypto
     {
-        public delegate void SendCall(byte[] data);
+        public delegate bool SendCall(byte[] data);
         public delegate bool ReceiveCall(out byte[] data, out EndPoint source);
 
         bool Active { get; set; }

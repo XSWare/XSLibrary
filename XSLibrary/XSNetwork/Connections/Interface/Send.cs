@@ -17,16 +17,20 @@ namespace XSLibrary.Network.Connections
 
         private SafeExecutor m_sendLock = new SingleThreadExecutor();
 
-        public void Send(byte[] data)
+        public void Send(byte[] data, int timeout = -1)
         {
-            if (SafeSend(() => SendSpecialized(Crypto.EncryptData(data))))
+            if (SafeSend(() => SendSpecialized(Crypto.EncryptData(data)), timeout))
                 Logger.Log(LogLevel.Information, "Sent data to {0}.", Remote.ToString());
         }
 
-        protected bool SafeSend(Action SendFunction)
+        protected bool SafeSend(Action SendFunction, int timeout = -1)
         {
             return m_sendLock.Execute(() =>
             {
+                int sendTimeout = ConnectionSocket.SendTimeout;
+                if (timeout > -1)
+                    ConnectionSocket.SendTimeout = timeout;
+
                 bool error = false;
                 try
                 {
@@ -35,6 +39,8 @@ namespace XSLibrary.Network.Connections
                         if (CanSend())
                         {
                             SendFunction();
+                            if (timeout > -1)
+                                ConnectionSocket.SendTimeout = sendTimeout;
                             return true;
                         }
                         else

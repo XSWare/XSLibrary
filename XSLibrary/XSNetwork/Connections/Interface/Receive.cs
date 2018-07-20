@@ -77,9 +77,9 @@ namespace XSLibrary.Network.Connections
             Receiving = false;
         }
 
-        public bool Receive(out byte[] data, out EndPoint source)
+        public bool Receive(out byte[] data, out EndPoint source, int timeout = -1)
         {
-            if (SafeReceive(out data, out source))
+            if (SafeReceive(out data, out source, timeout))
             {
                 data = Crypto.DecryptData(data);
                 return true;
@@ -88,16 +88,22 @@ namespace XSLibrary.Network.Connections
                 return false;
         }
 
-        private bool SafeReceive(out byte[] data, out EndPoint source)
+        private bool SafeReceive(out byte[] data, out EndPoint source, int timeout = -1)
         {
             data = null;
             source = null;
 
             m_receiveLock.Lock();
+
+            int receiveTimeout = ConnectionSocket.ReceiveTimeout;
+            if (timeout > -1)
+                ConnectionSocket.ReceiveTimeout = timeout;
             try
             {
                 if (ReceiveSpecialized(out data, out source))
                 {
+                    if (timeout > -1)
+                        ConnectionSocket.ReceiveTimeout = receiveTimeout;
                     return true;
                 }
                 else

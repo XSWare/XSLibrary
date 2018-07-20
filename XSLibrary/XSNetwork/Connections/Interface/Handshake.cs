@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using XSLibrary.Cryptography.ConnectionCryptos;
 using XSLibrary.ThreadSafety.Executors;
 using XSLibrary.Utility;
@@ -25,9 +26,6 @@ namespace XSLibrary.Network.Connections
 
         private bool ExecuteCryptoHandshake(IConnectionCrypto crypto)
         {
-            int previousTimeout = ConnectionSocket.ReceiveTimeout;
-            ConnectionSocket.ReceiveTimeout = HandshakeTimeout;
-
             try
             {
                 if (Receiving)
@@ -38,10 +36,13 @@ namespace XSLibrary.Network.Connections
 
                 ExecutePreReceiveActions();
 
-                if (!crypto.Handshake((data) => SafeSend(() => SendSpecialized(data)), SafeReceive))
+                if (!crypto.Handshake(
+                    (data) => SafeSend(() => SendSpecialized(data), HandshakeTimeout),  // send
+                    (out byte[] data, out EndPoint source) => SafeReceive(out data, out source, HandshakeTimeout))) // receive
+                {
                     return false;
+                }
 
-                ConnectionSocket.ReceiveTimeout = previousTimeout;
                 Crypto = crypto;
                 Logger.Log(LogLevel.Information, "Crypto handshake successful.");
                 return true;
@@ -51,7 +52,7 @@ namespace XSLibrary.Network.Connections
 
         private void HandleHandshakeFailure()
         {
-            Logger.Log(LogLevel.Warning, "Crypto handshake failed!");
+            Logger.Log(LogLevel.Error, "Crypto handshake failed!");
             Disconnect();   // in case it is not already disconnected
         }
     }
