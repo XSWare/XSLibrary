@@ -8,14 +8,11 @@ namespace XSLibrary.Network.Connections
 {
     public abstract partial class IConnection
     {
-        // timeout in milliseconds
-        public int HandshakeTimeout { get; set; } = 5000;
-
         private SafeExecutor m_handshakeLock = new SingleThreadExecutor();
 
-        public bool InitializeCrypto(IConnectionCrypto crypto)
+        public bool InitializeCrypto(IConnectionCrypto crypto, int timeout = 5000)
         {
-            if (!m_handshakeLock.Execute(() => ExecuteCryptoHandshake(crypto)))
+            if (!m_handshakeLock.Execute(() => ExecuteCryptoHandshake(crypto, timeout)))
             {
                 HandleHandshakeFailure();
                 return false;
@@ -24,7 +21,7 @@ namespace XSLibrary.Network.Connections
             return true;
         }
 
-        private bool ExecuteCryptoHandshake(IConnectionCrypto crypto)
+        private bool ExecuteCryptoHandshake(IConnectionCrypto crypto, int timeout)
         {
             try
             {
@@ -37,8 +34,8 @@ namespace XSLibrary.Network.Connections
                 ExecutePreReceiveActions();
 
                 if (!crypto.Handshake(
-                    (data) => SafeSend(() => SendSpecialized(data), HandshakeTimeout),  // send
-                    (out byte[] data, out EndPoint source) => SafeReceive(out data, out source, HandshakeTimeout))) // receive
+                    (data) => SafeSend(() => SendSpecialized(data), timeout),  // send
+                    (out byte[] data, out EndPoint source) => SafeReceive(out data, out source, timeout))) // receive
                 {
                     return false;
                 }
