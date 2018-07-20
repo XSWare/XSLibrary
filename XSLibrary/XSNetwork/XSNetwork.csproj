@@ -44,16 +44,19 @@
   <ItemGroup>
     <Compile Include="Accepter\GuardedAccepter.cs" />
     <Compile Include="Accepter\TCPAccepter.cs" />
+    <Compile Include="Connectors\AccountConnector.cs" />
     <Compile Include="Connections\Interface\Handshake.cs" />
     <Compile Include="Connections\Interface\IConnection.cs" />
     <Compile Include="Connections\PackageParser.cs" />
     <Compile Include="Connections\Interface\Send.cs" />
     <Compile Include="Connections\Interface\Receive.cs" />
     <Compile Include="Connections\TCPPacketConnection.cs" />
+    <Compile Include="Connectors\TCPConnector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Session.cs" />
     <Compile Include="Connections\TCPConnection.cs" />
     <Compile Include="Connections\UDPConnection.cs" />
+    <Compile Include="Connectors\Connector.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\XSCryptography\XSCryptography.csproj">

@@ -52,6 +52,7 @@
     <Compile Include="BitManipulation\Operators.cs" />
     <Compile Include="BitManipulation\Structure.cs" />
     <Compile Include="ConnectionCryptos\ConnectionCrypto.cs" />
+    <Compile Include="ConnectionCryptos\CryptoFactory.cs" />
     <Compile Include="ConnectionCryptos\Curve25519Crypto.cs" />
     <Compile Include="ConnectionCryptos\ECCrypto.cs" />
     <Compile Include="ConnectionCryptos\ECOpenSSLCrypto.cs" />
