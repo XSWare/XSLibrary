@@ -19,18 +19,40 @@ namespace XSLibrary.Network.Connectors
 
         }
 
-        public void Connect(EndPoint remote, Action<ConnectionType> SuccessActions, Action<string> ErrorActions)
+        public bool Connect(EndPoint remote, out ConnectionType connection, out string message)
+        {
+            connection = null;
+            message = "";
+
+            if (CurrentlyConnecting)
+                return false;
+
+            CurrentlyConnecting = true;
+
+            return ConnectInternal(remote, out connection, out message);
+        }
+
+        public void ConnectAsync(EndPoint remote, Action<ConnectionType> SuccessActions, Action<string> ErrorActions)
         {
             if (CurrentlyConnecting)
                 return;
 
             CurrentlyConnecting = true;
 
-            new Task(() => ConnectAsync(remote, SuccessActions, ErrorActions)).Start();
+            new Task(() =>
+            {
+                if (ConnectInternal(remote, out ConnectionType connection, out string message))
+                    SuccessActions(connection);
+                else
+                    ErrorActions(message);
+            }).Start();
         }
 
-        private void ConnectAsync(EndPoint remote, Action<ConnectionType> SuccessActions, Action<string> ErrorActions)
+        private bool ConnectInternal(EndPoint remote, out ConnectionType connection, out string message)
         {
+            connection = null;
+            message = "";
+
             try
             {
                 Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -40,17 +62,21 @@ namespace XSLibrary.Network.Connectors
                 if(!socket.Connected)
                 {
                     socket.Close();
-                    ErrorActions("Failed to connect.");
-                    return;
+                    message = "Failed to connect.";
+                    return false;
                 }
                 else
                     socket.EndConnect(result);
 
-                try { SuccessActions(InitializeConnection(socket)); }
+                try { connection = InitializeConnection(socket); }
                 catch (Exception exception)
                 {
-                    ErrorActions(exception.Message);
+                    message = exception.Message;
+                    return false;
                 }
+
+                message = "Successfully connected.";
+                return true;
             }
             finally { CurrentlyConnecting = false; }
         }

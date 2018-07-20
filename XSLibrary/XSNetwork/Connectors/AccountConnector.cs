@@ -9,6 +9,9 @@ namespace XSLibrary.Network.Connectors
 {
     public class AccountConnector : Connector<TCPPacketConnection>
     {
+        public const string HANDSHAKE_FAILED = "Handshake failed.";
+        public const string AUTHENTICATION_FAILED = "Authentication failed.";
+
         public CryptoType Crypto { get; set; } = CryptoType.NoCrypto;
         public int TimeoutCryptoHandshake { get; set; } = 5000;
         public int TimeoutAuthentication { get; set; } = 5000;
@@ -20,11 +23,11 @@ namespace XSLibrary.Network.Connectors
             TCPPacketConnection connection = new TCPPacketConnection(connectedSocket);
 
             if (!connection.InitializeCrypto(CryptoFactory.CreateCrypto(Crypto, true), TimeoutCryptoHandshake))
-                throw new Exception("Handshake failed.");
+                throw new Exception(HANDSHAKE_FAILED);
 
             connection.Send(Encoding.ASCII.GetBytes(Login) , TimeoutAuthentication);
             if (!connection.Receive(out byte[] data, out EndPoint source, TimeoutAuthentication) || Encoding.ASCII.GetString(data) != SuccessResponse)
-                throw new Exception("Authentication failed.");
+                throw new Exception(AUTHENTICATION_FAILED);
 
             return connection;
         }
