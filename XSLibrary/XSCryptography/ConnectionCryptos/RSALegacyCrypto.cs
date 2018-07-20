@@ -82,7 +82,7 @@ namespace XSLibrary.Cryptography.ConnectionCryptos
 
             KEXCrypto.FromXmlString(Encoding.ASCII.GetString(data));
 
-            byte[] key = new byte[DataCrypto.KeySize];
+            byte[] key = new byte[DataCrypto.KeySize / 8];
             RandomNumberGenerator.Create().GetBytes(key);
             DataCrypto.Key = key;
 
