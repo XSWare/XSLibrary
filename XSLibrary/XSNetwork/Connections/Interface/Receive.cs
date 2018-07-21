@@ -95,11 +95,12 @@ namespace XSLibrary.Network.Connections
 
             m_receiveLock.Lock();
 
-            int receiveTimeout = ConnectionSocket.ReceiveTimeout;
-            if (timeout > -1)
-                ConnectionSocket.ReceiveTimeout = timeout;
             try
             {
+                int receiveTimeout = ConnectionSocket.ReceiveTimeout;
+                if (timeout > -1)
+                    ConnectionSocket.ReceiveTimeout = timeout;
+
                 if (ReceiveSpecialized(out data, out source))
                 {
                     if (timeout > -1)
@@ -112,7 +113,7 @@ namespace XSLibrary.Network.Connections
                     Disconnect();
                 }
             }
-            catch (SocketException)
+            catch (SocketException ex)
             {
                 ReceiveThread = null;
                 ReceiveErrorHandling(Remote);

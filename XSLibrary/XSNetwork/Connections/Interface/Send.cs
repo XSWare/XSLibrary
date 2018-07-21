@@ -27,13 +27,13 @@ namespace XSLibrary.Network.Connections
         {
             return m_sendLock.Execute(() =>
             {
-                int sendTimeout = ConnectionSocket.SendTimeout;
-                if (timeout > -1)
-                    ConnectionSocket.SendTimeout = timeout;
-
                 bool error = false;
                 try
                 {
+                    int sendTimeout = ConnectionSocket.SendTimeout;
+                    if (timeout > -1)
+                        ConnectionSocket.SendTimeout = timeout;
+
                     if (!m_connectLock.ExecuteReadonly(() =>
                     {
                         if (CanSend())
