@@ -4,13 +4,16 @@ using System.Net.Sockets;
 using System.Text;
 using XSLibrary.Cryptography.ConnectionCryptos;
 using XSLibrary.Network.Connections;
+using XSLibrary.Utility;
 
 namespace XSLibrary.Network.Connectors
 {
     public class AccountConnector : Connector<TCPPacketConnection>
     {
-        public const string HANDSHAKE_FAILED = "Handshake failed.";
-        public const string AUTHENTICATION_FAILED = "Authentication failed.";
+        public static string MessageInitiatingHandshake { get; set; } = "Encrypting connection...";
+        public static string MessageHandshakeFailed { get; set; } = "Handshake failed.";
+        public static string MessageInitiatingAuthentication { get; set; } = "Authenticating...";
+        public static string MessageAuthenticationFailed = "Authentication failed.";
 
         public CryptoType Crypto { get; set; } = CryptoType.NoCrypto;
         public int TimeoutCryptoHandshake { get; set; } = 5000;
@@ -22,12 +25,17 @@ namespace XSLibrary.Network.Connectors
         {
             TCPPacketConnection connection = new TCPPacketConnection(connectedSocket);
 
+            Logger.Log(LogLevel.Information, MessageInitiatingHandshake);
             if (!connection.InitializeCrypto(CryptoFactory.CreateCrypto(Crypto, true), TimeoutCryptoHandshake))
-                throw new Exception(HANDSHAKE_FAILED);
+                throw new Exception(MessageHandshakeFailed);
 
+            Logger.Log(LogLevel.Information, MessageInitiatingAuthentication);
             connection.Send(Encoding.ASCII.GetBytes(Login) , TimeoutAuthentication);
             if (!connection.Receive(out byte[] data, out EndPoint source, TimeoutAuthentication) || Encoding.ASCII.GetString(data) != SuccessResponse)
-                throw new Exception(AUTHENTICATION_FAILED);
+            {
+                Login = "";
+                throw new Exception(MessageAuthenticationFailed);
+            }
 
             return connection;
         }
