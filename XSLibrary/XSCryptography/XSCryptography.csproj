@@ -73,6 +73,10 @@
       <Project>{73dcc218-655b-485f-8eac-0ce5f2f7343d}</Project>
       <Name>ManagedOpenSsl</Name>
     </ProjectReference>
+    <ProjectReference Include="..\XSThreadSafety\XSThreadSafety.csproj">
+      <Project>{1364168D-0353-49F5-9DAC-2A501FD8055A}</Project>
+      <Name>XSThreadSafety</Name>
+    </ProjectReference>
     <ProjectReference Include="..\XSUtility\XSUtility.csproj">
       <Project>{A37C8BF1-08E7-46BB-8F9E-536A82365FED}</Project>
       <Name>XSUtility</Name>

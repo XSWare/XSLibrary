@@ -80,7 +80,7 @@ namespace XSLibrary.Cryptography.AccountManagement
             return userString.Split(' ')[0];
         }
 
-        public override bool EraseAccount(string username)
+        protected override bool EraseAccountUnsafe(string username)
         {
             System.IO.Directory.CreateDirectory(Directory);
             if (!File.Exists(FilePath))

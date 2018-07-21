@@ -1,4 +1,5 @@
 ﻿using XSLibrary.Cryptography.PasswordHashes;
+using XSLibrary.ThreadSafety.Executors;
 
 namespace XSLibrary.Cryptography.AccountManagement
 {
@@ -8,6 +9,7 @@ namespace XSLibrary.Cryptography.AccountManagement
         public int Difficulty { get; set; } = 10000;
 
         PasswordHash HashAlgorithm { get; set; }
+        SafeReadWriteExecutor m_lock = new RWExecutorUnlimited();
 
         public IUserDataBase()
         {
@@ -15,6 +17,11 @@ namespace XSLibrary.Cryptography.AccountManagement
         }
 
         public bool AddAccount(string username, byte[] password)
+        {
+            return m_lock.Execute(() => AddAccountUnsafe(username, password));
+        }
+
+        private bool AddAccountUnsafe(string username, byte[] password)
         {
             if (GetAccount(username) != null)
                 return false;
@@ -25,31 +32,47 @@ namespace XSLibrary.Cryptography.AccountManagement
 
         public void ReplaceAccount(string username, byte[] password)
         {
-            EraseAccount(username);
-            AddAccount(username, password);
+            m_lock.Execute(() => ReplaceAccountUnsafe(username, password));
+        }
+
+        private void ReplaceAccountUnsafe(string username, byte[] password)
+        {
+            EraseAccountUnsafe(username);
+            AddAccountUnsafe(username, password);
+        }
+
+        public bool EraseAccount(string username)
+        {
+            return m_lock.Execute(() => EraseAccountUnsafe(username));
         }
 
         protected abstract bool AddUserData(UserData userData);
-
         protected abstract UserData GetAccount(string username);
-
-        public abstract bool EraseAccount(string username);
+        protected abstract bool EraseAccountUnsafe(string username);
 
         public bool ChangePassword(string username, byte[] oldPassword, byte[] newPassword)
         {
-            if (!Validate(username, oldPassword))
+            return m_lock.Execute(() => ChangePasswordUnsafe(username, oldPassword, newPassword));
+        }
+
+        private bool ChangePasswordUnsafe(string username, byte[] oldPassword, byte[] newPassword)
+        {
+            if (!ValidateUnsafe(username, oldPassword))
                 return false;
 
-            ReplaceAccount(username, newPassword);
+            ReplaceAccountUnsafe(username, newPassword);
             return true;
         }
 
         /// <summary>
-        /// check if the user data is in the data base and has a valid password
+        /// Check if the user data is in the data base and has a valid password
         /// </summary>
-        /// <param name="userData"></param>
-        /// <returns></returns>
         public bool Validate(string username, byte[] password)
+        {
+            return m_lock.ExecuteReadonly(() => ValidateUnsafe(username, password));
+        }
+
+        private bool ValidateUnsafe(string username, byte[] password)
         {
             UserData user = GetAccount(username);
             if (user == null)
@@ -59,7 +82,6 @@ namespace XSLibrary.Cryptography.AccountManagement
         }
 
         protected abstract PasswordHash CreateHashAlgorithm();
-
         protected abstract byte[] GenerateSalt(int length);
 
         private bool AreHashesEqual(byte[] hash1, byte[] hash2)
