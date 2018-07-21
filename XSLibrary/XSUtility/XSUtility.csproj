@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="HexStringConverter.cs" />
+    <Compile Include="Logging\LambdaLogger.cs" />
     <Compile Include="Logging\Logger.cs" />
     <Compile Include="Logging\MultiLogger.cs" />
     <Compile Include="Logging\NetworkLogger.cs" />
