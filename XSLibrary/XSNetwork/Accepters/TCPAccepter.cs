@@ -1,16 +1,13 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using XSLibrary.Utility;
 
 namespace XSLibrary.Network.Accepters
 {
-    public class TCPAccepter : IDisposable
+    public class TCPAccepter : IAccepter
     {
-        public delegate void ClientConnectedHandler(object sender, Socket acceptedSocket);
         public event ClientConnectedHandler ClientConnected;
-
         public Logger Logger { get; set; }
 
         public int Port { get; private set; }
@@ -45,6 +42,8 @@ namespace XSLibrary.Network.Accepters
 
             m_listeningSocket.Bind(new IPEndPoint(IPAddress.Any, Port));
             m_listeningSocket.Listen(MaxPendingConnections);
+
+            Logger.Log(LogLevel.Warning, "Now accepting incoming connections on port {0}.", Port);
 
             StartParallelLoops();
         }
