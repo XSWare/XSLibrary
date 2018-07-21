@@ -9,7 +9,7 @@ namespace XSLibrary.Network.Connectors
 {
     public abstract class Connector<ConnectionType> where ConnectionType: TCPConnection
     {
-        public static string MessageConnecting { get; set; } = "Connecting...";
+        public static string MessageConnecting { get; set; } = "Connecting to {0}...";
         public static string MessageFailedConnect { get; set; } = "Failed to connect!";
         public static string MessageSuccess { get; set; } = "Successfully connected.";
 
@@ -86,7 +86,7 @@ namespace XSLibrary.Network.Connectors
 
             try
             {
-                Logger.Log(LogLevel.Information, MessageConnecting);
+                Logger.Log(LogLevel.Information, MessageConnecting, remote);
 
                 Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 IAsyncResult result = socket.BeginConnect(remote, null, null);
