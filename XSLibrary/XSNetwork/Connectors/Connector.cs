@@ -27,10 +27,9 @@ namespace XSLibrary.Network.Connectors
         {
         }
 
-        public bool Connect(EndPoint remote, out ConnectionType connection, out string message)
+        public bool Connect(EndPoint remote, out ConnectionType connection)
         {
             connection = null;
-            message = "";
 
             if (CurrentlyConnecting)
                 return false;
@@ -56,18 +55,17 @@ namespace XSLibrary.Network.Connectors
             }).Start();
         }
 
-        public bool Reconnect(out ConnectionType connection, out string message)
+        public bool Reconnect(out ConnectionType connection)
         {
             connection = null;
-            message = "";
 
             if (!LastConnectSuccessfull)
             {
-                message = RECONNECT_EMPTY;
+                Logger.Log(LogLevel.Error, RECONNECT_EMPTY);
                 return false;
             }
 
-            return Connect(LastConnect, out connection, out message);
+            return Connect(LastConnect, out connection);
         }
 
         public void ReconnectAsync(Action<ConnectionType> SuccessCallback, Action ErrorCallback)
@@ -110,7 +108,7 @@ namespace XSLibrary.Network.Connectors
                     return false;
                 }
 
-                Logger.Log(LogLevel.Information, MessageSuccess);
+                Logger.Log(LogLevel.Warning, MessageSuccess);
                 LastConnect = remote;
                 return true;
             }
