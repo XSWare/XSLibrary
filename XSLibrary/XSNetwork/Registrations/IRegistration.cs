@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using XSLibrary.Cryptography.AccountManagement;
 using XSLibrary.Cryptography.ConnectionCryptos;
-using XSLibrary.Network.Accepters;
+using XSLibrary.Network.Acceptors;
 using XSLibrary.Network.Connections;
 using XSLibrary.Utility;
 
@@ -29,11 +29,11 @@ namespace XSLibrary.Network.Registrations
         public int CryptoHandshakeTimeout { get; set; } = 5000;
         public CryptoType Crypto = CryptoType.NoCrypto;
 
-        private IAccepter Accepter { get; set; }
+        private IAcceptor Accepter { get; set; }
         protected IUserDataBase DataBase { get; private set; }
         protected IAccountPool<AccountType> Accounts { get; private set; }
 
-        public IRegistration(TCPAccepter accepter, IUserDataBase dataBase, IAccountPool<AccountType> initialAccounts)
+        public IRegistration(TCPAcceptor accepter, IUserDataBase dataBase, IAccountPool<AccountType> initialAccounts)
         {
             Accepter = accepter;
             DataBase = dataBase;

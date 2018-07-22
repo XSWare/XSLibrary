@@ -3,9 +3,9 @@ using System.Net.Sockets;
 using System.Threading;
 using XSLibrary.Utility;
 
-namespace XSLibrary.Network.Accepters
+namespace XSLibrary.Network.Acceptors
 {
-    public class TCPAccepter : IAccepter
+    public class TCPAcceptor : IAcceptor
     {
         public event ClientConnectedHandler ClientConnected;
         public Logger Logger { get; set; }
@@ -20,7 +20,7 @@ namespace XSLibrary.Network.Accepters
         Socket m_listeningSocket;
         Thread m_acceptThread;
 
-        public TCPAccepter(int port, int maxPendingConnections)
+        public TCPAcceptor(int port, int maxPendingConnections)
         { 
             Port = port;
             MaxPendingConnections = maxPendingConnections;

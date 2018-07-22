@@ -6,9 +6,9 @@ using XSLibrary.ThreadSafety.Executors;
 using System.Collections.Generic;
 using XSLibrary.Utility;
 
-namespace XSLibrary.Network.Accepters
+namespace XSLibrary.Network.Acceptors
 {
-    public class GuardedAccepter : TCPAccepter
+    public class GuardedAcceptor : TCPAcceptor
     {
         Dictionary<string, int> Filter { get; set; } = new Dictionary<string, int>();
         SafeExecutor m_lock;
@@ -16,7 +16,7 @@ namespace XSLibrary.Network.Accepters
         public int ReduceInterval { get; set; } = 5000;
         public int AllowedRequestCount { get; set; } = 10;
 
-        public GuardedAccepter(int port, int maxPendingConnection) : base(port, maxPendingConnection)
+        public GuardedAcceptor(int port, int maxPendingConnection) : base(port, maxPendingConnection)
         {
             m_lock = new SingleThreadExecutor();
         }

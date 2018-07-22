@@ -2,11 +2,11 @@
 using System.Net.Sockets;
 using XSLibrary.Utility;
 
-namespace XSLibrary.Network.Accepters
+namespace XSLibrary.Network.Acceptors
 {
     public delegate void ClientConnectedHandler(object sender, Socket acceptedSocket);
 
-    public interface IAccepter : IDisposable
+    public interface IAcceptor : IDisposable
     {
         event ClientConnectedHandler ClientConnected;
 

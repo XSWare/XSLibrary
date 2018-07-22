@@ -113,7 +113,7 @@ namespace XSLibrary.Network.Connections
                     Disconnect();
                 }
             }
-            catch (SocketException ex)
+            catch (SocketException)
             {
                 ReceiveThread = null;
                 ReceiveErrorHandling(Remote);
