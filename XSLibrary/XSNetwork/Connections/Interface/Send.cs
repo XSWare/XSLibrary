@@ -17,10 +17,15 @@ namespace XSLibrary.Network.Connections
 
         private SafeExecutor m_sendLock = new SingleThreadExecutor();
 
-        public void Send(byte[] data, int timeout = -1)
+        public bool Send(byte[] data, int timeout = -1)
         {
             if (SafeSend(() => SendSpecialized(Crypto.EncryptData(data)), timeout))
+            {
                 Logger.Log(LogLevel.Information, "Sent data to {0}.", Remote.ToString());
+                return true;
+            }
+            else
+                return false;
         }
 
         protected bool SafeSend(Action SendFunction, int timeout = -1)
