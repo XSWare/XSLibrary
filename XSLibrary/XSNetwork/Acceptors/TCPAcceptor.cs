@@ -73,7 +73,7 @@ namespace XSLibrary.Network.Acceptors
 
         protected virtual void HandleAcceptedSocket(Socket acceptedSocket)
         {
-            Logger.Log(LogLevel.Information, "Accepted connection from {0}", acceptedSocket.RemoteEndPoint.ToString());
+            Logger.Log(LogLevel.Information, "Accepted connection from {0} on port {1}", acceptedSocket.RemoteEndPoint, Port);
             ThreadStarter.ThreadpoolDebug("Socket init routine", () => RaiseClientConnectedEvent(acceptedSocket));
         }
 
@@ -89,6 +89,8 @@ namespace XSLibrary.Network.Acceptors
 
         public void Dispose()
         {
+            Logger.Log(LogLevel.Detail, "Disposing acceptor listening on port {0}", Port);
+
             Abort = true;
 
             try
@@ -102,6 +104,8 @@ namespace XSLibrary.Network.Acceptors
 
             if(m_acceptThread != null && m_acceptThread.ThreadState != ThreadState.Unstarted)
                 m_acceptThread.Join();
+
+            Logger.Log(LogLevel.Detail, "Acceptor listening on port {0} disposed.", Port);
         }
     }
 }

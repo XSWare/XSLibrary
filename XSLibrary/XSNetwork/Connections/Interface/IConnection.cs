@@ -87,7 +87,7 @@ namespace XSLibrary.Network.Connections
             if(m_connectLock.Execute(CloseSocket))
             {
                 WaitReceiveThread();
-                Logger.Log(LogLevel.Warning, "Disconnected from {0}.", Remote.ToString());
+                Logger.Log(LogLevel.Information, "Disconnected from {0}.", Remote.ToString());
                 RaiseOnDisconnect();
             }
         }

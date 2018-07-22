@@ -50,7 +50,7 @@ namespace XSLibrary.Network.Acceptors
                 base.HandleAcceptedSocket(acceptedSocket);
             else
             {
-                Logger.Log(LogLevel.Warning, "Rejected connection from " + acceptedSocket.RemoteEndPoint.ToString());
+                Logger.Log(LogLevel.Warning, "Rejected connection from {0} on port {1}", acceptedSocket.RemoteEndPoint, Port);
                 acceptedSocket.Dispose();
             }
         }

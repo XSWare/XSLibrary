@@ -107,7 +107,7 @@ namespace XSLibrary.Network.Connectors
                     return false;
                 }
 
-                Logger.Log(LogLevel.Warning, MessageSuccess);
+                Logger.Log(LogLevel.Information, MessageSuccess);
                 LastConnect = remote;
                 return true;
             }

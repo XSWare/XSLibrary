@@ -74,6 +74,7 @@ namespace XSLibrary.Network.Registrations
         public virtual void Dispose()
         {
             Accepter.Dispose();
+            Logger.Log(LogLevel.Detail, "Registration disposed.");
         }
     }
 }
