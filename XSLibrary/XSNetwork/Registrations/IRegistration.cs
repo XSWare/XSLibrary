@@ -55,7 +55,7 @@ namespace XSLibrary.Network.Registrations
 
             if (!Authenticate(out AccountType user, connection))
             {
-                Logger.Log(LogLevel.Error, "Authentication failed.");
+                Logger.Log(LogLevel.Error, "Authentication failed from {0}", connection.Remote);
                 Accounts.DisposeAccount(user);
                 connection.Disconnect();
                 return;
