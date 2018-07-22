@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading.Tasks;
 using XSLibrary.Network.Connections;
 using XSLibrary.Utility;
 
@@ -46,13 +45,13 @@ namespace XSLibrary.Network.Connectors
 
             CurrentlyConnecting = true;
 
-            new Task(() =>
+            ThreadStarter.ThreadpoolDebug("Connector", () =>
             {
                 if (ConnectInternal(remote, out ConnectionType connection))
                     SuccessCallback(connection);
                 else
                     ErrorCallback();
-            }).Start();
+            });
         }
 
         public bool Reconnect(out ConnectionType connection)
@@ -92,7 +91,7 @@ namespace XSLibrary.Network.Connectors
                 IAsyncResult result = socket.BeginConnect(remote, null, null);
                 bool success = result.AsyncWaitHandle.WaitOne(TimeoutConnect, true);
 
-                if(!socket.Connected)
+                if (!socket.Connected)
                 {
                     socket.Close();
                     Logger.Log(LogLevel.Error, MessageFailedConnect);
