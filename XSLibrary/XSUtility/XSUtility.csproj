@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ThreadStarter.cs" />
     <Compile Include="HexStringConverter.cs" />
     <Compile Include="Logging\LambdaLogger.cs" />
     <Compile Include="Logging\Logger.cs" />
