@@ -30,14 +30,19 @@ namespace XSLibrary.Network.Connectors
                 throw new Exception(MessageHandshakeFailed);
 
             Logger.Log(LogLevel.Information, MessageInitiatingAuthentication);
-            connection.Send(Encoding.ASCII.GetBytes(Login) , TimeoutAuthentication);
+            if (!connection.Send(Encoding.ASCII.GetBytes(Login), TimeoutAuthentication))
+                HandleAuthenticationFailure(connection);
+
             if (!connection.Receive(out byte[] data, out EndPoint source, TimeoutAuthentication) || Encoding.ASCII.GetString(data) != SuccessResponse)
-            {
-                Login = "";
-                throw new Exception(MessageAuthenticationFailed);
-            }
+                HandleAuthenticationFailure(connection);
 
             return connection;
+        }
+
+        private void HandleAuthenticationFailure(TCPPacketConnection connection)
+        {
+            Login = "";
+            throw new Exception(MessageAuthenticationFailed);
         }
     }
 }
