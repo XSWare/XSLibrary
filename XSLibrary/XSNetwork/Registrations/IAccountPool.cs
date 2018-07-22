@@ -50,7 +50,10 @@ namespace XSLibrary.Network.Registrations
             {
                 AccountType user = account as AccountType;
                 if (user != null && !user.StillInUse())
+                {
+                    Logger.Log(LogLevel.Detail, "Released memory of account \"{0}\".", user.Username);
                     Accounts.Remove(user);
+                }
             });
         }
 
