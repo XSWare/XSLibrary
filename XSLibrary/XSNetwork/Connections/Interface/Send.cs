@@ -39,7 +39,7 @@ namespace XSLibrary.Network.Connections
                     if (timeout > -1)
                         ConnectionSocket.SendTimeout = timeout;
 
-                    if (!m_connectLock.ExecuteReadonly(() =>
+                    if (!m_connectLock.ExecuteRead(() =>
                     {
                         if (CanSend())
                         {

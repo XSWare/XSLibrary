@@ -31,7 +31,7 @@ namespace XSLibrary.Network.Connections
 
         public virtual Logger Logger { get; set; }
 
-        public bool Connected { get { return m_connectLock.ExecuteReadonly(() => { return !m_disconnecting && ConnectionSocket.Connected; }); } }
+        public bool Connected { get { return m_connectLock.ExecuteRead(() => { return !m_disconnecting && ConnectionSocket.Connected; }); } }
 
         volatile bool m_receiving = false;
         public bool Receiving

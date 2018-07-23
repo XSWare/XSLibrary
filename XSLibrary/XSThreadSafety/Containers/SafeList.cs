@@ -12,7 +12,7 @@ namespace XSLibrary.ThreadSafety.Containers
         List<T> m_internalList;
         SafeReadWriteExecutor m_safeExecutor;
 
-        public SafeList() : this(new RWExecutorUnlimited()) { }
+        public SafeList() : this(new RWExecutor()) { }
 
         /// <param name="safeExecutor">Use your own implementation of an executor.</param>
         public SafeList(SafeReadWriteExecutor safeExecutor)
@@ -24,7 +24,7 @@ namespace XSLibrary.ThreadSafety.Containers
         /// <summary>
         /// Returns a snapshot-copy of the list. Accessing the elements is NOT THREADSAFE.
         /// </summary>
-        public T[] Entries { get { return m_safeExecutor.ExecuteReadonly(() => m_internalList.ToArray()); } }
+        public T[] Entries { get { return m_safeExecutor.ExecuteRead(() => m_internalList.ToArray()); } }
 
         public void Add(T item)
         {
@@ -33,7 +33,7 @@ namespace XSLibrary.ThreadSafety.Containers
 
         public bool Contains(T item)
         {
-            return m_safeExecutor.ExecuteReadonly(() => m_internalList.Contains(item));
+            return m_safeExecutor.ExecuteRead(() => m_internalList.Contains(item));
         }
 
         public void Insert(int index, T element)
@@ -59,7 +59,7 @@ namespace XSLibrary.ThreadSafety.Containers
 
         public T GetElement(int index)
         {
-            return m_safeExecutor.ExecuteReadonly(() => m_internalList[index]);
+            return m_safeExecutor.ExecuteRead(() => m_internalList[index]);
         }
 
         public void SetElement(int index, T element)
@@ -67,6 +67,6 @@ namespace XSLibrary.ThreadSafety.Containers
             m_safeExecutor.Execute(() => m_internalList[index] = element);
         }
 
-        public int Count { get { return m_safeExecutor.ExecuteReadonly(() => m_internalList.Count); } }
+        public int Count { get { return m_safeExecutor.ExecuteRead(() => m_internalList.Count); } }
     }
 }

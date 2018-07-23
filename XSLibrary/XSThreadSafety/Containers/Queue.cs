@@ -8,7 +8,7 @@ namespace XSLibrary.ThreadSafety.Containers
         LinkedList<T> m_list;
         SafeReadWriteExecutor m_safeExecutor;
 
-        public SafeQueue() : this(new RWExecutorUnlimited()) { }
+        public SafeQueue() : this(new RWExecutor()) { }
         public SafeQueue(SafeReadWriteExecutor safeExecutor)
         {
             m_list = new LinkedList<T>();
@@ -35,7 +35,7 @@ namespace XSLibrary.ThreadSafety.Containers
             return returnVal;
         }
 
-        public int Count { get { return m_safeExecutor.ExecuteReadonly(() => m_list.Count); } }
+        public int Count { get { return m_safeExecutor.ExecuteRead(() => m_list.Count); } }
 
         public void Clear()
         {

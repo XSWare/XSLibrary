@@ -1,21 +1,35 @@
 ﻿using System;
+using XSLibrary.ThreadSafety.Locks;
 using XSLibrary.Utility;
 
 namespace XSLibrary.ThreadSafety.Executors
 {
     public abstract class SafeExecutor : TransparentFunctionWrapper
     {
+        protected ILock m_lock;
+
+        protected SafeExecutor(ILock @lock)
+        {
+            m_lock = @lock;
+        }
+
         override public void Execute(Action executeFunction)
         {
             try
             {
-                Lock();
+                m_lock.Lock();
                 executeFunction();
             }
-            finally { Release(); }
+            finally { m_lock.Release(); }
         }
 
-        public abstract void Lock();
-        public abstract void Release();
+        public void Lock()
+        {
+            m_lock.Lock();
+        }
+        public void Release()
+        {
+            m_lock.Release();
+        }
     }
 }

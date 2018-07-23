@@ -9,7 +9,7 @@ namespace XSLibrary.Cryptography.AccountManagement
         public int Difficulty { get; set; } = 10000;
 
         PasswordHash HashAlgorithm { get; set; }
-        SafeReadWriteExecutor m_lock = new RWExecutorUnlimited();
+        SafeReadWriteExecutor m_lock = new RWExecutor();
 
         public IUserDataBase()
         {
@@ -69,7 +69,7 @@ namespace XSLibrary.Cryptography.AccountManagement
         /// </summary>
         public bool Validate(string username, byte[] password)
         {
-            return m_lock.ExecuteReadonly(() => ValidateUnsafe(username, password));
+            return m_lock.ExecuteRead(() => ValidateUnsafe(username, password));
         }
 
         private bool ValidateUnsafe(string username, byte[] password)
