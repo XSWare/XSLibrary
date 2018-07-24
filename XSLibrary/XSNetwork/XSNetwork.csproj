@@ -54,9 +54,8 @@
     <Compile Include="Connections\TCPPacketConnection.cs" />
     <Compile Include="Connectors\TCPConnector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Registrations\IAccountPool.cs" />
-    <Compile Include="Registrations\IRegistration.cs" />
     <Compile Include="Registrations\IUserAccount.cs" />
+    <Compile Include="Registrations\IRegistration.cs" />
     <Compile Include="Session.cs" />
     <Compile Include="Connections\TCPConnection.cs" />
     <Compile Include="Connections\UDPConnection.cs" />
