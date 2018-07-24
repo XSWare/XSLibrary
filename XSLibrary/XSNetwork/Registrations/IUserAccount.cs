@@ -1,20 +1,16 @@
-﻿using XSLibrary.Utility;
+﻿using System;
+using XSLibrary.ThreadSafety.MemoryPool;
+using XSLibrary.Utility;
 
 namespace XSLibrary.Network.Registrations
 {
-    public abstract class IUserAccount
+    public abstract class IUserAccount : IMemoryTransparentElement<string>
     {
-        public delegate void MemoryReleaseHandler(object sender);
-        public abstract event MemoryReleaseHandler OnMemoryCleanUp;
-
         public Logger Logger { get; set; } = Logger.NoLog;
-        public string Username { get; private set; }
+        public string Username => ID;
 
-        public IUserAccount(string username)
+        public IUserAccount(string username, Action<string> referenceCallback) : base(username, referenceCallback)
         {
-            Username = username;
         }
-
-        public abstract bool StillInUse();
     }
 }

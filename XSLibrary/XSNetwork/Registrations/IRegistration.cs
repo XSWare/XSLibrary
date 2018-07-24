@@ -4,6 +4,7 @@ using XSLibrary.Cryptography.AccountManagement;
 using XSLibrary.Cryptography.ConnectionCryptos;
 using XSLibrary.Network.Acceptors;
 using XSLibrary.Network.Connections;
+using XSLibrary.ThreadSafety.MemoryPool;
 using XSLibrary.Utility;
 
 namespace XSLibrary.Network.Registrations
@@ -30,9 +31,9 @@ namespace XSLibrary.Network.Registrations
 
         private IAcceptor Accepter { get; set; }
         protected IUserDataBase DataBase { get; private set; }
-        protected IAccountPool<AccountType> Accounts { get; private set; }
+        protected IMemoryPool<string, AccountType> Accounts { get; private set; }
 
-        public IRegistration(TCPAcceptor accepter, IUserDataBase dataBase, IAccountPool<AccountType> initialAccounts)
+        public IRegistration(TCPAcceptor accepter, IUserDataBase dataBase, IMemoryPool<string, AccountType> initialAccounts)
         {
             Accepter = accepter;
             DataBase = dataBase;
@@ -53,21 +54,19 @@ namespace XSLibrary.Network.Registrations
             if (!connection.InitializeCrypto(CryptoFactory.CreateCrypto(Crypto, false), CryptoHandshakeTimeout))
                 return;
 
-            if (!Authenticate(out AccountType user, connection))
+            if (!Authenticate(out string username, connection))
             {
                 Logger.Log(LogLevel.Error, "Authentication failed from {0}", connection.Remote);
-                Accounts.DisposeAccount(user);
                 connection.Disconnect();
                 return;
             }
 
-            HandleVerifiedConnection(user, connection);
-            Accounts.AddAccount(user);
+            HandleVerifiedConnection(Accounts.GetElement(username), connection);
         }
 
         protected abstract ConnectionType CreateConnection(Socket acceptedSocket);
 
-        protected abstract bool Authenticate(out AccountType user, ConnectionType connection);
+        protected abstract bool Authenticate(out string username, ConnectionType connection);
 
         protected abstract void HandleVerifiedConnection(AccountType user, ConnectionType clientConnection);
 
