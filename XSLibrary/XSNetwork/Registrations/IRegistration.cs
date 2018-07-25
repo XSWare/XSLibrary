@@ -31,13 +31,11 @@ namespace XSLibrary.Network.Registrations
         public CryptoType Crypto = CryptoType.NoCrypto;
 
         private IAcceptor Accepter { get; set; }
-        protected IUserDataBase DataBase { get; private set; }
-        protected IMemoryPool<string, AccountType> Accounts { get; private set; }
+        private IMemoryPool<string, AccountType> Accounts { get; set; }
 
-        public IRegistration(TCPAcceptor accepter, IUserDataBase dataBase, IMemoryPool<string, AccountType> initialAccounts)
+        public IRegistration(TCPAcceptor accepter, IMemoryPool<string, AccountType> initialAccounts)
         {
             Accepter = accepter;
-            DataBase = dataBase;
             Accounts = initialAccounts;
         }
 
