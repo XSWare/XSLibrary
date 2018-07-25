@@ -26,7 +26,7 @@ namespace XSLibrary.Network.Registrations
 
         public int AuthenticationTimeout { get; set; } = 5000;
         public int CryptoHandshakeTimeout { get; set; } = 5000;
-        public CryptoType Crypto = CryptoType.NoCrypto;
+        public CryptoType Crypto { get; set; } = CryptoType.NoCrypto;
 
         private IAcceptor Accepter { get; set; }
         private IMemoryPool<string, AccountType> Accounts { get; set; }
