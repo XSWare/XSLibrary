@@ -33,14 +33,14 @@ namespace XSLibrary.ThreadSafety.MemoryPool
         {
             if (!m_referenceCounting.ContainsKey(ID))
             {
-                ElementType element = CreateElement(ID, DecrementReferenceCount);
+                ElementType element = CreateElement(ID, ReleaseElement);
                 m_referenceCounting.Add(ID, new ReferencePair() { Element = element, ReferenceCount = 0 });
                 Logger.Log(LogLevel.Detail, "Allocated memory for element \"{0}\".", element.ID);
             }
             return m_referenceCounting[ID];
         }
 
-        private void DecrementReferenceCount(Identifier ID)
+        public void ReleaseElement(Identifier ID)
         {
             Lock.Execute(() =>
             {

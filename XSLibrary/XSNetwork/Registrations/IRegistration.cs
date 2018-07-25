@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Net.Sockets;
 using XSLibrary.Cryptography.AccountManagement;
 using XSLibrary.Cryptography.ConnectionCryptos;
@@ -62,6 +63,7 @@ namespace XSLibrary.Network.Registrations
             }
 
             HandleVerifiedConnection(Accounts.GetElement(username), connection);
+            connection.OnDisconnect += (eventSender, arguments) => Accounts.ReleaseElement(username);
         }
 
         protected abstract ConnectionType CreateConnection(Socket acceptedSocket);

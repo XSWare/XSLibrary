@@ -1,5 +1,4 @@
-﻿using System;
-using XSLibrary.ThreadSafety.MemoryPool;
+﻿using XSLibrary.ThreadSafety.MemoryPool;
 using XSLibrary.Utility;
 
 namespace XSLibrary.Network.Registrations
@@ -9,7 +8,7 @@ namespace XSLibrary.Network.Registrations
         public Logger Logger { get; set; } = Logger.NoLog;
         public string Username => ID;
 
-        public IUserAccount(string username, Action<string> referenceCallback) : base(username, referenceCallback)
+        public IUserAccount(string username) : base(username)
         {
         }
     }

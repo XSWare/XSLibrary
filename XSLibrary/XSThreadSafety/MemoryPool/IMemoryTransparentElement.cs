@@ -6,17 +6,9 @@ namespace XSLibrary.ThreadSafety.MemoryPool
     {
         public Identifier ID { get; private set; }
 
-        Action<Identifier> DecrementCallback;
-
-        public IMemoryTransparentElement(Identifier id, Action<Identifier> referenceCallback)
+        public IMemoryTransparentElement(Identifier id)
         {
             ID = id;
-            DecrementCallback = referenceCallback;
-        }
-
-        public void DecrementReferenceCount()
-        {
-            DecrementCallback(ID);
         }
 
         public abstract bool IsEqual(Identifier ID);
