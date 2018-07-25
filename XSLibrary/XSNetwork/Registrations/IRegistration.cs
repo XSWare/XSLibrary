@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Net;
 using System.Net.Sockets;
-using XSLibrary.Cryptography.AccountManagement;
 using XSLibrary.Cryptography.ConnectionCryptos;
 using XSLibrary.Network.Acceptors;
 using XSLibrary.Network.Connections;
