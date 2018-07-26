@@ -44,5 +44,10 @@ namespace XSLibrary.ThreadSafety.Locks
         {
             m_lock.DowngradeFromWriterLock(ref lockCookie);
         }
+
+        public void Dispose()
+        {
+
+        }
     }
 }

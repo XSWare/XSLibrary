@@ -107,5 +107,13 @@ namespace XSLibrary.ThreadSafety.Locks
 
             m_writeEntry.Release();
         }
+
+        public void Dispose()
+        {
+            m_readEntry.Dispose();
+            m_readLock.Dispose();
+            m_writeEntry.Dispose();
+            m_resourceLock.Dispose();
+        }
     }
 }

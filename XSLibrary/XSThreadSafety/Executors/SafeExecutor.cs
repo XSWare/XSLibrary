@@ -4,7 +4,7 @@ using XSLibrary.Utility;
 
 namespace XSLibrary.ThreadSafety.Executors
 {
-    public abstract class SafeExecutor : TransparentFunctionWrapper
+    public abstract class SafeExecutor : TransparentFunctionWrapper, IDisposable
     {
         protected ILock m_lock;
 
@@ -27,9 +27,15 @@ namespace XSLibrary.ThreadSafety.Executors
         {
             m_lock.Lock();
         }
+
         public void Release()
         {
             m_lock.Release();
+        }
+
+        public void Dispose()
+        {
+            m_lock.Dispose();
         }
     }
 }
