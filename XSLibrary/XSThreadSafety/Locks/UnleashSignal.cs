@@ -11,11 +11,11 @@ namespace XSLibrary.ThreadSafety.Locks
 
         public void Lock()
         {
-            if (destroyed)
-                return;
-
             lock (m_lock)
             {
+                if (destroyed)
+                    return;
+
                 currentlyWaiting++;
                 Monitor.Wait(m_lock);  // wait for a changed pulse
                 currentlyWaiting--;
