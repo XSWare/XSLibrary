@@ -60,6 +60,7 @@
     <Compile Include="Locks\Lock.cs" />
     <Compile Include="Locks\RWLock.cs" />
     <Compile Include="Locks\RWWinNative.cs" />
+    <Compile Include="Locks\UnleashSignal.cs" />
     <Compile Include="MemoryPool\IMemoryPool.cs" />
     <Compile Include="MemoryPool\IMemoryTransparentElement.cs" />
     <Compile Include="OneShotCondition.cs" />
