@@ -1,4 +1,6 @@
-﻿namespace XSLibrary.Cryptography.ConnectionCryptos
+﻿using System;
+
+namespace XSLibrary.Cryptography.ConnectionCryptos
 {
     public enum CryptoType
     {
@@ -22,9 +24,9 @@
                     return new RSALegacyCrypto(active);
                 case CryptoType.EC:
                     return new ECCrypto(active);
+                default:
+                    throw new NotImplementedException();
             }
-
-            return null;
         }
     }
 }

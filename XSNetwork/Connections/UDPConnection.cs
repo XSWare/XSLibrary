@@ -8,8 +8,6 @@ namespace XSLibrary.Network.Connections
     {
         const int SIO_UDP_CONNRESET = -1744830452;
 
-        EndPoint ReceiveSource { get; set; }
-
         public UDPConnection(EndPoint local) : base(new Socket(local.AddressFamily, SocketType.Dgram, ProtocolType.Udp))
         {
             

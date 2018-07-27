@@ -67,7 +67,7 @@ namespace XSLibrary.Cryptography.AccountManagement
             if (account == null)
                 return false;
 
-            if (!ValidateHash(username, oldPassword, account))
+            if (!ValidateHash(account, oldPassword))
                 return false;
 
             AccountCreationData creationData = new AccountCreationData(username, newPassword, GetAccount(username).AccessLevel);
@@ -86,16 +86,16 @@ namespace XSLibrary.Cryptography.AccountManagement
                 if (account == null)
                     return false;
 
-                return ValidateHash(username, password, account) && ValidateAccesslevel(accessLevel, account);
+                return ValidateHash(account, password) && ValidateAccesslevel(account, accessLevel);
             });
         }
 
-        private bool ValidateHash(string username, byte[] password, AccountData account)
+        private bool ValidateHash(AccountData account, byte[] password)
         {
             return AreHashesEqual(account.PasswordHash, HashAlgorithm.Hash(password, account.Salt, account.Difficulty));
         }
 
-        private bool ValidateAccesslevel(int accessLevel, AccountData account)
+        private bool ValidateAccesslevel(AccountData account, int accessLevel)
         {
             return accessLevel >= account.AccessLevel;
         }

@@ -50,7 +50,6 @@
     <Compile Include="XSCryptography\BitManipulation\Structure.cs" />
     <Compile Include="XSCryptography\ConnectionCryptos\ConnectionCrypto.cs" />
     <Compile Include="XSCryptography\ConnectionCryptos\CryptoFactory.cs" />
-    <Compile Include="XSCryptography\ConnectionCryptos\Curve25519Crypto.cs" />
     <Compile Include="XSCryptography\ConnectionCryptos\ECCrypto.cs" />
     <Compile Include="XSCryptography\ConnectionCryptos\NoCrypto.cs" />
     <Compile Include="XSCryptography\ConnectionCryptos\RSACrypto.cs" />

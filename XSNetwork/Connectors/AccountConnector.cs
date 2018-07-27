@@ -27,22 +27,22 @@ namespace XSLibrary.Network.Connectors
 
             Logger.Log(LogLevel.Information, MessageInitiatingHandshake);
             if (!connection.InitializeCrypto(CryptoFactory.CreateCrypto(Crypto, true), TimeoutCryptoHandshake))
-                throw new Exception(MessageHandshakeFailed);
+                throw new ConnectException(MessageHandshakeFailed);
 
             Logger.Log(LogLevel.Information, MessageInitiatingAuthentication);
             if (!connection.Send(Encoding.ASCII.GetBytes(Login), TimeoutAuthentication))
-                HandleAuthenticationFailure(connection);
+                HandleAuthenticationFailure();
 
             if (!connection.Receive(out byte[] data, out EndPoint source, TimeoutAuthentication) || Encoding.ASCII.GetString(data) != SuccessResponse)
-                HandleAuthenticationFailure(connection);
+                HandleAuthenticationFailure();
 
             return connection;
         }
 
-        private void HandleAuthenticationFailure(TCPPacketConnection connection)
+        private void HandleAuthenticationFailure()
         {
             Login = "";
-            throw new Exception(MessageAuthenticationFailed);
+            throw new ConnectException(MessageAuthenticationFailed);
         }
     }
 }

@@ -6,6 +6,12 @@ using XSLibrary.Utility;
 
 namespace XSLibrary.Network.Connectors
 {
+    public class ConnectException : Exception
+    {
+        public ConnectException() : base() { }
+        public ConnectException(string message) : base(message) { }
+    }
+
     public abstract class Connector<ConnectionType> where ConnectionType: TCPConnection
     {
         public static string MessageConnecting { get; set; } = "Connecting to {0}...";

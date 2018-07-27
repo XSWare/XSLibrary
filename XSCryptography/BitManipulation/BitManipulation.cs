@@ -199,8 +199,6 @@ namespace XSLibrary.Cryptography.BitManipulation
         {
             BitPosition position = FirstBitNotZeroIndex(array);
 
-            int newSize = position.IntIndex - steps + 1;
-
             for (int i = 0; i <= position.IntIndex; i++)
             {
                 if (i + steps <= position.IntIndex)
