@@ -228,7 +228,7 @@ namespace XSLibrary.Cryptography.BitManipulation
             return (ZeroPadding(TrimLeft(str, size), size));
         }
 
-        string TrimLeft(string toCut, int size)
+        static string TrimLeft(string toCut, int size)
         {
             if (size <= 0)
                 return "";

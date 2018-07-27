@@ -30,7 +30,7 @@ namespace XSLibrary.Network.Registrations
         private IAcceptor Accepter { get; set; }
         protected IAccountPool<AccountType> Accounts { get; private set; }
 
-        public IRegistration(TCPAcceptor accepter, IAccountPool<AccountType> initialAccounts)
+        protected IRegistration(TCPAcceptor accepter, IAccountPool<AccountType> initialAccounts)
         {
             Accepter = accepter;
             Accounts = initialAccounts;

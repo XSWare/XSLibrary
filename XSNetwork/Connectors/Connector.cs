@@ -8,7 +8,7 @@ namespace XSLibrary.Network.Connectors
 {
     public class ConnectException : Exception
     {
-        public ConnectException() : base() { }
+        public ConnectException() { }
         public ConnectException(string message) : base(message) { }
     }
 
@@ -28,7 +28,7 @@ namespace XSLibrary.Network.Connectors
 
         const string RECONNECT_EMPTY = "Previous connect attempt failed or no attempt was made yet.";
 
-        public Connector()
+        protected Connector()
         {
         }
 

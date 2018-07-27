@@ -24,7 +24,8 @@
             Close(true);
         }
 
-        public void Close(bool join = false)
+        public void Close() { Close(false); }
+        public void Close(bool join)
         {
             foreach (ActorNode actor in Actors)
             {

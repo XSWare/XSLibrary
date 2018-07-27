@@ -77,7 +77,8 @@ namespace XSLibrary.Network.Connections
             Receiving = false;
         }
 
-        public bool Receive(out byte[] data, out EndPoint source, int timeout = -1)
+        public bool Receive(out byte[] data, out EndPoint source) { return Receive(out data, out source, -1); }
+        public bool Receive(out byte[] data, out EndPoint source, int timeout)
         {
             if (SafeReceive(out data, out source, timeout))
             {

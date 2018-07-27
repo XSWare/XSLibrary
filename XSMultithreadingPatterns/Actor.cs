@@ -40,7 +40,8 @@ namespace XSLibrary.MultithreadingPatterns.Actor
             Logger.Log(LogLevel.Information, "Thread started. {0} messages in queue.", m_queue.Count);
         }
 
-        public void Start(bool clearQueue = false)
+        public void Start() { Start(false); }
+        public void Start(bool clearQueue)
         {
             new Thread(()=>RestartThread(clearQueue)).Start();
         }

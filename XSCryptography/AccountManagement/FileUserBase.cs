@@ -65,7 +65,7 @@ namespace XSLibrary.Cryptography.AccountManagement
             return null;
         }
 
-        private AccountData StringToUser(string userString)
+        private static AccountData StringToUser(string userString)
         {
             string[] split = userString.Split(' ');
             string username = split[0];
@@ -77,7 +77,7 @@ namespace XSLibrary.Cryptography.AccountManagement
             return new AccountData(username, passwordHash, salt, difficulty, accessLevel);
         }
 
-        private string StringToUsername(string userString)
+        private static string StringToUsername(string userString)
         {
             return userString.Split(' ')[0];
         }

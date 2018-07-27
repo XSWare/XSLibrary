@@ -103,7 +103,7 @@ namespace XSLibrary.Cryptography.AccountManagement
         protected abstract PasswordHash CreateHashAlgorithm();
         protected abstract byte[] GenerateSalt(int length);
 
-        private bool AreHashesEqual(byte[] hash1, byte[] hash2)
+        private static bool AreHashesEqual(byte[] hash1, byte[] hash2)
         {
             if (hash1.Length != hash2.Length)
                 return false;
