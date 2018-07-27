@@ -55,12 +55,9 @@
     <Compile Include="ConnectionCryptos\CryptoFactory.cs" />
     <Compile Include="ConnectionCryptos\Curve25519Crypto.cs" />
     <Compile Include="ConnectionCryptos\ECCrypto.cs" />
-    <Compile Include="ConnectionCryptos\ECOpenSSLCrypto.cs" />
     <Compile Include="ConnectionCryptos\NoCrypto.cs" />
     <Compile Include="ConnectionCryptos\RSACrypto.cs" />
     <Compile Include="ConnectionCryptos\RSALegacyCrypto.cs" />
-    <Compile Include="ConnectionCryptos\Wrappers\AESOpenSSL.cs" />
-    <Compile Include="ConnectionCryptos\Wrappers\ECDHOpenSSL.cs" />
     <Compile Include="PasswordHashes\PasswordHash.cs" />
     <Compile Include="PasswordHashes\SlowHashPBKDF2.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -69,10 +66,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\openssl-net\ManagedOpenSsl\ManagedOpenSsl.csproj">
-      <Project>{73dcc218-655b-485f-8eac-0ce5f2f7343d}</Project>
-      <Name>ManagedOpenSsl</Name>
-    </ProjectReference>
     <ProjectReference Include="..\XSThreadSafety\XSThreadSafety.csproj">
       <Project>{1364168D-0353-49F5-9DAC-2A501FD8055A}</Project>
       <Name>XSThreadSafety</Name>
