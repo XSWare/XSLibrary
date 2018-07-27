@@ -11,7 +11,7 @@ namespace XSLibrary.Utility
         Priority
     }
 
-    public abstract class Logger
+    public abstract class Logger : IDisposable
     {
         public static LogLevel DefaultLogLevel { get; set; } = LogLevel.Warning;
         public LogLevel LogLevel { get; set; } = DefaultLogLevel;
@@ -33,6 +33,11 @@ namespace XSLibrary.Utility
         }
 
         protected virtual void LogMessage(string text) { }
+
+        public virtual void Dispose()
+        {
+
+        }
     }
 
     class NoLog : Logger
@@ -52,8 +57,15 @@ namespace XSLibrary.Utility
 
     public class LoggerConsolePeriodic : Logger
     {
-        public string Prefix { get; set; } = "";
-        public string Suffix { get; set; } = "";
+        public string Prefix { get; set; }
+        public string Suffix { get; set; }
+
+        public LoggerConsolePeriodic() : this("", "") { }
+        public LoggerConsolePeriodic(string prefix, string suffix)
+        {
+            Prefix = prefix;
+            Suffix = suffix;
+        }
 
         protected override void LogMessage(string text)
         {
