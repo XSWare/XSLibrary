@@ -11,5 +11,10 @@ namespace XSLibrary.Network.Registrations
         public IUserAccount(string username) : base(username)
         {
         }
+
+        public override bool IsEqual(string ID)
+        {
+            return Username == ID;
+        }
     }
 }
