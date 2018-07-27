@@ -5,7 +5,7 @@ namespace XSLibrary.Cryptography.AccountManagement
 {
     public abstract class IUserDataBase
     {
-        public int SaltLenth { get; set; } = 64;
+        public int SaltLength { get; set; } = 64;
         public int Difficulty { get; set; } = 10000;
 
         PasswordHash HashAlgorithm { get; set; }
@@ -16,29 +16,35 @@ namespace XSLibrary.Cryptography.AccountManagement
             HashAlgorithm = CreateHashAlgorithm();
         }
 
-        public bool AddAccount(string username, byte[] password)
+        public bool AddAccount(AccountCreationData creationData)
         {
-            return m_lock.Execute(() => AddAccountUnsafe(username, password));
+            return m_lock.Execute(() => AddAccountUnsafe(creationData));
         }
 
-        private bool AddAccountUnsafe(string username, byte[] password)
+        private bool AddAccountUnsafe(AccountCreationData creationData)
         {
-            if (GetAccount(username) != null)
+            if (GetAccount(creationData.Username) != null)
                 return false;
 
-            byte[] salt = GenerateSalt(SaltLenth);
-            return AddUserData(new UserData(username, HashAlgorithm.Hash(password, salt, Difficulty), salt, Difficulty));
+            byte[] salt = GenerateSalt(SaltLength);
+
+            return AddUserData(new AccountData(
+                creationData.Username, 
+                HashAlgorithm.Hash(creationData.Password, salt, Difficulty), 
+                salt, 
+                Difficulty, 
+                creationData.AccessLevel));
         }
 
-        public void ReplaceAccount(string username, byte[] password)
+        public void ReplaceAccount(AccountCreationData creationData)
         {
-            m_lock.Execute(() => ReplaceAccountUnsafe(username, password));
+            m_lock.Execute(() => ReplaceAccountUnsafe(creationData));
         }
 
-        private void ReplaceAccountUnsafe(string username, byte[] password)
+        private void ReplaceAccountUnsafe(AccountCreationData creationData)
         {
-            EraseAccountUnsafe(username);
-            AddAccountUnsafe(username, password);
+            EraseAccountUnsafe(creationData.Username);
+            AddAccountUnsafe(creationData);
         }
 
         public bool EraseAccount(string username)
@@ -46,8 +52,8 @@ namespace XSLibrary.Cryptography.AccountManagement
             return m_lock.Execute(() => EraseAccountUnsafe(username));
         }
 
-        protected abstract bool AddUserData(UserData userData);
-        protected abstract UserData GetAccount(string username);
+        protected abstract bool AddUserData(AccountData userData);
+        protected abstract AccountData GetAccount(string username);
         protected abstract bool EraseAccountUnsafe(string username);
 
         public bool ChangePassword(string username, byte[] oldPassword, byte[] newPassword)
@@ -57,28 +63,41 @@ namespace XSLibrary.Cryptography.AccountManagement
 
         private bool ChangePasswordUnsafe(string username, byte[] oldPassword, byte[] newPassword)
         {
-            if (!ValidateUnsafe(username, oldPassword))
+            AccountData account = GetAccount(username);
+            if (account == null)
                 return false;
 
-            ReplaceAccountUnsafe(username, newPassword);
+            if (!ValidateHash(username, oldPassword, account))
+                return false;
+
+            AccountCreationData creationData = new AccountCreationData(username, newPassword, GetAccount(username).AccessLevel);
+            ReplaceAccountUnsafe(creationData);
             return true;
         }
 
         /// <summary>
         /// Check if the user data is in the data base and has a valid password
         /// </summary>
-        public bool Validate(string username, byte[] password)
+        public bool Validate(string username, byte[] password, int accessLevel)
         {
-            return m_lock.ExecuteRead(() => ValidateUnsafe(username, password));
+            return m_lock.ExecuteRead(() =>
+            {
+                AccountData account = GetAccount(username);
+                if (account == null)
+                    return false;
+
+                return ValidateHash(username, password, account) && ValidateAccesslevel(accessLevel, account);
+            });
         }
 
-        private bool ValidateUnsafe(string username, byte[] password)
+        private bool ValidateHash(string username, byte[] password, AccountData account)
         {
-            UserData user = GetAccount(username);
-            if (user == null)
-                return false;
+            return AreHashesEqual(account.PasswordHash, HashAlgorithm.Hash(password, account.Salt, account.Difficulty));
+        }
 
-            return AreHashesEqual(user.PasswordHash, HashAlgorithm.Hash(password, user.Salt, user.Difficulty));
+        private bool ValidateAccesslevel(int accessLevel, AccountData account)
+        {
+            return accessLevel >= account.AccessLevel;
         }
 
         protected abstract PasswordHash CreateHashAlgorithm();

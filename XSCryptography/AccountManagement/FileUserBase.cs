@@ -21,7 +21,7 @@ namespace XSLibrary.Cryptography.AccountManagement
             FilePath = directory + fileName;
         }
 
-        protected override bool AddUserData(UserData userData)
+        protected override bool AddUserData(AccountData userData)
         {
             if (userData.Username.Contains(" ") || userData.Username.Contains("\n"))
                 return false;
@@ -37,15 +37,16 @@ namespace XSLibrary.Cryptography.AccountManagement
             return true;
         }
 
-        private string UserToString(UserData user)
+        private string UserToString(AccountData user)
         {
             string passwordHash = HexStringConverter.ToString(user.PasswordHash);
             string salt = new SoapHexBinary(user.Salt).ToString();
             string difficulty = Convert.ToString(user.Difficulty);
-            return string.Format("{0} {1} {2} {3}", user.Username, passwordHash, salt, difficulty);
+            string accessLevel = Convert.ToString(user.AccessLevel);
+            return string.Format("{0} {1} {2} {3} {4}", user.Username, passwordHash, salt, difficulty, accessLevel);
         }
 
-        protected override UserData GetAccount(string username)
+        protected override AccountData GetAccount(string username)
         {
             System.IO.Directory.CreateDirectory(Directory);
 
@@ -56,7 +57,7 @@ namespace XSLibrary.Cryptography.AccountManagement
 
             foreach(string userString in lines)
             {
-                UserData user = StringToUser(userString);
+                AccountData user = StringToUser(userString);
                 if (user.Username == username)
                     return user;
             }
@@ -64,15 +65,16 @@ namespace XSLibrary.Cryptography.AccountManagement
             return null;
         }
 
-        private UserData StringToUser(string userString)
+        private AccountData StringToUser(string userString)
         {
             string[] split = userString.Split(' ');
             string username = split[0];
             byte[] passwordHash = HexStringConverter.ToBytes(split[1]);
             byte[] salt = HexStringConverter.ToBytes(split[2]);
             int difficulty = Convert.ToInt32(split[3]);
+            int accessLevel = Convert.ToInt32(split[4]);
 
-            return new UserData(username, passwordHash, salt, difficulty);
+            return new AccountData(username, passwordHash, salt, difficulty, accessLevel);
         }
 
         private string StringToUsername(string userString)
