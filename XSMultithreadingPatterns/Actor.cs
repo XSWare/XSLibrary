@@ -7,6 +7,7 @@ namespace XSLibrary.MultithreadingPatterns.Actor
     public abstract class Actor<MessageType>
     {
         public Logger Logger { get; set; }
+        public string ThreadName { get; private set; }
 
         SafeQueue<MessageType> m_queue = new SafeQueue<MessageType>();
         Semaphore m_limit;
@@ -14,16 +15,15 @@ namespace XSLibrary.MultithreadingPatterns.Actor
         bool m_abort;
         Semaphore m_creationLock = new Semaphore(1,1);
 
-
-        public Actor(Logger logger)
+        public Actor(string threadName) : this(Logger.NoLog, threadName) { }
+        public Actor() : this(Logger.NoLog) { }
+        public Actor(Logger logger, string threadName = "Actor")
         {
             Logger = logger;
-            Logger.Log(LogLevel.Information, "Actor started.");
+            ThreadName = threadName;
+            Logger.Log(LogLevel.Information, "Actor created.");
             Initialize();
             StartThread();
-        }
-        public Actor() : this(Logger.NoLog)
-        {
         }
 
         private void Initialize()
@@ -35,7 +35,7 @@ namespace XSLibrary.MultithreadingPatterns.Actor
         private void StartThread()
         {
             m_thread = new Thread(WorkLoop);
-            m_thread.Name = "Actor";
+            m_thread.Name = ThreadName;
             m_thread.Start();
             Logger.Log(LogLevel.Information, "Thread started. {0} messages in queue.", m_queue.Count);
         }
@@ -48,7 +48,7 @@ namespace XSLibrary.MultithreadingPatterns.Actor
         private void RestartThread(bool clearQueue)
         {
             m_creationLock.WaitOne();
-            AbortThread();
+            AbortThread(true);
 
             if(clearQueue)
                 m_queue.Clear();
@@ -58,9 +58,9 @@ namespace XSLibrary.MultithreadingPatterns.Actor
             m_creationLock.Release();
         }
 
-        public void SendMessage(MessageType mes)
+        public void SendMessage(MessageType message)
         {
-            m_queue.Write(mes);
+            m_queue.Write(message);
             m_limit.Release();
         }
 
@@ -82,18 +82,20 @@ namespace XSLibrary.MultithreadingPatterns.Actor
 
         abstract protected void HandleMessage(MessageType message);
 
-        public void Stop()
+        public void Stop(bool synchronized)
         {
             m_creationLock.WaitOne();
-            AbortThread();
+            AbortThread(synchronized);
             m_creationLock.Release();
         }
 
-        private void AbortThread()
+        /// <param name="synchronized">Wait until the actor stopped</param>
+        private void AbortThread(bool synchronized)
         {
             m_abort = true;
             m_limit.Release();
-            m_thread.Join();
+            if(synchronized)
+                m_thread.Join();
         }
     }
 }
