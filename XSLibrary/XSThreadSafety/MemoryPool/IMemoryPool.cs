@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using XSLibrary.ThreadSafety.Executors;
 using XSLibrary.Utility;
 
@@ -33,7 +32,7 @@ namespace XSLibrary.ThreadSafety.MemoryPool
         {
             if (!m_referenceCounting.ContainsKey(ID))
             {
-                ElementType element = CreateElement(ID, ReleaseElement);
+                ElementType element = CreateElement(ID);
                 m_referenceCounting.Add(ID, new ReferencePair() { Element = element, ReferenceCount = 0 });
                 Logger.Log(LogLevel.Detail, "Allocated memory for element \"{0}\".", element.ID);
             }
@@ -46,7 +45,7 @@ namespace XSLibrary.ThreadSafety.MemoryPool
             {
                 ReferencePair referencePair = m_referenceCounting[ID];
                 referencePair.ReferenceCount--;
-                if (referencePair.ReferenceCount <= 0)
+                if (referencePair.ReferenceCount == 0)
                 {
                     Logger.Log(LogLevel.Detail, "Released memory of element \"{0}\".", ID);
                     m_referenceCounting.Remove(ID);
@@ -54,6 +53,6 @@ namespace XSLibrary.ThreadSafety.MemoryPool
             });
         }
 
-        protected abstract ElementType CreateElement(Identifier ID, Action<Identifier> referenceCallback);
+        protected abstract ElementType CreateElement(Identifier ID);
     }
 }
