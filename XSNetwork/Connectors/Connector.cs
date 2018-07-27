@@ -95,7 +95,7 @@ namespace XSLibrary.Network.Connectors
 
                 Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 IAsyncResult result = socket.BeginConnect(remote, null, null);
-                bool success = result.AsyncWaitHandle.WaitOne(TimeoutConnect, true);
+                result.AsyncWaitHandle.WaitOne(TimeoutConnect, true);
 
                 if (!socket.Connected)
                 {
