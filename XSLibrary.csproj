@@ -91,6 +91,7 @@
     <Compile Include="XSNetwork\Connectors\AccountConnector.cs" />
     <Compile Include="XSNetwork\Connectors\Connector.cs" />
     <Compile Include="XSNetwork\Connectors\TCPConnector.cs" />
+    <Compile Include="XSNetwork\Registrations\IAccountPool.cs" />
     <Compile Include="XSNetwork\Registrations\IRegistration.cs" />
     <Compile Include="XSNetwork\Registrations\IUserAccount.cs" />
     <Compile Include="XSNetwork\Session.cs" />

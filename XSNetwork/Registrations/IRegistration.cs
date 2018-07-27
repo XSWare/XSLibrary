@@ -3,7 +3,6 @@ using System.Net.Sockets;
 using XSLibrary.Cryptography.ConnectionCryptos;
 using XSLibrary.Network.Acceptors;
 using XSLibrary.Network.Connections;
-using XSLibrary.ThreadSafety.MemoryPool;
 using XSLibrary.Utility;
 
 namespace XSLibrary.Network.Registrations
@@ -29,9 +28,9 @@ namespace XSLibrary.Network.Registrations
         public CryptoType Crypto { get; set; } = CryptoType.NoCrypto;
 
         private IAcceptor Accepter { get; set; }
-        private IMemoryPool<string, AccountType> Accounts { get; set; }
+        protected IAccountPool<AccountType> Accounts { get; private set; }
 
-        public IRegistration(TCPAcceptor accepter, IMemoryPool<string, AccountType> initialAccounts)
+        public IRegistration(TCPAcceptor accepter, IAccountPool<AccountType> initialAccounts)
         {
             Accepter = accepter;
             Accounts = initialAccounts;
