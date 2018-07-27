@@ -2,7 +2,7 @@
 
 namespace XSLibrary.Utility
 {
-    class MultiLogger : Logger
+    public class MultiLogger : Logger
     {
         public List<Logger> Logs { get; private set; }
 
