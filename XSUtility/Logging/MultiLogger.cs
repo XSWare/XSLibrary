@@ -1,21 +1,30 @@
-﻿using System.Collections.Generic;
+﻿using XSLibrary.ThreadSafety.Containers;
 
 namespace XSLibrary.Utility
 {
     public class MultiLogger : Logger
     {
-        public List<Logger> Logs { get; private set; }
+        public SafeList<Logger> Logs { get; private set; }
 
-        public MultiLogger() : this(new List<Logger>()) { }
-        public MultiLogger(List<Logger> logs)
+        public MultiLogger() : this(new SafeList<Logger>()) { }
+        public MultiLogger(SafeList<Logger> logs)
         {
             Logs = logs;
         }
 
         public override void Log(LogLevel logLevel, string text)
         {
-            foreach (Logger logger in Logs)
+            foreach (Logger logger in Logs.Entries)
                 logger.Log(logLevel, text);
+        }
+
+        public override void Dispose()
+        {
+            foreach (Logger logger in Logs.Entries)
+            {
+                if(Logs.Remove(logger))
+                    logger.Dispose();
+            }
         }
     }
 }
