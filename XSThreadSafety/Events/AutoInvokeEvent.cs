@@ -39,6 +39,11 @@ namespace XSLibrary.ThreadSafety.Events
             GetEventHandle(sender, args)?.Invoke(m_sender, m_eventArgs);
         }
 
+        public IEvent<Relay, Args> CreateRelay<Relay>(Relay sender)
+        {
+            return new EventRelay<Relay, Sender, Args>(sender, this);
+        }
+
         private EventHandle GetEventHandle(Sender sender, Args args)
         {
             return m_lock.Execute(() =>
