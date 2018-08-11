@@ -12,7 +12,7 @@ namespace XSLibrary.ThreadSafety.Events
         /// Handle will be invoked if the event was triggered in the past.
         /// <para>Unsubscribing happens automatically after the invocation and is redundant if done from the event handle.</para>
         /// </summary>
-        public override event EventHandle Event
+        public sealed override event EventHandle Event
         {
             add
             {
@@ -39,7 +39,7 @@ namespace XSLibrary.ThreadSafety.Events
             GetEventHandle(sender, args)?.Invoke(m_sender, m_eventArgs);
         }
 
-        public IEvent<Relay, Args> CreateRelay<Relay>(Relay sender)
+        public sealed override IEvent<Relay, Args> CreateRelay<Relay>(Relay sender)
         {
             return new EventRelay<Relay, Sender, Args>(sender, this);
         }
