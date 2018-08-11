@@ -57,14 +57,9 @@ namespace XSLibrary.Utility
             return m_timerOverflow;
         }
 
-        public static bool operator ==(OneShotTimer timer, bool val)
+        public static implicit operator bool (OneShotTimer timer)
         {
-            return timer.TimerOverflow() == val;
-        }
-
-        public static bool operator !=(OneShotTimer timer, bool val)
-        {
-            return timer != val;
+            return timer.TimerOverflow();
         }
         
         public override int GetHashCode()
