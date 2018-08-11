@@ -8,25 +8,20 @@ using XSLibrary.Utility;
 
 namespace XSLibrary.Network.Connections
 {
+    using OnDisconnectEvent = AutoInvokeEvent<object, EndPoint>;
+
     public class ConnectionException : Exception
     {
         public ConnectionException(string exceptionMessage) : this(exceptionMessage, null) { }
         public ConnectionException(string exceptionMessage, Exception innerException) : base(exceptionMessage, innerException) { }
     }
 
-    public class OnDisconnectEvent : AutoInvokeEvent<object, EndPoint> { }
-
     public abstract partial class IConnection : IDisposable
     {
         /// <summary>
         /// Can come from any thread so make your actions threadsafe
         /// </summary>
-        public event OnDisconnectEvent.EventHandle OnDisconnect
-        {
-            add { DisconnectHandle.Event += value; }
-            remove { DisconnectHandle.Event -= value; }
-        }
-
+        public IEvent<object, EndPoint> OnDisconnect { get { return DisconnectHandle; } }  
         private OnDisconnectEvent DisconnectHandle = new OnDisconnectEvent();
 
         public virtual Logger Logger { get; set; }
