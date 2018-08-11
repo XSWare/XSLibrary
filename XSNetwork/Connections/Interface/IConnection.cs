@@ -2,7 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 using XSLibrary.Cryptography.ConnectionCryptos;
-using XSLibrary.ThreadSafety;
+using XSLibrary.ThreadSafety.Events;
 using XSLibrary.ThreadSafety.Executors;
 using XSLibrary.Utility;
 
