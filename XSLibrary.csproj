@@ -103,6 +103,7 @@
     <Compile Include="XSThreadSafety\Containers\SafeList.cs" />
     <Compile Include="XSThreadSafety\Containers\SafeStack.cs" />
     <Compile Include="XSThreadSafety\Containers\SingleBuffer.cs" />
+    <Compile Include="XSThreadSafety\Events\EventRelay.cs" />
     <Compile Include="XSThreadSafety\Events\IEvent.cs" />
     <Compile Include="XSThreadSafety\Executors\RWExecutor.cs" />
     <Compile Include="XSThreadSafety\Executors\RWExecutorWinNative.cs" />
