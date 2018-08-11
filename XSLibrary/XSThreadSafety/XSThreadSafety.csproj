@@ -46,6 +46,9 @@
     <Compile Include="Containers\SafeStack.cs" />
     <Compile Include="Containers\SingleBuffer.cs" />
     <Compile Include="Containers\Queue.cs" />
+    <Compile Include="Events\AutoInvokeEvent.cs" />
+    <Compile Include="Events\EventRelay.cs" />
+    <Compile Include="Events\IEvent.cs" />
     <Compile Include="Executors\RWExecutorUnlimited.cs" />
     <Compile Include="Executors\RWExecutorLimited.cs" />
     <Compile Include="Executors\RWExecutorWinNative.cs" />
@@ -58,7 +61,6 @@
     <Compile Include="Locks\ILock.cs" />
     <Compile Include="Locks\UnleashSignal.cs" />
     <Compile Include="OneShotCondition.cs" />
-    <Compile Include="AutoInvokeEvent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
