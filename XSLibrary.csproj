@@ -94,7 +94,7 @@
     <Compile Include="XSNetwork\Registrations\IRegistration.cs" />
     <Compile Include="XSNetwork\Registrations\IUserAccount.cs" />
     <Compile Include="XSNetwork\Session.cs" />
-    <Compile Include="XSThreadSafety\AutoInvokeEvent.cs" />
+    <Compile Include="XSThreadSafety\Events\AutoInvokeEvent.cs" />
     <Compile Include="XSThreadSafety\CatchingThread.cs" />
     <Compile Include="XSThreadSafety\Containers\DataContainer.cs" />
     <Compile Include="XSThreadSafety\Containers\DataWrapper.cs" />

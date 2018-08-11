@@ -1,20 +1,18 @@
 ﻿using XSLibrary.ThreadSafety.Executors;
 
-namespace XSLibrary.ThreadSafety
+namespace XSLibrary.ThreadSafety.Events
 {
     /// <summary>
     /// Triggers if the event is invoked or was invoked before subscribing to it.
     /// <para> Can be accessed safely by multiple threads.</para>
     /// </summary>
-    public class AutoInvokeEvent<Sender, Args>
+    public class AutoInvokeEvent<Sender, Args> : IEvent<Sender, Args>
     {
-        public delegate void EventHandle(Sender sender, Args arguments);
-
         /// <summary>
         /// Handle will be invoked if the event was triggered in the past.
         /// <para>Unsubscribing happens automatically after the invocation and is redundant if done from the event handle.</para>
         /// </summary>
-        public event EventHandle Event
+        public override event EventHandle Event
         {
             add
             {
