@@ -4,11 +4,14 @@ using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Threading;
 using XSLibrary.Cryptography.ConnectionCryptos;
+using XSLibrary.ThreadSafety.Events;
 using XSLibrary.ThreadSafety.Executors;
 using XSLibrary.Utility;
 
 namespace XSLibrary.Network.Connections
 {
+    using OnDisconnectEvent = AutoInvokeEvent<object, IPEndPoint>;
+
     public class ConnectionException : Exception
     {
         public ConnectionException(string exceptionMessage) : this(exceptionMessage, null) { }
@@ -23,7 +26,9 @@ namespace XSLibrary.Network.Connections
         public delegate void CommunicationErrorHandler(object sender, IPEndPoint remote);
         public event CommunicationErrorHandler OnSendError;
         public event CommunicationErrorHandler OnReceiveError;
-        public event CommunicationErrorHandler OnDisconnect;     // can basically come from any thread so make your actions threadsafe
+        public IEvent<object, IPEndPoint> OnDisconnect { get { return DisconnectHandle; } }    // can basically come from any thread so make your actions threadsafe
+
+        OnDisconnectEvent DisconnectHandle = new OnDisconnectEvent();
 
         public int MaxReceiveSize { get; set; } = 2048;     // MTU usually limits this to ~1450
         // timeout in milliseconds
@@ -332,7 +337,7 @@ namespace XSLibrary.Network.Connections
 
         private void RaiseOnDisconnect()
         {
-            OnDisconnect?.Invoke(this, Remote);
+            DisconnectHandle?.Invoke(this, Remote);
         }
     }
 }
