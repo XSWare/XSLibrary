@@ -296,6 +296,7 @@ namespace XSLibrary.Network.Connections
                 WaitForDisconnect();
                 Logger.Log("Disconnected.");
                 RaiseOnDisconnect();
+                DataReceivedEvent = null;
             }
         }
 
