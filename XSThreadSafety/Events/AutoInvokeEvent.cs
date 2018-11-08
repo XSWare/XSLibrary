@@ -1,20 +1,18 @@
 ﻿using XSLibrary.ThreadSafety.Executors;
 
-namespace XSLibrary.ThreadSafety
+namespace XSLibrary.ThreadSafety.Events
 {
     /// <summary>
     /// Triggers if the event is invoked or was invoked before subscribing to it.
     /// <para> Can be accessed safely by multiple threads.</para>
     /// </summary>
-    public class AutoInvokeEvent<Sender, Args>
+    public class AutoInvokeEvent<Sender, Args> : IEvent<Sender, Args>
     {
-        public delegate void EventHandle(Sender sender, Args arguments);
-
         /// <summary>
         /// Handle will be invoked if the event was triggered in the past.
         /// <para>Unsubscribing happens automatically after the invocation and is redundant if done from the event handle.</para>
         /// </summary>
-        public event EventHandle Event
+        public sealed override event EventHandle Event
         {
             add
             {
@@ -39,6 +37,11 @@ namespace XSLibrary.ThreadSafety
         public void Invoke(Sender sender, Args args)
         {
             GetEventHandle(sender, args)?.Invoke(m_sender, m_eventArgs);
+        }
+
+        public sealed override IEvent<Relay, Args> CreateRelay<Relay>(Relay sender)
+        {
+            return new EventRelay<Relay, Sender, Args>(sender, this);
         }
 
         private EventHandle GetEventHandle(Sender sender, Args args)

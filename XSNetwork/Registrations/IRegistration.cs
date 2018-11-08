@@ -58,7 +58,7 @@ namespace XSLibrary.Network.Registrations
             }
 
             HandleVerifiedConnection(Accounts.GetElement(username), connection);
-            connection.OnDisconnect += (eventSender, arguments) => Accounts.ReleaseElement(username);
+            connection.OnDisconnect.Event += (eventSender, arguments) => Accounts.ReleaseElement(username);
         }
 
         protected abstract ConnectionType CreateConnection(Socket acceptedSocket);
