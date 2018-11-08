@@ -118,6 +118,7 @@
     <Compile Include="XSThreadSafety\MemoryPool\IMemoryTransparentElement.cs" />
     <Compile Include="XSThreadSafety\OneShotCondition.cs" />
     <Compile Include="XSUtility\HexStringConverter.cs" />
+    <Compile Include="XSUtility\Logging\FileLogger.cs" />
     <Compile Include="XSUtility\Logging\LambdaLogger.cs" />
     <Compile Include="XSUtility\Logging\Logger.cs" />
     <Compile Include="XSUtility\Logging\MultiLogger.cs" />
