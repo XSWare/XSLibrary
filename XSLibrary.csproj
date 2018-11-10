@@ -128,7 +128,7 @@
     <Compile Include="XSUtility\OneShotTimer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="XSUtility\ReoccuringForLoop.cs" />
-    <Compile Include="XSUtility\ThreadStarter.cs" />
+    <Compile Include="XSUtility\DebugTools.cs" />
     <Compile Include="XSUtility\TransparentFunctionWrapper.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

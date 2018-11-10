@@ -74,7 +74,7 @@ namespace XSLibrary.Network.Acceptors
         protected virtual void HandleAcceptedSocket(Socket acceptedSocket)
         {
             Logger.Log(LogLevel.Information, "Accepted connection from {0} on port {1}", acceptedSocket.RemoteEndPoint, Port);
-            ThreadStarter.ThreadpoolDebug("Socket init routine", () => RaiseClientConnectedEvent(acceptedSocket));
+            DebugTools.ThreadpoolStarter("Socket init routine", () => RaiseClientConnectedEvent(acceptedSocket));
         }
 
         private void RaiseClientConnectedEvent(Socket acceptedSocket)

@@ -25,9 +25,7 @@ namespace XSLibrary.Network.Acceptors
         {
             base.StartParallelLoops();
 
-            Thread reduce = new Thread(ReduceLoop);
-            reduce.Name = "Reduce loop";
-            reduce.Start();
+            DebugTools.ThreadpoolStarter("Reduce loop", ReduceLoop);
         }
 
         protected override void HandleAcceptedSocket(Socket acceptedSocket)

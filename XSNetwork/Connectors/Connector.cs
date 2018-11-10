@@ -51,7 +51,7 @@ namespace XSLibrary.Network.Connectors
 
             CurrentlyConnecting = true;
 
-            ThreadStarter.ThreadpoolDebug("Connector", () =>
+            DebugTools.ThreadpoolStarter("Connector", () =>
             {
                 if (ConnectInternal(remote, out ConnectionType connection))
                     SuccessCallback(connection);
