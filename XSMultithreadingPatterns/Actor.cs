@@ -6,7 +6,7 @@ namespace XSLibrary.MultithreadingPatterns.Actor
 {
     public abstract class Actor<MessageType>
     {
-        public Logger Logger { get; set; }
+        public Logger Logger { get; set; } = Logger.NoLog;
         public string ThreadName { get; private set; }
 
         SafeQueue<MessageType> m_queue = new SafeQueue<MessageType>();
@@ -15,9 +15,8 @@ namespace XSLibrary.MultithreadingPatterns.Actor
         bool m_abort;
         Semaphore m_creationLock = new Semaphore(1,1);
 
-        public Actor(string threadName) : this(Logger.NoLog, threadName) { }
-        public Actor() : this(Logger.NoLog) { }
-        public Actor(Logger logger, string threadName = "Actor")
+        public Actor(string threadName = "Actor") : this(Logger.NoLog, threadName) { }
+        public Actor(Logger logger, string threadName)
         {
             Logger = logger;
             ThreadName = threadName;
