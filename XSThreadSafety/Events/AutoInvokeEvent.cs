@@ -24,7 +24,7 @@ namespace XSLibrary.ThreadSafety.Events
 
         private event EventHandle InternalEvent;
 
-        private SafeExecutor m_lock = new SingleThreadExecutor();
+        private SafeReadWriteExecutor m_lock = new RWExecutorWinNative();
         private volatile bool m_invoked = false;
 
         Sender m_sender;
@@ -63,10 +63,10 @@ namespace XSLibrary.ThreadSafety.Events
         /// <returns>Returns true if subscription was successful and false if handle needs to be invoked immediately.</returns>
         private bool Subscribe(EventHandle handle)
         {
-            return m_lock.Execute(() =>
+            return m_lock.ExecuteRead(() =>
             {
                 if (!m_invoked)
-                    InternalEvent += handle;
+                    InternalEvent += handle;    // multiple readers can increment this simultaniously because the operation is threadsafe
 
                 return !m_invoked;
             });
