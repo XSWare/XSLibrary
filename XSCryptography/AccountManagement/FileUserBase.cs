@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using System.Security.Cryptography;
 using XSLibrary.Cryptography.PasswordHashes;
 using XSLibrary.Utility;
@@ -40,7 +39,7 @@ namespace XSLibrary.Cryptography.AccountManagement
         private string UserToString(AccountData user)
         {
             string passwordHash = HexStringConverter.ToString(user.PasswordHash);
-            string salt = new SoapHexBinary(user.Salt).ToString();
+            string salt = HexStringConverter.ToString(user.Salt);
             string difficulty = Convert.ToString(user.Difficulty);
             string accessLevel = Convert.ToString(user.AccessLevel);
             return string.Format("{0} {1} {2} {3} {4}", user.Username, passwordHash, salt, difficulty, accessLevel);
