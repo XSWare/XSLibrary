@@ -1,4 +1,4 @@
-﻿using System.Runtime.Remoting.Metadata.W3cXsd2001;
+﻿using System;
 
 namespace XSLibrary.Utility
 {
@@ -6,12 +6,16 @@ namespace XSLibrary.Utility
     {
         public static byte[] ToBytes(string hexString)
         {
-            return SoapHexBinary.Parse(hexString).Value;
+            int NumberChars = hexString.Length;
+            byte[] bytes = new byte[NumberChars / 2];
+            for (int i = 0; i < NumberChars; i += 2)
+                bytes[i / 2] = Convert.ToByte(hexString.Substring(i, 2), 16);
+            return bytes;
         }
 
         public static string ToString(byte[] hexBytes)
         {
-            return new SoapHexBinary(hexBytes).ToString();
+            return BitConverter.ToString(hexBytes).Replace("-", "");
         }
     }
 }
