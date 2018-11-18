@@ -79,5 +79,23 @@
 
             return value;
         }
+
+        public int[] ToArray()
+        {
+            int[] matrix = new int[StepCount * ElementCount];
+
+            for (int step = 0; step < StepCount; step++)
+            {
+                for (int element = 0; element < ElementCount; element++)
+                {
+                    if(element % 2 == 0)
+                        matrix[step * ElementCount + element] = PairMatrix[step][element / 2].ID1;
+                    else
+                        matrix[step * ElementCount + element] = PairMatrix[step][element / 2].ID2;
+                }
+            }
+
+            return matrix;
+        }
     }
 }
