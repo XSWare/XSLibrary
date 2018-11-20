@@ -6,6 +6,7 @@ namespace XSLibrary.MultithreadingPatterns.UniquePair
     {
         public delegate void PairCalculationFunction(ElementType element1, ElementType element2, GlobalDataType globalData);
 
+        public bool DataChanged { get; set; } = true;
         public abstract int CoreCount { get; }
 
         public abstract void SetCalculationFunction(PairCalculationFunction function);
