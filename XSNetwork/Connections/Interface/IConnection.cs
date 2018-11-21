@@ -8,7 +8,7 @@ using XSLibrary.Utility;
 
 namespace XSLibrary.Network.Connections
 {
-    using OnDisconnectEvent = AutoInvokeEvent<object, EndPoint>;
+    using OnDisconnectEvent = OneShotEvent<object, EndPoint>;
 
     public class ConnectionException : Exception
     {

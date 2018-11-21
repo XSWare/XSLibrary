@@ -1,6 +1,6 @@
 ﻿namespace XSLibrary.ThreadSafety.Events
 {
-    public class EventRelay<Relay, Sender, Args> : AutoInvokeEvent<Relay, Args>
+    public class EventRelay<Relay, Sender, Args> : OneShotEvent<Relay, Args>
     {
         public EventRelay(Relay sender, IEvent<Sender, Args> relayedEvent)
         {

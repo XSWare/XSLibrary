@@ -6,7 +6,7 @@ namespace XSLibrary.ThreadSafety.Events
     /// Triggers if the event is invoked or was invoked before subscribing to it.
     /// <para> Can be accessed safely by multiple threads.</para>
     /// </summary>
-    public class AutoInvokeEvent<Sender, Args> : IEvent<Sender, Args>
+    public class OneShotEvent<Sender, Args> : IEvent<Sender, Args>
     {
         /// <summary>
         /// Handle will be invoked if the event was triggered in the past.
@@ -25,7 +25,7 @@ namespace XSLibrary.ThreadSafety.Events
         private event EventHandle InternalEvent;
 
         private SafeReadWriteExecutor m_lock = new RWExecutorWinNative();
-        private volatile bool m_invoked = false;
+        private bool m_invoked = false;
 
         Sender m_sender;
         Args m_eventArgs;
