@@ -51,6 +51,11 @@ namespace XSLibrary.ThreadSafety.Containers
             m_safeExecutor.Execute(() => m_internalList.RemoveAt(index));
         }
 
+        public void TrimExcess()
+        {
+            m_safeExecutor.Execute(() => m_internalList.TrimExcess());
+        }
+
         public T this[int index]
         {
             get { return GetElement(index); }
