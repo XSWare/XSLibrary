@@ -21,6 +21,9 @@ namespace XSLibrary.MultithreadingPatterns.UniquePair
         {
             ElementCount = elements.Length;
 
+            if (ElementCount < 2)
+                return;
+
             int previouslyUsableCores = UsableCoreCount;
             UsableCoreCount = CalculateUsableCoreCount(ElementCount);
 
