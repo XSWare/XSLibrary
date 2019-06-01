@@ -34,6 +34,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Security" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -58,6 +59,7 @@
     <Compile Include="XSCryptography\ConnectionCryptos\RSALegacyCrypto.cs" />
     <Compile Include="XSCryptography\PasswordHashes\PasswordHash.cs" />
     <Compile Include="XSCryptography\PasswordHashes\SlowHashPBKDF2.cs" />
+    <Compile Include="XSCryptography\PasswordStorage\PasswordStorage.cs" />
     <Compile Include="XSMultithreadingPatterns\Actor.cs" />
     <Compile Include="XSMultithreadingPatterns\UniquePair\CalculationNodes\ActorNode.cs" />
     <Compile Include="XSMultithreadingPatterns\UniquePair\CalculationNodes\ActorPool.cs" />
