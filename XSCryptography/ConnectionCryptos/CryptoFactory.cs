@@ -6,6 +6,7 @@ namespace XSLibrary.Cryptography.ConnectionCryptos
     {
         NoCrypto,
         EC,
+        EC25519,
         RSA,
         RSALegacy
     }
@@ -24,6 +25,8 @@ namespace XSLibrary.Cryptography.ConnectionCryptos
                     return new RSALegacyCrypto(active);
                 case CryptoType.EC:
                     return new ECCrypto(active);
+                case CryptoType.EC25519:
+                    return new EC25519Crypto(active);
                 default:
                     throw new NotImplementedException();
             }

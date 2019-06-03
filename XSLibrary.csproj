@@ -32,6 +32,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Curve25519, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\RemoteControlClientWPF\packages\Curve25519.1.0.1\lib\net20\Curve25519.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Security" />
@@ -53,6 +56,8 @@
     <Compile Include="XSCryptography\BitManipulation\Structure.cs" />
     <Compile Include="XSCryptography\ConnectionCryptos\ConnectionCrypto.cs" />
     <Compile Include="XSCryptography\ConnectionCryptos\CryptoFactory.cs" />
+    <Compile Include="XSCryptography\ConnectionCryptos\EC25519.cs" />
+    <Compile Include="XSCryptography\ConnectionCryptos\EC25519Crypto.cs" />
     <Compile Include="XSCryptography\ConnectionCryptos\ECCrypto.cs" />
     <Compile Include="XSCryptography\ConnectionCryptos\NoCrypto.cs" />
     <Compile Include="XSCryptography\ConnectionCryptos\RSACrypto.cs" />
@@ -134,6 +139,9 @@
     <Compile Include="XSUtility\ReoccuringForLoop.cs" />
     <Compile Include="XSUtility\DebugTools.cs" />
     <Compile Include="XSUtility\TransparentFunctionWrapper.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
