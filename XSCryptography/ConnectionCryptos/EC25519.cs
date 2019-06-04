@@ -1,4 +1,4 @@
-﻿using Elliptic;
+﻿using XSLibrary.Cryptography.Algorithms;
 
 namespace XSLibrary.Cryptography.ConnectionCryptos
 {
@@ -21,4 +21,5 @@ namespace XSLibrary.Cryptography.ConnectionCryptos
             return Curve25519.GetSharedSecret(m_privateKey, peerPublicKey);
         }
     }
+
 }

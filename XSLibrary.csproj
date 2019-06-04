@@ -32,9 +32,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Curve25519, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\RemoteControlClientWPF\packages\Curve25519.1.0.1\lib\net20\Curve25519.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Security" />
@@ -49,6 +46,7 @@
     <Compile Include="XSCryptography\AccountManagement\FileUserBase.cs" />
     <Compile Include="XSCryptography\AccountManagement\IUserDataBase.cs" />
     <Compile Include="XSCryptography\AccountManagement\UserData.cs" />
+    <Compile Include="XSCryptography\Algorithms\Curve25519.cs" />
     <Compile Include="XSCryptography\BitManipulation\BitManipulation.cs" />
     <Compile Include="XSCryptography\BitManipulation\BitPosition.cs" />
     <Compile Include="XSCryptography\BitManipulation\Bits.cs" />
