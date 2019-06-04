@@ -138,8 +138,5 @@
     <Compile Include="XSUtility\DebugTools.cs" />
     <Compile Include="XSUtility\TransparentFunctionWrapper.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
