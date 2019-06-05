@@ -16,6 +16,24 @@ namespace XSLibrary.Cryptography.AccountManagement
             HashAlgorithm = CreateHashAlgorithm();
         }
 
+        protected abstract bool AddUserData(AccountData userData);
+        protected abstract AccountData GetAccount(string username);
+        protected abstract bool EraseAccountUnsafe(string username);
+        protected abstract bool IsCharacterAllowed(char character);
+        protected abstract string SanitizeData(string data);
+        protected abstract bool IsAccountExisting(string username, string contact);
+
+        protected virtual bool IsStringAllowed(string str)
+        {
+            foreach(char c in str)
+            {
+                if (!IsCharacterAllowed(c))
+                    return false;
+            }
+
+            return true;
+        }
+
         public bool AddAccount(AccountCreationData creationData)
         {
             return m_lock.Execute(() => AddAccountUnsafe(creationData));
@@ -23,7 +41,10 @@ namespace XSLibrary.Cryptography.AccountManagement
 
         private bool AddAccountUnsafe(AccountCreationData creationData)
         {
-            if (GetAccount(creationData.Username) != null)
+            if (creationData.Username.Length <= 0 || !IsStringAllowed(creationData.Username) || !IsStringAllowed(creationData.Contact))
+                return false;
+
+            if (IsAccountExisting(creationData.Username, creationData.Contact))
                 return false;
 
             byte[] salt = GenerateSalt(SaltLength);
@@ -33,7 +54,8 @@ namespace XSLibrary.Cryptography.AccountManagement
                 HashAlgorithm.Hash(creationData.Password, salt, Difficulty), 
                 salt, 
                 Difficulty, 
-                creationData.AccessLevel));
+                creationData.AccessLevel,
+                creationData.Contact));
         }
 
         public void ReplaceAccount(AccountCreationData creationData)
@@ -52,10 +74,6 @@ namespace XSLibrary.Cryptography.AccountManagement
             return m_lock.Execute(() => EraseAccountUnsafe(username));
         }
 
-        protected abstract bool AddUserData(AccountData userData);
-        protected abstract AccountData GetAccount(string username);
-        protected abstract bool EraseAccountUnsafe(string username);
-
         public bool ChangePassword(string username, byte[] oldPassword, byte[] newPassword)
         {
             return m_lock.Execute(() => ChangePasswordUnsafe(username, oldPassword, newPassword));
@@ -70,7 +88,7 @@ namespace XSLibrary.Cryptography.AccountManagement
             if (!ValidateHash(account, oldPassword))
                 return false;
 
-            AccountCreationData creationData = new AccountCreationData(username, newPassword, GetAccount(username).AccessLevel);
+            AccountCreationData creationData = new AccountCreationData(username, newPassword, GetAccount(username).AccessLevel, account.Contact);
             ReplaceAccountUnsafe(creationData);
             return true;
         }

@@ -22,9 +22,6 @@ namespace XSLibrary.Cryptography.AccountManagement
 
         protected override bool AddUserData(AccountData userData)
         {
-            if (userData.Username.Contains(" ") || userData.Username.Contains("\n"))
-                return false;
-
             System.IO.Directory.CreateDirectory(Directory);
 
             using (StreamWriter file = File.AppendText(FilePath))
@@ -42,7 +39,7 @@ namespace XSLibrary.Cryptography.AccountManagement
             string salt = HexStringConverter.ToString(user.Salt);
             string difficulty = Convert.ToString(user.Difficulty);
             string accessLevel = Convert.ToString(user.AccessLevel);
-            return string.Format("{0} {1} {2} {3} {4}", user.Username, passwordHash, salt, difficulty, accessLevel);
+            return string.Format("{0} {1} {2} {3} {4} {5}", user.Username, passwordHash, salt, difficulty, accessLevel, user.Contact);
         }
 
         protected override AccountData GetAccount(string username)
@@ -64,6 +61,25 @@ namespace XSLibrary.Cryptography.AccountManagement
             return null;
         }
 
+        protected override bool IsAccountExisting(string username, string contact)
+        {
+            System.IO.Directory.CreateDirectory(Directory);
+
+            if (!File.Exists(FilePath))
+                return false;
+
+            string[] lines = File.ReadAllLines(FilePath);
+
+            foreach (string userString in lines)
+            {
+                AccountData user = StringToUser(userString);
+                if (user.Username == username || user.Contact == contact)
+                    return true;
+            }
+
+            return false;
+        }
+
         private static AccountData StringToUser(string userString)
         {
             string[] split = userString.Split(' ');
@@ -72,8 +88,9 @@ namespace XSLibrary.Cryptography.AccountManagement
             byte[] salt = HexStringConverter.ToBytes(split[2]);
             int difficulty = Convert.ToInt32(split[3]);
             int accessLevel = Convert.ToInt32(split[4]);
+            string contact = split[5];
 
-            return new AccountData(username, passwordHash, salt, difficulty, accessLevel);
+            return new AccountData(username, passwordHash, salt, difficulty, accessLevel, contact);
         }
 
         private static string StringToUsername(string userString)
@@ -113,6 +130,16 @@ namespace XSLibrary.Cryptography.AccountManagement
         protected override PasswordHash CreateHashAlgorithm()
         {
             return new SlowHashPBKDF2();
+        }
+
+        protected override bool IsCharacterAllowed(char character)
+        {
+            return character != ' ' && character != '\n';
+        }
+
+        protected override string SanitizeData(string data)
+        {
+            return data;
         }
     }
 }
