@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
+using System.Threading;
 using XSLibrary.Cryptography.PasswordHashes;
 using XSLibrary.Utility;
 
@@ -49,7 +50,7 @@ namespace XSLibrary.Cryptography.AccountManagement
             if (!File.Exists(FilePath))
                 return null;
 
-            string[] lines = File.ReadAllLines(FilePath);
+            string[] lines = ReadFileBlocking(FilePath);
 
             foreach(string userString in lines)
             {
@@ -68,7 +69,7 @@ namespace XSLibrary.Cryptography.AccountManagement
             if (!File.Exists(FilePath))
                 return false;
 
-            string[] lines = File.ReadAllLines(FilePath);
+            string[] lines = ReadFileBlocking(FilePath);
 
             foreach (string userString in lines)
             {
@@ -78,6 +79,23 @@ namespace XSLibrary.Cryptography.AccountManagement
             }
 
             return false;
+        }
+
+        private string[] ReadFileBlocking(string filePath)
+        {
+            string[] result;
+
+            while (true)
+            {
+                try
+                {
+                    result = File.ReadAllLines(FilePath);
+                    break;
+                }
+                catch (IOException) { Thread.Sleep(100); }
+            }
+
+            return result;
         }
 
         private static AccountData StringToUser(string userString)
