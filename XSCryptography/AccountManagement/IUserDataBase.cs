@@ -19,6 +19,7 @@ namespace XSLibrary.Cryptography.AccountManagement
         protected abstract bool AddUserData(AccountData userData);
         protected abstract AccountData GetAccount(string username);
         protected abstract bool EraseAccountUnsafe(string username);
+        protected abstract void EraseAllAccountsUnsafe();
         protected abstract bool IsCharacterAllowed(char character);
         protected abstract string SanitizeData(string data);
         protected abstract bool IsAccountExisting(string username, string contact);
@@ -72,6 +73,14 @@ namespace XSLibrary.Cryptography.AccountManagement
         public bool EraseAccount(string username)
         {
             return m_lock.Execute(() => EraseAccountUnsafe(username));
+        }
+
+        /// <summary>
+        /// Carefull here, buddy.
+        /// </summary>
+        public void EraseAllAccounts()
+        {
+            m_lock.Execute(() => EraseAllAccountsUnsafe());
         }
 
         public bool ChangePassword(string username, byte[] oldPassword, byte[] newPassword)

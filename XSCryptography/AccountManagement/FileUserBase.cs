@@ -50,7 +50,7 @@ namespace XSLibrary.Cryptography.AccountManagement
             if (!File.Exists(FilePath))
                 return null;
 
-            string[] lines = ReadFileBlocking(FilePath);
+            string[] lines = ReadFileBlocking();
 
             foreach(string userString in lines)
             {
@@ -69,7 +69,7 @@ namespace XSLibrary.Cryptography.AccountManagement
             if (!File.Exists(FilePath))
                 return false;
 
-            string[] lines = ReadFileBlocking(FilePath);
+            string[] lines = ReadFileBlocking();
 
             foreach (string userString in lines)
             {
@@ -81,7 +81,7 @@ namespace XSLibrary.Cryptography.AccountManagement
             return false;
         }
 
-        private string[] ReadFileBlocking(string filePath)
+        private string[] ReadFileBlocking()
         {
             string[] result;
 
@@ -96,6 +96,19 @@ namespace XSLibrary.Cryptography.AccountManagement
             }
 
             return result;
+        }
+
+        private void WriteFileBlocking(string[] content)
+        {
+            while (true)
+            {
+                try
+                {
+                    File.WriteAllLines(FilePath, content);
+                    break;
+                }
+                catch (IOException) { Thread.Sleep(100); }
+            }
         }
 
         private static AccountData StringToUser(string userString)
@@ -119,11 +132,11 @@ namespace XSLibrary.Cryptography.AccountManagement
         protected override bool EraseAccountUnsafe(string username)
         {
             System.IO.Directory.CreateDirectory(Directory);
-            if (!File.Exists(FilePath))
+            if (!File.Exists(FilePath)) // this check may be thread safe but not "multiple application"-safe
                 return false;
 
             bool erased = false;
-            string[] lines = File.ReadAllLines(FilePath);
+            string[] lines = ReadFileBlocking();
 
             List<string> writeBack = new List<string>();
             foreach(string userString in lines)
@@ -134,8 +147,13 @@ namespace XSLibrary.Cryptography.AccountManagement
                     erased = true;
             }
 
-            File.WriteAllLines(FilePath, writeBack.ToArray());
+            WriteFileBlocking(writeBack.ToArray());
             return erased;
+        }
+
+        protected override void EraseAllAccountsUnsafe()
+        {
+            WriteFileBlocking(new string[0]);          
         }
 
         protected override byte[] GenerateSalt(int length)
