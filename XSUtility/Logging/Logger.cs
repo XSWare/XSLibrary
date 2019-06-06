@@ -32,6 +32,11 @@ namespace XSLibrary.Utility
                 LogMessage(text);
         }
 
+        public void Log(string text)
+        {
+            Log(LogLevel.Priority, text);
+        }
+
         protected virtual void LogMessage(string text) { }
 
         public virtual void Dispose()
