@@ -90,7 +90,7 @@
     <Compile Include="XSNetwork\Connections\Interface\IConnection.cs" />
     <Compile Include="XSNetwork\Connections\Interface\Receive.cs" />
     <Compile Include="XSNetwork\Connections\Interface\Send.cs" />
-    <Compile Include="XSNetwork\Connections\PackageParser.cs" />
+    <Compile Include="XSNetwork\Connections\PacketParser.cs" />
     <Compile Include="XSNetwork\Connections\TCPConnection.cs" />
     <Compile Include="XSNetwork\Connections\TCPPacketConnection.cs" />
     <Compile Include="XSNetwork\Connections\UDPConnection.cs" />

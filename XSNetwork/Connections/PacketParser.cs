@@ -5,7 +5,7 @@ namespace XSLibrary.Network.Connections
 {
     public partial class TCPPacketConnection : TCPConnection
     {
-        class PackageParser
+        class PacketParser
         {
             public int MaxPackageSize { get; set; }
 
@@ -19,13 +19,13 @@ namespace XSLibrary.Network.Connections
             byte[] currentData;
             int currentPos;
 
-            public PackageParser()
+            public PacketParser()
             {
                 NeedsFreshData = true;
                 PackageFinished = false;
             }
 
-            public byte[] GetPackage()
+            public byte[] GetPacket()
             {
                 if (!PackageFinished)
                     return null;
@@ -47,21 +47,21 @@ namespace XSLibrary.Network.Connections
                 NeedsFreshData = false;
             }
 
-            public void ParsePackage()
+            public void ParsePacket()
             {
                 if (NeedsFreshData)
                     return;
 
-                if (currentPackage == null && !CreatePackage())
+                if (currentPackage == null && !CreatePacket())
                 {
                     NeedsFreshData = true;
                     return;
                 }
 
-                FillPackage();
+                FillPacket();
             }
 
-            private void FillPackage()
+            private void FillPacket()
             {
                 int spacePackage = currentPackage.Length - currentPackagePos;
                 int currentDataLeft = currentData.Length - currentPos;
@@ -87,13 +87,9 @@ namespace XSLibrary.Network.Connections
                 }
             }
 
-            private bool CreatePackage()
+            private bool CreatePacket()
             {
-                ConsumeKeepAlives();
                 if (currentPos >= currentData.Length)
-                    return false;
-
-                if (!IsPacket())
                     return false;
 
                 int packetSize = ParseSize();
@@ -109,41 +105,15 @@ namespace XSLibrary.Network.Connections
                 return true;
             }
 
-            private void ConsumeKeepAlives()
-            {
-                while (currentPos < currentData.Length)
-                {
-                    if (IsKeepAlive())
-                    {
-                        currentPos += Header_Size_Total;
-                        Logger.Log(LogLevel.Detail, "Received keep alive.");
-                    }
-                    else
-                    {
-                        return;
-                    }
-                }
-            }
-
             int ParseSize()
             {
                 if (currentPos + Header_Size_Total > currentData.Length)
                     return -1;
 
-                return currentData[currentPos + Header_Size_ID]
-                    + (currentData[currentPos + Header_Size_ID + 1] << 8)
-                    + (currentData[currentPos + Header_Size_ID + 2] << 16)
-                    + (currentData[currentPos + Header_Size_ID + 3] << 24);
-            }
-
-            private bool IsKeepAlive()
-            {
-                return currentData[currentPos] == Header_ID_KeepAlive;
-            }
-
-            private bool IsPacket()
-            {
-                return currentData[currentPos] == Header_ID_Packet;
+                return currentData[currentPos]
+                    + (currentData[currentPos + 1] << 8)
+                    + (currentData[currentPos + 2] << 16)
+                    + (currentData[currentPos + 3] << 24);
             }
         }
     }
