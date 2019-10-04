@@ -52,25 +52,6 @@ namespace XSLibrary.Network.Connections
                 Logger.Log(LogLevel.Detail, "Sent keep alive.");
         }
 
-        public void StartKeepAliveLoop(int loopInterval, int checkInterval)
-        {
-            DebugTools.ThreadpoolStarter("Keep alive loop", () =>
-            {
-                int currentWaitTime = 0;
-                while (Connected)
-                {
-                    Thread.Sleep(checkInterval);
-
-                    currentWaitTime += checkInterval;
-                    if (currentWaitTime >= loopInterval)
-                    {
-                        currentWaitTime = 0;
-                        SendKeepAlive();
-                    }
-                }
-            });
-        }
-
         protected override bool ReceiveSpecialized(out byte[] data, out EndPoint source)
         {
             data = null;
