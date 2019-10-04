@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using XSLibrary.Utility;
 
 namespace XSLibrary.Network.Connections
@@ -49,6 +50,25 @@ namespace XSLibrary.Network.Connections
         {
             if(SafeSend(() => ConnectionSocket.Send(new byte[] { Header_ID_KeepAlive, 0, 0, 0, 0 })))
                 Logger.Log(LogLevel.Detail, "Sent keep alive.");
+        }
+
+        public void StartKeepAliveLoop(int loopInterval, int checkInterval)
+        {
+            DebugTools.ThreadpoolStarter("Keep alive loop", () =>
+            {
+                int currentWaitTime = 0;
+                while (Connected)
+                {
+                    Thread.Sleep(checkInterval);
+
+                    currentWaitTime += checkInterval;
+                    if (currentWaitTime >= loopInterval)
+                    {
+                        currentWaitTime = 0;
+                        SendKeepAlive();
+                    }
+                }
+            });
         }
 
         protected override bool ReceiveSpecialized(out byte[] data, out EndPoint source)
