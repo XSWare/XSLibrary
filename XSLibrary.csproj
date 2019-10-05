@@ -95,6 +95,7 @@
     <Compile Include="XSNetwork\Connections\TCPPacketConnection.cs" />
     <Compile Include="XSNetwork\Connections\UDPConnection.cs" />
     <Compile Include="XSNetwork\Connectors\AccountConnector.cs" />
+    <Compile Include="XSNetwork\AddressResolver.cs" />
     <Compile Include="XSNetwork\Connectors\Connector.cs" />
     <Compile Include="XSNetwork\Connectors\TCPConnector.cs" />
     <Compile Include="XSNetwork\Registrations\IAccountPool.cs" />
