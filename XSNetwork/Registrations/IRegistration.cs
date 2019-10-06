@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net.Sockets;
 using XSLibrary.Cryptography.ConnectionCryptos;
 using XSLibrary.Network.Acceptors;
 using XSLibrary.Network.Connections;
@@ -7,8 +6,7 @@ using XSLibrary.Utility;
 
 namespace XSLibrary.Network.Registrations
 {
-    public abstract class IRegistration<ConnectionType, AccountType> : IDisposable 
-        where ConnectionType : IConnection 
+    public abstract class IRegistration<AccountType> : IDisposable 
         where AccountType : IUserAccount
     {
         private Logger m_logger = Logger.NoLog;
@@ -18,7 +16,7 @@ namespace XSLibrary.Network.Registrations
             set
             {
                 m_logger = value;
-                Accepter.Logger = m_logger;
+                Acceptor.Logger = m_logger;
                 Accounts.Logger = m_logger;
             }
         }
@@ -27,28 +25,24 @@ namespace XSLibrary.Network.Registrations
         public int CryptoHandshakeTimeout { get; set; } = 5000;
         public CryptoType Crypto { get; set; } = CryptoType.NoCrypto;
 
-        private IAcceptor Accepter { get; set; }
+        private SecureAcceptor Acceptor { get; set; }
         protected IAccountPool<AccountType> Accounts { get; private set; }
 
-        protected IRegistration(TCPAcceptor accepter, IAccountPool<AccountType> initialAccounts)
+        protected IRegistration(SecureAcceptor acceptor, IAccountPool<AccountType> initialAccounts)
         {
-            Accepter = accepter;
+            Acceptor = acceptor;
             Accounts = initialAccounts;
         }
 
         public void Run()
         {
-            Accepter.ClientConnected += OnClientConnected;
-            Accepter.Run();
+            Acceptor.SecureConnectionEstablished += OnClientConnected;
+            Acceptor.Run();
         }
 
-        void OnClientConnected(object sender, Socket acceptedSocket)
-        {
-            ConnectionType connection = CreateConnection(acceptedSocket);
+        void OnClientConnected(object sender, TCPPacketConnection connection)
+        { 
             connection.Logger = Logger;
-
-            if (!connection.InitializeCrypto(CryptoFactory.CreateCrypto(Crypto, false), CryptoHandshakeTimeout))
-                return;
 
             if (!Authenticate(out string username, connection))
             {
@@ -61,15 +55,13 @@ namespace XSLibrary.Network.Registrations
             connection.OnDisconnect.Event += (eventSender, arguments) => Accounts.ReleaseElement(username);
         }
 
-        protected abstract ConnectionType CreateConnection(Socket acceptedSocket);
+        protected abstract bool Authenticate(out string username, TCPPacketConnection connection);
 
-        protected abstract bool Authenticate(out string username, ConnectionType connection);
-
-        protected abstract void HandleVerifiedConnection(AccountType user, ConnectionType clientConnection);
+        protected abstract void HandleVerifiedConnection(AccountType user, TCPPacketConnection clientConnection);
 
         public virtual void Dispose()
         {
-            Accepter.Dispose();
+            Acceptor.Dispose();
             Logger.Log(LogLevel.Detail, "Registration disposed.");
         }
     }
