@@ -16,6 +16,7 @@ namespace XSLibrary.Network.Connectors
         protected override TCPPacketConnection InitializeConnection(Socket connectedSocket)
         {
             TCPPacketConnection connection = new TCPPacketConnection(connectedSocket);
+            connection.Logger = Logger;
 
             Logger.Log(LogLevel.Information, MessageInitiatingHandshake);
             if (!connection.InitializeCrypto(CryptoFactory.CreateCrypto(Crypto, true), TimeoutCryptoHandshake))

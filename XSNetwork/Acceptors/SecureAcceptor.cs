@@ -14,11 +14,21 @@ namespace XSLibrary.Network.Acceptors
         public int CryptoHandshakeTimeout { get; set; } = 5000;
         public CryptoType Crypto { get; set; } = CryptoType.NoCrypto;
 
-        public Logger Logger { get; set; }
+        Logger m_logger;
+        public Logger Logger
+        {
+            get { return m_logger; }
+            set
+            {
+                m_logger = value;
+                Acceptor.Logger = value;
+            }
+        }
         TCPAcceptor Acceptor { get; set; }
 
         public SecureAcceptor(TCPAcceptor acceptor)
         {
+            m_logger = new NoLog();
             Acceptor = acceptor;
             Acceptor.ClientConnected += OnBaseAcceptorClientConnect;
         }
