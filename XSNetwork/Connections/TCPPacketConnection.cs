@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -128,7 +128,7 @@ namespace XSLibrary.Network.Connections
             success &= size > 0;
 
             if (success)
-                data = TrimData(buffer, size);
+                TrimData(ref data, size);
             else
                 data = null;
 

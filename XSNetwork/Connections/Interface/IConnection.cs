@@ -67,14 +67,12 @@ namespace XSLibrary.Network.Connections
             });
         }
 
-        protected byte[] TrimData(byte[] data, int size)
+        protected void TrimData(ref byte[] data, int size)
         {
             if (data.Length <= size)
-                return data;
+                return;
 
-            byte[] returnData = new byte[size];
-            Array.Copy(data, 0, returnData, 0, size);
-            return returnData;
+            Array.Resize(ref data, size);
         }
 
         public void Disconnect()

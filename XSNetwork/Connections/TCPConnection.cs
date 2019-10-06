@@ -35,7 +35,7 @@ namespace XSLibrary.Network.Connections
                 return false;
             }
 
-            data = TrimData(data, size);
+            TrimData(ref data, size);
             return true;
         }
     }

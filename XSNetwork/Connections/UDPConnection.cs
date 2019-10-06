@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Sockets;
 using XSLibrary.Utility;
 
@@ -55,7 +55,7 @@ namespace XSLibrary.Network.Connections
             do { size = ConnectionSocket.ReceiveFrom(data, ref source); }
             while (IsHolePunching(size));
 
-            data = TrimData(data, size);
+            TrimData(ref data, size);
             return true;
         }
 
