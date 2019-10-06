@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using XSLibrary.Utility;
 
 namespace XSLibrary.Network.Connections
@@ -18,6 +18,9 @@ namespace XSLibrary.Network.Connections
             int currentPackagePos;
             byte[] currentData;
             int currentPos;
+
+            byte[] headerLeftovers = new byte[Header_Size_Total];
+            int headerLeftoverSize = 0;
 
             public PackageParser()
             {
@@ -72,7 +75,7 @@ namespace XSLibrary.Network.Connections
                     Array.Copy(currentData, currentPos, currentPackage, currentPackagePos, spacePackage);
                     PackageFinished = true;
 
-                    currentPos += currentPackage.Length;
+                    currentPos += spacePackage;
 
                     if (currentPos == currentData.Length)   // package is full and data is empty -> get more data for next
                         NeedsFreshData = true;
@@ -98,9 +101,10 @@ namespace XSLibrary.Network.Connections
 
                 int packetSize = ParseSize();
                 if (packetSize < 0 || packetSize > MaxPackageSize)  // invalid package
+                {
+                    Logger.Log(LogLevel.Warning, "Received package has invalid size");
                     return false;
-
-                currentPos += Header_Size_Total;
+                }
 
                 PackageFinished = false;
                 currentPackage = new byte[packetSize];
@@ -127,13 +131,54 @@ namespace XSLibrary.Network.Connections
 
             int ParseSize()
             {
+                if (headerLeftoverSize > 0)
+                    return CombineHeaderLeftovers();
+
                 if (currentPos + Header_Size_Total > currentData.Length)
+                {
+                    StoreHeaderLeftovers();
+                    return -1;
+                }
+
+                int size = ReadSize(currentData, currentPos + Header_Size_ID);
+                currentPos += Header_Size_Total;
+                return size;
+            }
+
+            private int CombineHeaderLeftovers()
+            {
+                int availableDataSize = currentData.Length - currentPos;
+                if (availableDataSize == 0)
                     return -1;
 
-                return currentData[currentPos + Header_Size_ID]
-                    + (currentData[currentPos + Header_Size_ID + 1] << 8)
-                    + (currentData[currentPos + Header_Size_ID + 2] << 16)
-                    + (currentData[currentPos + Header_Size_ID + 3] << 24);
+                int requiredHeaderData = Header_Size_Total - headerLeftoverSize;
+
+                if (requiredHeaderData > availableDataSize)
+                {
+                    Array.Copy(currentData, currentPos, headerLeftovers, headerLeftoverSize, availableDataSize);
+                    return -1;
+                }
+                else
+                {
+                    Array.Copy(currentData, currentPos, headerLeftovers, headerLeftoverSize, requiredHeaderData);
+                    headerLeftoverSize = 0;
+                    currentPos += requiredHeaderData;
+                    return ReadSize(headerLeftovers, Header_Size_ID);
+                }
+            }
+
+            private void StoreHeaderLeftovers()
+            {
+                headerLeftoverSize = currentData.Length - currentPos;
+                Array.Copy(currentData, currentPos, headerLeftovers, 0, headerLeftoverSize);
+            }
+
+            private int ReadSize(byte[] data, int offset)
+            {
+                return data[offset]
+                    + (data[offset + 1] << 8)
+                    + (data[offset + 2] << 16)
+                    + (data[offset + 3] << 24);
             }
 
             private bool IsKeepAlive()
@@ -143,7 +188,15 @@ namespace XSLibrary.Network.Connections
 
             private bool IsPacket()
             {
-                return currentData[currentPos] == Header_ID_Packet;
+                return CheckHeaderLeftoversforPacketFlag() || currentData[currentPos] == Header_ID_Packet;
+            }
+
+            private bool CheckHeaderLeftoversforPacketFlag()
+            {
+                if (headerLeftoverSize <= 0)
+                    return false;
+
+                return headerLeftovers[0] == Header_ID_Packet;
             }
         }
     }
