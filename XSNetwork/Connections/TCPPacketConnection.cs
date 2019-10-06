@@ -111,9 +111,9 @@ namespace XSLibrary.Network.Connections
 
         private bool AsyncReceive(out byte[] data, int timeout)
         {
-            byte[] buffer = new byte[MaxReceiveSize];
+            data = new byte[MaxReceiveSize];
 
-            IAsyncResult receiveResult = ConnectionSocket.BeginReceive(buffer, 0, MaxReceiveSize, SocketFlags.None, null, null);
+            IAsyncResult receiveResult = ConnectionSocket.BeginReceive(data, 0, MaxReceiveSize, SocketFlags.None, null, null);
 
             bool success = false;
             if (timeout > 0)
