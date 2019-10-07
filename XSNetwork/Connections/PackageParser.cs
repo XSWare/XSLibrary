@@ -9,8 +9,8 @@ namespace XSLibrary.Network.Connections
         {
             public int MaxPackageSize { get; set; }
 
-            public bool NeedsFreshData { get; private set; }
-            public bool PackageFinished { get; private set; }
+            public bool NeedsFreshData { get { return currentData == null || currentPos == currentData.Length; } }
+            public bool PackageFinished { get { return currentPackage != null && currentPackagePos == currentPackage.Length; } }
 
             public Logger Logger { get; set; } = Logger.NoLog;
 
@@ -18,12 +18,6 @@ namespace XSLibrary.Network.Connections
             int currentPackagePos;
             byte[] currentData;
             int currentPos;
-
-            public PackageParser()
-            {
-                NeedsFreshData = true;
-                PackageFinished = false;
-            }
 
             public byte[] GetPacket(int packetSize, Func<byte[]> receive)
             {
@@ -48,7 +42,6 @@ namespace XSLibrary.Network.Connections
 
                 byte[] package = currentPackage;
                 currentPackage = null;
-                PackageFinished = false;
 
                 return package;
             }
@@ -60,7 +53,6 @@ namespace XSLibrary.Network.Connections
 
                 currentData = data;
                 currentPos = 0;
-                NeedsFreshData = false;
             }
 
             private void ParsePackage()
@@ -78,36 +70,24 @@ namespace XSLibrary.Network.Connections
             {
                 int spacePackage = currentPackage.Length - currentPackagePos;
                 int currentDataLeft = currentData.Length - currentPos;
-                int leftoverDataSize = currentDataLeft - spacePackage;
 
-                if (leftoverDataSize >= 0)  // enough data to fill the package
-                {
-                    Array.Copy(currentData, currentPos, currentPackage, currentPackagePos, spacePackage);
-                    PackageFinished = true;
+                WriteDataToPacket(Math.Min(currentDataLeft, spacePackage));
+            }
 
-                    currentPos += spacePackage;
-
-                    if (currentPos == currentData.Length)   // package is full and data is empty -> get more data for next
-                        NeedsFreshData = true;
-                }
-                else    // not enough data to fill package
-                {
-                    // insert rest of data into package and wait for fresh data
-                    Array.Copy(currentData, currentPos, currentPackage, currentPackagePos, currentDataLeft);
-                    currentPackagePos += currentDataLeft;
-
-                    NeedsFreshData = true;
-                }
+            private void WriteDataToPacket(int size)
+            {
+                Array.Copy(currentData, currentPos, currentPackage, currentPackagePos, size);
+                currentPos += size;
+                currentPackagePos += size;
             }
 
             public void CreatePacket(int packetSize)
             {
-                if (packetSize < 0 || packetSize > MaxPackageSize)  // invalid package
+                if (packetSize < 0 || packetSize > MaxPackageSize)
                     throw new ConnectionException(String.Format("Invalid packet size ({0} byte) detected!", packetSize));
 
                 currentPackage = new byte[packetSize];
                 currentPackagePos = 0;
-                PackageFinished = false;
             }
 
             private void ConsumeKeepAlives()
