@@ -19,19 +19,32 @@ namespace XSLibrary.Network.Connections
             byte[] currentData;
             int currentPos;
 
-            byte[] headerLeftovers = new byte[Header_Size_Total];
-            int headerLeftoverSize = 0;
-
             public PackageParser()
             {
                 NeedsFreshData = true;
                 PackageFinished = false;
             }
 
-            public byte[] GetPackage()
+            public byte[] GetPacket(int packetSize, Func<byte[]> receive)
+            {
+                ConsumeKeepAlives();
+                CreatePacket(packetSize);
+
+                while (!PackageFinished)
+                {
+                    if (NeedsFreshData)
+                        AddData(receive());
+
+                    ParsePackage();
+                }
+
+                return FinalizePacket();
+            }
+
+            private byte[] FinalizePacket()
             {
                 if (!PackageFinished)
-                    return null;
+                    throw new ConnectionException("Packet finalized prematurely!");
 
                 byte[] package = currentPackage;
                 currentPackage = null;
@@ -40,7 +53,7 @@ namespace XSLibrary.Network.Connections
                 return package;
             }
 
-            public void AddData(byte[] data)
+            private void AddData(byte[] data)
             {
                 if (!NeedsFreshData)
                     return;
@@ -50,16 +63,13 @@ namespace XSLibrary.Network.Connections
                 NeedsFreshData = false;
             }
 
-            public void ParsePackage()
+            private void ParsePackage()
             {
+                if (currentPackage == null)
+                    throw new ConnectionException("Trying to write data into uninitialized packet!");
+
                 if (NeedsFreshData)
                     return;
-
-                if (currentPackage == null && !CreatePackage())
-                {
-                    NeedsFreshData = true;
-                    return;
-                }
 
                 FillPackage();
             }
@@ -90,31 +100,21 @@ namespace XSLibrary.Network.Connections
                 }
             }
 
-            private bool CreatePackage()
+            public void CreatePacket(int packetSize)
             {
-                ConsumeKeepAlives();
-                if (currentPos >= currentData.Length)
-                    return false;
-
-                if (!IsPacket())
-                    return false;
-
-                int packetSize = ParseSize();
                 if (packetSize < 0 || packetSize > MaxPackageSize)  // invalid package
-                {
-                    Logger.Log(LogLevel.Warning, "Received package has invalid size");
-                    return false;
-                }
+                    throw new ConnectionException(String.Format("Invalid packet size ({0} byte) detected!", packetSize));
 
-                PackageFinished = false;
                 currentPackage = new byte[packetSize];
                 currentPackagePos = 0;
-
-                return true;
+                PackageFinished = false;
             }
 
             private void ConsumeKeepAlives()
             {
+                if (NeedsFreshData)
+                    return;
+                
                 while (currentPos < currentData.Length)
                 {
                     if (IsKeepAlive())
@@ -129,51 +129,7 @@ namespace XSLibrary.Network.Connections
                 }
             }
 
-            int ParseSize()
-            {
-                if (headerLeftoverSize > 0)
-                    return CombineHeaderLeftovers();
-
-                if (currentPos + Header_Size_Total > currentData.Length)
-                {
-                    StoreHeaderLeftovers();
-                    return -1;
-                }
-
-                int size = ReadSize(currentData, currentPos + Header_Size_ID);
-                currentPos += Header_Size_Total;
-                return size;
-            }
-
-            private int CombineHeaderLeftovers()
-            {
-                int availableDataSize = currentData.Length - currentPos;
-                if (availableDataSize == 0)
-                    return -1;
-
-                int requiredHeaderData = Header_Size_Total - headerLeftoverSize;
-
-                if (requiredHeaderData > availableDataSize)
-                {
-                    Array.Copy(currentData, currentPos, headerLeftovers, headerLeftoverSize, availableDataSize);
-                    return -1;
-                }
-                else
-                {
-                    Array.Copy(currentData, currentPos, headerLeftovers, headerLeftoverSize, requiredHeaderData);
-                    headerLeftoverSize = 0;
-                    currentPos += requiredHeaderData;
-                    return ReadSize(headerLeftovers, Header_Size_ID);
-                }
-            }
-
-            private void StoreHeaderLeftovers()
-            {
-                headerLeftoverSize = currentData.Length - currentPos;
-                Array.Copy(currentData, currentPos, headerLeftovers, 0, headerLeftoverSize);
-            }
-
-            private int ReadSize(byte[] data, int offset)
+            public static int ReadSize(byte[] data, int offset)
             {
                 return data[offset]
                     + (data[offset + 1] << 8)
@@ -184,19 +140,6 @@ namespace XSLibrary.Network.Connections
             private bool IsKeepAlive()
             {
                 return currentData[currentPos] == Header_ID_KeepAlive;
-            }
-
-            private bool IsPacket()
-            {
-                return CheckHeaderLeftoversforPacketFlag() || currentData[currentPos] == Header_ID_Packet;
-            }
-
-            private bool CheckHeaderLeftoversforPacketFlag()
-            {
-                if (headerLeftoverSize <= 0)
-                    return false;
-
-                return headerLeftovers[0] == Header_ID_Packet;
             }
         }
     }

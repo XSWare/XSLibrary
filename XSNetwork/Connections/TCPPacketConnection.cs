@@ -76,36 +76,54 @@ namespace XSLibrary.Network.Connections
             data = null;
             source = Remote;
 
-            OneShotTimer timeout = null;
+            OneShotTimer timeoutTimer = null;
             int receiveTimeout = ReceiveTimeout;   // copy to avoid race condition
             if (receiveTimeout > 0)
-                timeout = new OneShotTimer(receiveTimeout * 1000);
+                timeoutTimer = new OneShotTimer(receiveTimeout * 1000);
 
             Parser.MaxPackageSize = MaxPacketReceiveSize;
 
-            while (!Parser.PackageFinished)
+            Func<byte[]> receive = () =>
             {
-                if (Parser.NeedsFreshData)
-                {
-                    if(timeout == null) // no timeout
-                    {
-                        if (!AsyncReceive(out data, 0))
-                            return false;
-                    }
-                    else                // with timeout
-                    {
-                        int timeLeft = (int)timeout.TimeLeft.TotalMilliseconds;
-                        if (timeLeft <= 0 || !AsyncReceive(out data, timeLeft))
-                            return false;
-                    }
+                byte[] receivedChunk;
+                if (!TimedReceive(out receivedChunk, timeoutTimer))
+                    throw new ConnectionException(String.Format("Receive from {0} failed!", Remote));
 
-                    Parser.AddData(data);
-                }
+                return receivedChunk;
+            };
 
-                Parser.ParsePackage();
+            byte[] header = Parser.GetPacket(Header_Size_Total, receive);
+            data = Parser.GetPacket(GetPacketSize(header), receive);
+
+            return true;
+        }
+
+        private int GetPacketSize(byte[] header)
+        {
+            if (header.Length != Header_Size_Total)
+                throw new ConnectionException("Failed to parse header data!");
+
+            if (header[0] != Header_ID_Packet)
+                throw new ConnectionException("Packet flag in header is invalid!");
+
+            return PackageParser.ReadSize(header, 1);
+        }
+
+        private bool TimedReceive(out byte[] data, OneShotTimer timeoutTimer)
+        {
+            data = null;
+            if (timeoutTimer == null) // no timeout
+            {
+                if (!AsyncReceive(out data, 0))
+                    return false;
+            }
+            else                // with timeout
+            {
+                int timeLeft = (int)timeoutTimer.TimeLeft.TotalMilliseconds;
+                if (timeLeft <= 0 || !AsyncReceive(out data, timeLeft))
+                    return false;
             }
 
-            data = Parser.GetPackage();
             return true;
         }
 
