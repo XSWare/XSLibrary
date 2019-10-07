@@ -43,6 +43,11 @@ namespace XSLibrary.Network.Acceptors
             Acceptor.Run();
         }
 
+        public void Stop()
+        {
+            Acceptor.Stop();
+        }
+
         private void OnBaseAcceptorClientConnect(object sender, Socket acceptedSocket)
         {
             TCPPacketConnection connection = new TCPPacketConnection(acceptedSocket);
