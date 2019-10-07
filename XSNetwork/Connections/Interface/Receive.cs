@@ -110,24 +110,25 @@ namespace XSLibrary.Network.Connections
                 }
                 else
                 {
-                    ReceiveThread = null;
-                    Disconnect();
+                    ReceiveErrorHandling(Remote);
                 }
             }
             catch (SocketException)
             {
-                ReceiveThread = null;
                 ReceiveErrorHandling(Remote);
             }
             catch (ObjectDisposedException)
             {
-                ReceiveThread = null;
                 ReceiveErrorHandling(Remote);
             }
             catch (CryptographicException)
             {
                 Logger.Log(LogLevel.Error, "Decryption error!");
-                ReceiveThread = null;
+                ReceiveErrorHandling(Remote);
+            }
+            catch (ConnectionException ex)
+            {
+                Logger.Log(LogLevel.Error, ex.Message);
                 ReceiveErrorHandling(Remote);
             }
             finally { m_receiveLock.Release(); }
@@ -139,6 +140,7 @@ namespace XSLibrary.Network.Connections
 
         protected void ReceiveErrorHandling(EndPoint remote)
         {
+            ReceiveThread = null;
             Disconnect();
         }
 
