@@ -9,7 +9,7 @@ namespace XSLibrary.Network.Connections
     public partial class TCPPacketConnection : TCPConnection
     {
         // this includes any cryptographic overhead as well so consider this while deciding its value
-        public int MaxPackageReceiveSize { get; set; } = 2048;
+        public int MaxPacketReceiveSize { get; set; } = 2048;
 
         const byte Header_ID_Packet = 0x00;
         const byte Header_ID_KeepAlive = 0x01;
@@ -81,7 +81,7 @@ namespace XSLibrary.Network.Connections
             if (receiveTimeout > 0)
                 timeout = new OneShotTimer(receiveTimeout * 1000);
 
-            Parser.MaxPackageSize = MaxPackageReceiveSize;
+            Parser.MaxPackageSize = MaxPacketReceiveSize;
 
             while (!Parser.PackageFinished)
             {
