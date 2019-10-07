@@ -13,7 +13,7 @@ namespace XSLibrary.Network.Connections
         public delegate void DataReceivedHandler(object sender, byte[] data, EndPoint source);
         public event DataReceivedHandler DataReceivedEvent;
 
-        public int MaxReceiveSize { get; set; } = 2048;     // MTU usually limits this to ~1450
+        public int ReceiveBufferSize { get; set; } = 2048;  // increase to have better performance for big data chunks with the cost of using more RAM
         public int ReceiveTimeout
         {
             get { return ConnectionSocket.ReceiveTimeout; }
