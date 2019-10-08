@@ -48,7 +48,7 @@ namespace XSLibrary.Network.Connections
 
         public void SendKeepAlive()
         {
-            if(SafeSend(() => ConnectionSocket.Send(new byte[] { Header_ID_KeepAlive, 0, 0, 0, 0 })))
+            if (SafeSend(() => ConnectionSocket.Send(new byte[] { Header_ID_KeepAlive, 0, 0, 0, 0 })))
                 Logger.Log(LogLevel.Detail, "Sent keep alive.");
         }
 
