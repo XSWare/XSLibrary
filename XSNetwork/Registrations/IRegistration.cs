@@ -47,7 +47,7 @@ namespace XSLibrary.Network.Registrations
             if (!Authenticate(out string username, connection))
             {
                 Logger.Log(LogLevel.Error, "Authentication failed from {0}", connection.Remote);
-                connection.Disconnect();
+                connection.Kill();
                 return;
             }
 

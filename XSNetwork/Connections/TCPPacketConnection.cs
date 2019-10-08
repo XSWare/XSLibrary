@@ -167,7 +167,8 @@ namespace XSLibrary.Network.Connections
                 ConnectionSocket.Dispose();
 
             int size = ConnectionSocket.EndReceive(receiveResult);
-            success &= size > 0;
+            if (size <= 0)
+                throw new DisconnectedGracefullyException();
 
             if (success)
                 TrimData(ref data, size);

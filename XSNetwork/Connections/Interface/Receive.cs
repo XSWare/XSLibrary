@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
@@ -10,6 +10,8 @@ namespace XSLibrary.Network.Connections
 {
     public abstract partial class IConnection
     {
+        protected class DisconnectedGracefullyException : Exception { }
+
         public delegate void DataReceivedHandler(object sender, byte[] data, EndPoint source);
         public event DataReceivedHandler DataReceivedEvent;
 
@@ -33,7 +35,7 @@ namespace XSLibrary.Network.Connections
         {
             if (m_disconnecting)
             {
-                Logger.Log(Utility.LogLevel.Error, "Can not start receiving from a disconnected connection!");
+                Logger.Log(LogLevel.Error, "Can not start receiving from a disconnected connection!");
                 return;
             }
 
@@ -127,6 +129,10 @@ namespace XSLibrary.Network.Connections
                 Logger.Log(LogLevel.Error, ex.Message);
                 ReceiveErrorHandling(Remote);
             }
+            catch (DisconnectedGracefullyException)
+            {
+                ReceiveErrorHandling(Remote);
+            }
             finally { m_receiveLock.Release(); }
 
             return false;
@@ -137,7 +143,7 @@ namespace XSLibrary.Network.Connections
         protected void ReceiveErrorHandling(EndPoint remote)
         {
             ReceiveThread = null;
-            Disconnect();
+            Kill();
         }
 
         private void RaiseReceivedEvent(byte[] data, EndPoint source)
@@ -146,9 +152,12 @@ namespace XSLibrary.Network.Connections
             DataReceivedEvent?.Invoke(this, data, source);
         }
 
-        protected virtual void WaitReceiveThread()
+        protected virtual void WaitReceiveThread(int timeout = 0)
         {
-            ReceiveThread?.Join();
+            if (timeout <= 0)
+                ReceiveThread?.Join();
+            else
+                ReceiveThread?.Join(timeout);
         }
     }
 }

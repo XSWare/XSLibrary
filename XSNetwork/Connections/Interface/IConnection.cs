@@ -21,7 +21,7 @@ namespace XSLibrary.Network.Connections
         /// <summary>
         /// Can come from any thread so make your actions threadsafe
         /// </summary>
-        public IEvent<object, EndPoint> OnDisconnect { get { return DisconnectHandle; } }  
+        public IEvent<object, EndPoint> OnDisconnect { get { return DisconnectHandle; } }
         private OnDisconnectEvent DisconnectHandle = new OnDisconnectEvent();
 
         public virtual Logger Logger { get; set; }
@@ -75,41 +75,72 @@ namespace XSLibrary.Network.Connections
             Array.Resize(ref data, size);
         }
 
-        public void Disconnect()
+        public void Kill()
         {
-            if(m_connectLock.Execute(CloseSocket))
+            Disconnect(0);
+        }
+
+        // timeout is in milliseconds and signals how much time the peer has to finish their cleanup of the connection
+        public void Disconnect(int timeout = 10000)
+        {
+            bool soft = timeout > 0;
+
+            if (m_connectLock.Execute(() =>
+             {
+                 if (!m_disconnecting)
+                 {
+                     m_disconnecting = true;
+
+                     ShutdownSocket();
+                     if (!soft)
+                         CloseSocket();
+
+                     return true;
+                 }
+
+                 return false;
+             }))
             {
-                WaitReceiveThread();
+                WaitReceiveThread(timeout);
+                if(soft)
+                    m_connectLock.Execute(CloseSocket);
                 Logger.Log(LogLevel.Information, "Disconnected from {0}.", Remote.ToString());
                 RaiseOnDisconnect();
             }
         }
 
-        private bool CloseSocket()
+        private void ShutdownSocket()
         {
-            if (!m_disconnecting)
+            try
             {
-                m_disconnecting = true;
-
-                try
-                {
-                    ConnectionSocket.Shutdown(SocketShutdown.Both);
-                    ConnectionSocket.Close();
-                }
-                catch (SocketException ex)
-                {
-                    Logger.Log(LogLevel.Error, ex.Message);
-                }
-                catch (ObjectDisposedException) { }
-                catch (Exception ex)
-                {
-                    throw new ConnectionException("Exception while disconnecting! Exception message: " + ex.Message, ex);
-                }
-
-                return true;
+                ConnectionSocket.Shutdown(SocketShutdown.Both);
             }
+            catch (SocketException ex)
+            {
+                Logger.Log(LogLevel.Error, ex.Message);
+            }
+            catch (ObjectDisposedException) { }
+            catch (Exception ex)
+            {
+                throw new ConnectionException("Exception while shutting down socket! Exception message: " + ex.Message, ex);
+            }
+        }
 
-            return false;
+        private void CloseSocket()
+        {
+            try
+            {
+                ConnectionSocket.Close();
+            }
+            catch (SocketException ex)
+            {
+                Logger.Log(LogLevel.Error, ex.Message);
+            }
+            catch (ObjectDisposedException) { }
+            catch (Exception ex)
+            {
+                throw new ConnectionException("Exception while closing socket! Exception message: " + ex.Message, ex);
+            }
         }
 
         private void RaiseOnDisconnect()
@@ -119,7 +150,7 @@ namespace XSLibrary.Network.Connections
 
         public void Dispose()
         {
-            Disconnect();
+            Kill();
         }
     }
 }
