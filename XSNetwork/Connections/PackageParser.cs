@@ -21,7 +21,6 @@ namespace XSLibrary.Network.Connections
 
             public byte[] GetPacket(int packetSize, Func<byte[]> receive)
             {
-                ConsumeKeepAlives();
                 CreatePacket(packetSize);
 
                 while (!PackageFinished)
@@ -88,38 +87,6 @@ namespace XSLibrary.Network.Connections
 
                 currentPackage = new byte[packetSize];
                 currentPackagePos = 0;
-            }
-
-            private void ConsumeKeepAlives()
-            {
-                if (NeedsFreshData)
-                    return;
-                
-                while (currentPos < currentData.Length)
-                {
-                    if (IsKeepAlive())
-                    {
-                        currentPos += Header_Size_Total;
-                        Logger.Log(LogLevel.Detail, "Received keep alive.");
-                    }
-                    else
-                    {
-                        return;
-                    }
-                }
-            }
-
-            public static int ReadSize(byte[] data, int offset)
-            {
-                return data[offset]
-                    + (data[offset + 1] << 8)
-                    + (data[offset + 2] << 16)
-                    + (data[offset + 3] << 24);
-            }
-
-            private bool IsKeepAlive()
-            {
-                return currentData[currentPos] == Header_ID_KeepAlive;
             }
         }
     }

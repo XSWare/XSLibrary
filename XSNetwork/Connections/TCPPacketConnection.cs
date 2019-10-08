@@ -92,21 +92,45 @@ namespace XSLibrary.Network.Connections
                 return receivedChunk;
             };
 
-            byte[] header = Parser.GetPacket(Header_Size_Total, receive);
-            data = Parser.GetPacket(GetPacketSize(header), receive);
+            byte[] header;
+            header = Parser.GetPacket(Header_Size_Total, receive);
+            while (IsKeepAlive(header))   // consume keep alives
+            {
+                Logger.Log(LogLevel.Detail, "Received keep alive.");
+                header = Parser.GetPacket(Header_Size_Total, receive);
+            }
 
+            data = Parser.GetPacket(GetPacketSize(header), receive);
             return true;
+        }
+
+        private bool IsKeepAlive(byte[] header)
+        {
+            return IsHeader(header) && header[0] == Header_ID_KeepAlive; 
         }
 
         private int GetPacketSize(byte[] header)
         {
-            if (header.Length != Header_Size_Total)
+            if (!IsHeader(header))
                 throw new ConnectionException("Failed to parse header data!");
 
             if (header[0] != Header_ID_Packet)
                 throw new ConnectionException("Packet flag in header is invalid!");
 
-            return PackageParser.ReadSize(header, 1);
+            return ReadSize(header, 1);
+        }
+
+        private bool IsHeader(byte[] data)
+        {
+            return data.Length == Header_Size_Total;
+        }
+
+        private int ReadSize(byte[] header, int offset)
+        {
+            return header[offset]
+                + (header[offset + 1] << 8)
+                + (header[offset + 2] << 16)
+                + (header[offset + 3] << 24);
         }
 
         private bool TimedReceive(out byte[] data, OneShotTimer timeoutTimer)
