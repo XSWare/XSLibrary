@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
@@ -80,13 +80,7 @@ namespace XSLibrary.Network.Connections
         public bool Receive(out byte[] data, out EndPoint source) { return Receive(out data, out source, -1); }
         public bool Receive(out byte[] data, out EndPoint source, int timeout)
         {
-            if (SafeReceive(out data, out source, timeout))
-            {
-                data = Crypto.DecryptData(data);
-                return true;
-            }
-            else
-                return false;
+             return SafeReceive(out data, out source, timeout);
         }
 
         private bool SafeReceive(out byte[] data, out EndPoint source, int timeout = -1)
@@ -106,6 +100,8 @@ namespace XSLibrary.Network.Connections
                 {
                     if (timeout > -1)
                         ConnectionSocket.ReceiveTimeout = receiveTimeout;
+
+                    data = Crypto.DecryptData(data);
                     return true;
                 }
                 else
