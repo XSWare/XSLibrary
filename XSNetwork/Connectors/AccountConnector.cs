@@ -21,9 +21,10 @@ namespace XSLibrary.Network.Connectors
         {
             TCPPacketConnection connection = base.InitializeConnection(connectedSocket);
 
-            Logger.Log(LogLevel.Information, MessageInitiatingAuthentication);
             if (!connection.Send(Encoding.ASCII.GetBytes(Login), TimeoutAuthentication))
                 HandleAuthenticationFailure();
+
+            Logger.Log(LogLevel.Information, MessageInitiatingAuthentication);
 
             if (!connection.Receive(out byte[] data, out EndPoint source, TimeoutAuthentication) || Encoding.ASCII.GetString(data) != SuccessResponse)
                 HandleAuthenticationFailure();
