@@ -1,14 +1,14 @@
-﻿using System;
+using System;
 using System.Net;
 using System.Net.Sockets;
 using XSLibrary.Utility;
 
 namespace XSLibrary.Network.Connections
 {
-    public partial class TCPPacketConnection : TCPConnection
+    public class TCPPacketConnection : TCPConnection
     {
         // this includes any cryptographic overhead as well so consider this while deciding its value
-        public int MaxPackageReceiveSize { get; set; } = 2048;
+        public int MaxPacketReceiveSize { get; set; } = 2048;
 
         const int Header_Size_PacketLength = 4;
         const int Header_Size_Total = Header_Size_PacketLength;
@@ -20,6 +20,7 @@ namespace XSLibrary.Network.Connections
         }
 
         PacketParser Parser = new PacketParser();
+        OneShotTimer TimeoutTimer = null;
 
         public TCPPacketConnection(Socket socket)
             : base(socket)
@@ -46,44 +47,101 @@ namespace XSLibrary.Network.Connections
             data = null;
             source = Remote;
 
-            OneShotTimer timeout = null;
-            int receiveTimeout = ReceiveTimeout;   // copy to avoid race condition
-            if (receiveTimeout > 0)
-                timeout = new OneShotTimer(receiveTimeout * 1000);
+            StartTimeoutTimer();
 
-            Parser.MaxPackageSize = MaxPackageReceiveSize;
-
-            while (!Parser.PackageFinished)
+            try
             {
-                if (Parser.NeedsFreshData)
-                {
-                    if(timeout == null) // no timeout
-                    {
-                        if (!AsyncReceive(out data, 0))
-                            return false;
-                    }
-                    else                // with timeout
-                    {
-                        int timeLeft = (int)timeout.TimeLeft.TotalMilliseconds;
-                        if (timeLeft <= 0 || !AsyncReceive(out data, timeLeft))
-                            return false;
-                    }
+                byte[] header = GetPacketHeader();
 
-                    Parser.AddData(data);
-                }
+                int packetSize = GetPacketSize(header);
+                if (packetSize > MaxPacketReceiveSize)
+                    throw new ConnectionException(String.Format("Packet size exceeded from {0}!", Remote));
 
-                Parser.ParsePacket();
+                data = Parser.GetPacket(packetSize, TimedReceive);
             }
+            catch (PacketParser.PacketException ex) { throw new ConnectionException(ex.Message); }
 
-            data = Parser.GetPacket();
             return true;
         }
 
-        private bool AsyncReceive(out byte[] data, int timeout)
+        private void StartTimeoutTimer()
         {
-            byte[] buffer = new byte[MaxReceiveSize];
+            TimeoutTimer = null;
+            int receiveTimeout = ReceiveTimeout;   // copy to avoid race condition
+            if (receiveTimeout > 0)
+                TimeoutTimer = new OneShotTimer(receiveTimeout * 1000);
+        }
 
-            IAsyncResult receiveResult = ConnectionSocket.BeginReceive(buffer, 0, MaxReceiveSize, SocketFlags.None, null, null);
+        private byte[] GetPacketHeader()
+        {
+            byte[] header;
+            header = Parser.GetPacket(Header_Size_Total, TimedReceive);
+            while (IsKeepAlive(header))   // consume keep alives
+            {
+                Logger.Log(LogLevel.Detail, "Received keep alive.");
+                header = Parser.GetPacket(Header_Size_Total, TimedReceive);
+            }
+
+            return header;
+        }
+
+        private bool IsKeepAlive(byte[] header)
+        {
+            return IsHeader(header) && header[0] == Header_ID_KeepAlive; 
+        }
+
+        private int GetPacketSize(byte[] header)
+        {
+            if (!IsHeader(header))
+                throw new ConnectionException("Failed to parse header data!");
+
+            if (header[0] != Header_ID_Packet)
+                throw new ConnectionException("Packet flag in header is invalid!");
+
+            return ReadSize(header, 1);
+        }
+
+        private bool IsHeader(byte[] data)
+        {
+            return data.Length == Header_Size_Total;
+        }
+
+        private int ReadSize(byte[] header, int offset)
+        {
+            return header[offset]
+                + (header[offset + 1] << 8)
+                + (header[offset + 2] << 16)
+                + (header[offset + 3] << 24);
+        }
+
+        private byte[] TimedReceive()
+        {
+            int size;
+            byte[] data = null;
+            if (TimeoutTimer != null)   // with timeout
+            {
+                int timeLeft = (int)TimeoutTimer.TimeLeft.TotalMilliseconds;
+                if (timeLeft <= 0)
+                    throw new ConnectionException(String.Format("Timeout while receiving from {0}!", Remote));
+
+                size = AsyncReceive(out data, timeLeft);
+            }
+            else                        // no timeout
+                size = AsyncReceive(out data, 0);
+
+            if(size == 0)
+                throw new DisconnectedGracefullyException();
+            else if(size < 0)
+                throw new ConnectionException(String.Format("Receive from {0} failed!", Remote));
+
+            return data;
+        }
+
+        private int AsyncReceive(out byte[] data, int timeout)
+        {
+            data = new byte[ReceiveBufferSize];
+
+            IAsyncResult receiveResult = ConnectionSocket.BeginReceive(data, 0, ReceiveBufferSize, SocketFlags.None, null, null);
 
             bool success = false;
             if (timeout > 0)
@@ -92,17 +150,20 @@ namespace XSLibrary.Network.Connections
                 success = receiveResult.AsyncWaitHandle.WaitOne();
 
             if (!success)
+            {
+                data = null;
                 ConnectionSocket.Dispose();
+                return -1;
+            }
 
             int size = ConnectionSocket.EndReceive(receiveResult);
-            success &= size > 0;
 
-            if (success)
-                data = TrimData(buffer, size);
+            if (size > 0)
+                TrimData(ref data, size);
             else
                 data = null;
 
-            return success;
+            return size;
         }
     }
 }

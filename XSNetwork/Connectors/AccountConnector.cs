@@ -8,26 +8,18 @@ using XSLibrary.Utility;
 
 namespace XSLibrary.Network.Connectors
 {
-    public class AccountConnector : Connector<TCPPacketConnection>
+    public class AccountConnector : SecureConnector
     {
-        public static string MessageInitiatingHandshake { get; set; } = "Encrypting connection...";
-        public static string MessageHandshakeFailed { get; set; } = "Handshake failed.";
         public static string MessageInitiatingAuthentication { get; set; } = "Authenticating...";
         public static string MessageAuthenticationFailed = "Authentication failed.";
 
-        public CryptoType Crypto { get; set; } = CryptoType.NoCrypto;
-        public int TimeoutCryptoHandshake { get; set; } = 5000;
         public int TimeoutAuthentication { get; set; } = 5000;
         public string Login { get; set; } = "";
         public string SuccessResponse { get; set; } = "+";
 
         protected override TCPPacketConnection InitializeConnection(Socket connectedSocket)
         {
-            TCPPacketConnection connection = new TCPPacketConnection(connectedSocket);
-
-            Logger.Log(LogLevel.Information, MessageInitiatingHandshake);
-            if (!connection.InitializeCrypto(CryptoFactory.CreateCrypto(Crypto, true), TimeoutCryptoHandshake))
-                throw new ConnectException(MessageHandshakeFailed);
+            TCPPacketConnection connection = base.InitializeConnection(connectedSocket);
 
             Logger.Log(LogLevel.Information, MessageInitiatingAuthentication);
             if (!connection.Send(Encoding.ASCII.GetBytes(Login), TimeoutAuthentication))

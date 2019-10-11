@@ -85,7 +85,7 @@ namespace XSLibrary.Network.Connections
 
         protected void SendErrorHandling(EndPoint remote)
         {
-            Disconnect();
+            Kill();
         }
     }
 }

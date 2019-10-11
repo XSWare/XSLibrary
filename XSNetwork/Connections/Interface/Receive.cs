@@ -10,10 +10,12 @@ namespace XSLibrary.Network.Connections
 {
     public abstract partial class IConnection
     {
+        protected class DisconnectedGracefullyException : Exception { }
+
         public delegate void DataReceivedHandler(object sender, byte[] data, EndPoint source);
         public event DataReceivedHandler DataReceivedEvent;
 
-        public int MaxReceiveSize { get; set; } = 2048;     // MTU usually limits this to ~1450
+        public int ReceiveBufferSize { get; set; } = 2048;  // increase to have better performance for big data chunks with the cost of using more RAM
         public int ReceiveTimeout
         {
             get { return ConnectionSocket.ReceiveTimeout; }
@@ -33,7 +35,7 @@ namespace XSLibrary.Network.Connections
         {
             if (m_disconnecting)
             {
-                Logger.Log(Utility.LogLevel.Error, "Can not start receiving from a disconnected connection!");
+                Logger.Log(LogLevel.Error, "Can not start receiving from a disconnected connection!");
                 return;
             }
 
@@ -71,7 +73,7 @@ namespace XSLibrary.Network.Connections
             while (!m_disconnecting)
             {
                 if (SafeReceive(out byte[] data, out EndPoint source))
-                    RaiseReceivedEvent(Crypto.DecryptData(data), source);
+                    RaiseReceivedEvent(data, source);
             }
 
             Receiving = false;
@@ -80,13 +82,7 @@ namespace XSLibrary.Network.Connections
         public bool Receive(out byte[] data, out EndPoint source) { return Receive(out data, out source, -1); }
         public bool Receive(out byte[] data, out EndPoint source, int timeout)
         {
-            if (SafeReceive(out data, out source, timeout))
-            {
-                data = Crypto.DecryptData(data);
-                return true;
-            }
-            else
-                return false;
+             return SafeReceive(out data, out source, timeout);
         }
 
         private bool SafeReceive(out byte[] data, out EndPoint source, int timeout = -1)
@@ -106,28 +102,35 @@ namespace XSLibrary.Network.Connections
                 {
                     if (timeout > -1)
                         ConnectionSocket.ReceiveTimeout = receiveTimeout;
+
+                    data = Crypto.DecryptData(data);
                     return true;
                 }
                 else
                 {
-                    ReceiveThread = null;
-                    Disconnect();
+                    ReceiveErrorHandling(Remote);
                 }
             }
             catch (SocketException)
             {
-                ReceiveThread = null;
                 ReceiveErrorHandling(Remote);
             }
             catch (ObjectDisposedException)
             {
-                ReceiveThread = null;
                 ReceiveErrorHandling(Remote);
             }
             catch (CryptographicException)
             {
                 Logger.Log(LogLevel.Error, "Decryption error!");
-                ReceiveThread = null;
+                ReceiveErrorHandling(Remote);
+            }
+            catch (ConnectionException ex)
+            {
+                Logger.Log(LogLevel.Error, ex.Message);
+                ReceiveErrorHandling(Remote);
+            }
+            catch (DisconnectedGracefullyException)
+            {
                 ReceiveErrorHandling(Remote);
             }
             finally { m_receiveLock.Release(); }
@@ -139,7 +142,8 @@ namespace XSLibrary.Network.Connections
 
         protected void ReceiveErrorHandling(EndPoint remote)
         {
-            Disconnect();
+            ReceiveThread = null;
+            Kill();
         }
 
         private void RaiseReceivedEvent(byte[] data, EndPoint source)
@@ -148,9 +152,12 @@ namespace XSLibrary.Network.Connections
             DataReceivedEvent?.Invoke(this, data, source);
         }
 
-        protected virtual void WaitReceiveThread()
+        protected virtual void WaitReceiveThread(int timeout = 0)
         {
-            ReceiveThread?.Join();
+            if (timeout <= 0)
+                ReceiveThread?.Join();
+            else
+                ReceiveThread?.Join(timeout);
         }
     }
 }

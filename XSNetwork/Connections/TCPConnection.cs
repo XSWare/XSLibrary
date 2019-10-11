@@ -36,10 +36,10 @@ namespace XSLibrary.Network.Connections
 
         protected override bool ReceiveSpecialized(out byte[] data, out EndPoint source)
         {
-            data = new byte[MaxReceiveSize];
+            data = new byte[ReceiveBufferSize];
             source = Remote;
 
-            int size = ConnectionSocket.Receive(data, MaxReceiveSize, SocketFlags.None);
+            int size = ConnectionSocket.Receive(data, ReceiveBufferSize, SocketFlags.None);
 
             if (size <= 0)
             {
@@ -47,7 +47,7 @@ namespace XSLibrary.Network.Connections
                 return false;
             }
 
-            data = TrimData(data, size);
+            TrimData(ref data, size);
             return true;
         }
     }

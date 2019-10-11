@@ -93,7 +93,7 @@ namespace XSLibrary.Network.Connectors
             {
                 Logger.Log(LogLevel.Information, MessageConnecting, remote);
 
-                Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                Socket socket = new Socket(remote.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                 IAsyncResult result = socket.BeginConnect(remote, null, null);
                 result.AsyncWaitHandle.WaitOne(TimeoutConnect, true);
 
@@ -120,6 +120,7 @@ namespace XSLibrary.Network.Connectors
             finally { CurrentlyConnecting = false; }
         }
 
+        // throw exceptions to signal something went wrong and to log the error message
         protected abstract ConnectionType InitializeConnection(Socket connectedSocket);
     }
 }

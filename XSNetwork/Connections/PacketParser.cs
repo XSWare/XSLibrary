@@ -1,120 +1,94 @@
-﻿using System;
+using System;
 using XSLibrary.Utility;
 
 namespace XSLibrary.Network.Connections
 {
-    public partial class TCPPacketConnection : TCPConnection
+    class PacketParser
     {
-        class PacketParser
+        public class PacketException : Exception 
+        { 
+            public PacketException() : base() { }
+            public PacketException(string message) : base(message) { }
+        }
+
+        public bool NeedsFreshData { get { return currentData == null || currentPos == currentData.Length; } }
+        public bool PackageFinished { get { return currentPackage != null && currentPackagePos == currentPackage.Length; } }
+
+        public Logger Logger { get; set; } = Logger.NoLog;
+
+        byte[] currentPackage;
+        int currentPackagePos;
+        byte[] currentData;
+        int currentPos;
+
+        public byte[] GetPacket(int packetSize, Func<byte[]> getData)
         {
-            public int MaxPackageSize { get; set; }
+            CreatePacket(packetSize);
 
-            public bool NeedsFreshData { get; private set; }
-            public bool PackageFinished { get; private set; }
-
-            public Logger Logger { get; set; } = Logger.NoLog;
-
-            byte[] currentPackage;
-            int currentPackagePos;
-            byte[] currentData;
-            int currentPos;
-
-            public PacketParser()
-            {
-                NeedsFreshData = true;
-                PackageFinished = false;
-            }
-
-            public byte[] GetPacket()
-            {
-                if (!PackageFinished)
-                    return null;
-
-                byte[] package = currentPackage;
-                currentPackage = null;
-                PackageFinished = false;
-
-                return package;
-            }
-
-            public void AddData(byte[] data)
-            {
-                if (!NeedsFreshData)
-                    return;
-
-                currentData = data;
-                currentPos = 0;
-                NeedsFreshData = false;
-            }
-
-            public void ParsePacket()
+            while (!PackageFinished)
             {
                 if (NeedsFreshData)
-                    return;
+                    AddData(getData());
 
-                if (currentPackage == null && !CreatePacket())
-                {
-                    NeedsFreshData = true;
-                    return;
-                }
-
-                FillPacket();
+                ParsePackage();
             }
 
-            private void FillPacket()
-            {
-                int spacePackage = currentPackage.Length - currentPackagePos;
-                int currentDataLeft = currentData.Length - currentPos;
-                int leftoverDataSize = currentDataLeft - spacePackage;
+            return FinalizePacket();
+        }
 
-                if (leftoverDataSize >= 0)  // enough data to fill the package
-                {
-                    Array.Copy(currentData, currentPos, currentPackage, currentPackagePos, spacePackage);
-                    PackageFinished = true;
+        private byte[] FinalizePacket()
+        {
+            if (!PackageFinished)
+                throw new PacketException("Packet finalized prematurely!");
 
-                    currentPos += currentPackage.Length;
+            byte[] package = currentPackage;
+            currentPackage = null;
 
-                    if (currentPos == currentData.Length)   // package is full and data is empty -> get more data for next
-                        NeedsFreshData = true;
-                }
-                else    // not enough data to fill package
-                {
-                    // insert rest of data into package and wait for fresh data
-                    Array.Copy(currentData, currentPos, currentPackage, currentPackagePos, currentDataLeft);
-                    currentPackagePos += currentDataLeft;
+            return package;
+        }
 
-                    NeedsFreshData = true;
-                }
-            }
+        private void AddData(byte[] data)
+        {
+            if (!NeedsFreshData)
+                return;
 
-            private bool CreatePacket()
-            {
-                if (currentPos >= currentData.Length)
-                    return false;
+            currentData = data;
+            currentPos = 0;
+        }
 
-                int packetSize = ParseSize();
-                if (packetSize < 0 || packetSize > MaxPackageSize)  // invalid package
-                    return false;
+        private void ParsePackage()
+        {
+            if (currentPackage == null)
+                throw new PacketException("Trying to write data into uninitialized packet!");
 
-                currentPos += Header_Size_Total;
+            if (NeedsFreshData)
+                return;
 
-                PackageFinished = false;
-                currentPackage = new byte[packetSize];
-                currentPackagePos = 0;
+            FillPackage();
+        }
 
-                return true;
-            }
+        private void FillPackage()
+        {
+            int spacePackage = currentPackage.Length - currentPackagePos;
+            int currentDataLeft = currentData.Length - currentPos;
 
-            int ParseSize()
-            {
-                if (currentPos + Header_Size_Total > currentData.Length)
-                    return -1;
+            WriteDataToPacket(Math.Min(currentDataLeft, spacePackage));
+        }
 
-                return currentData[currentPos]
-                    + (currentData[currentPos + 1] << 8)
-                    + (currentData[currentPos + 2] << 16)
-                    + (currentData[currentPos + 3] << 24);
-            }
+        private void WriteDataToPacket(int size)
+        {
+            Array.Copy(currentData, currentPos, currentPackage, currentPackagePos, size);
+            currentPos += size;
+            currentPackagePos += size;
+        }
+
+        public void CreatePacket(int packetSize)
+        {
+            if (packetSize < 0)
+                throw new PacketException(String.Format("Invalid packet size ({0} byte) detected!", packetSize));
+
+            currentPackage = new byte[packetSize];
+            currentPackagePos = 0;
         }
     }
 }

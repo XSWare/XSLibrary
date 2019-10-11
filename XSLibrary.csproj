@@ -85,6 +85,7 @@
     <Compile Include="XSMultithreadingPatterns\UniquePair\UniquePairDistribution.cs" />
     <Compile Include="XSNetwork\Acceptors\GuardedAcceptor.cs" />
     <Compile Include="XSNetwork\Acceptors\IAcceptor.cs" />
+    <Compile Include="XSNetwork\Acceptors\SecureAcceptor.cs" />
     <Compile Include="XSNetwork\Acceptors\TCPAcceptor.cs" />
     <Compile Include="XSNetwork\Connections\Interface\Handshake.cs" />
     <Compile Include="XSNetwork\Connections\Interface\IConnection.cs" />
@@ -95,7 +96,9 @@
     <Compile Include="XSNetwork\Connections\TCPPacketConnection.cs" />
     <Compile Include="XSNetwork\Connections\UDPConnection.cs" />
     <Compile Include="XSNetwork\Connectors\AccountConnector.cs" />
+    <Compile Include="XSNetwork\AddressResolver.cs" />
     <Compile Include="XSNetwork\Connectors\Connector.cs" />
+    <Compile Include="XSNetwork\Connectors\SecureConnector.cs" />
     <Compile Include="XSNetwork\Connectors\TCPConnector.cs" />
     <Compile Include="XSNetwork\Registrations\IAccountPool.cs" />
     <Compile Include="XSNetwork\Registrations\IRegistration.cs" />

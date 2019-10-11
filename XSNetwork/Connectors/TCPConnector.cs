@@ -3,7 +3,7 @@ using XSLibrary.Network.Connections;
 
 namespace XSLibrary.Network.Connectors
 {
-    class TCPConnector : Connector<TCPConnection>
+    public class TCPConnector : Connector<TCPConnection>
     {
         protected override TCPConnection InitializeConnection(Socket connectedSocket)
         {

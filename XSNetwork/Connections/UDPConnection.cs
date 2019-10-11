@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Sockets;
 using XSLibrary.Utility;
 
@@ -48,14 +48,14 @@ namespace XSLibrary.Network.Connections
 
         protected override bool ReceiveSpecialized(out byte[] data, out EndPoint source)
         {
-            data = new byte[MaxReceiveSize];
+            data = new byte[ReceiveBufferSize];
             source = Local;
 
             int size;
             do { size = ConnectionSocket.ReceiveFrom(data, ref source); }
             while (IsHolePunching(size));
 
-            data = TrimData(data, size);
+            TrimData(ref data, size);
             return true;
         }
 
