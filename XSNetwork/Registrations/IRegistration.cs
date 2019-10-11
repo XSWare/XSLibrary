@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Net;
 using XSLibrary.Cryptography.ConnectionCryptos;
 using XSLibrary.Network.Acceptors;
 using XSLibrary.Network.Connections;
+using XSLibrary.ThreadSafety.Events;
 using XSLibrary.Utility;
 
 namespace XSLibrary.Network.Registrations
@@ -9,6 +11,8 @@ namespace XSLibrary.Network.Registrations
     public abstract class IRegistration<AccountType> : IDisposable 
         where AccountType : IUserAccount
     {
+        OneShotEvent<object, object> DisposeCalled = new OneShotEvent<object, object>();
+
         private Logger m_logger = Logger.NoLog;
         public Logger Logger
         {
@@ -23,7 +27,11 @@ namespace XSLibrary.Network.Registrations
 
         public int AuthenticationTimeout { get; set; } = 5000;
         public int CryptoHandshakeTimeout { get; set; } = 5000;
-        public CryptoType Crypto { get; set; } = CryptoType.NoCrypto;
+        public CryptoType Crypto 
+        { 
+            get { return Acceptor.Crypto; }
+            set { Acceptor.Crypto = value; }
+        }
 
         private SecureAcceptor Acceptor { get; set; }
         protected IAccountPool<AccountType> Accounts { get; private set; }
@@ -52,7 +60,11 @@ namespace XSLibrary.Network.Registrations
             }
 
             HandleVerifiedConnection(Accounts.GetElement(username), connection);
+
             connection.OnDisconnect.Event += (eventSender, arguments) => Accounts.ReleaseElement(username);
+            OneShotEvent<object, object>.EventHandle disposeHandler = (object disposeSender, object disposer) => { connection.Dispose(); };
+            DisposeCalled.Event += disposeHandler;
+            connection.OnDisconnect.Event += (object disconnectSender, EndPoint endpoint) => { DisposeCalled.Event -= disposeHandler; };
         }
 
         protected abstract bool Authenticate(out string username, TCPPacketConnection connection);
@@ -62,6 +74,7 @@ namespace XSLibrary.Network.Registrations
         public virtual void Dispose()
         {
             Acceptor.Dispose();
+            DisposeCalled?.Invoke(this, this);
             Logger.Log(LogLevel.Detail, "Registration disposed.");
         }
     }
