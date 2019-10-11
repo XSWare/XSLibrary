@@ -74,20 +74,7 @@ namespace XSLibrary.Network.Connections
 
         private byte[] GetPacketHeader()
         {
-            byte[] header;
-            header = Parser.GetPacket(Header_Size_Total, TimedReceive);
-            while (IsKeepAlive(header))   // consume keep alives
-            {
-                Logger.Log(LogLevel.Detail, "Received keep alive.");
-                header = Parser.GetPacket(Header_Size_Total, TimedReceive);
-            }
-
-            return header;
-        }
-
-        private bool IsKeepAlive(byte[] header)
-        {
-            return IsHeader(header) && header[0] == Header_ID_KeepAlive; 
+            return Parser.GetPacket(Header_Size_Total, TimedReceive);
         }
 
         private int GetPacketSize(byte[] header)
@@ -95,10 +82,7 @@ namespace XSLibrary.Network.Connections
             if (!IsHeader(header))
                 throw new ConnectionException("Failed to parse header data!");
 
-            if (header[0] != Header_ID_Packet)
-                throw new ConnectionException("Packet flag in header is invalid!");
-
-            return ReadSize(header, 1);
+            return ReadSize(header, 0);
         }
 
         private bool IsHeader(byte[] data)
