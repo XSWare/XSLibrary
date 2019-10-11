@@ -73,7 +73,7 @@ namespace XSLibrary.Network.Connections
             while (!m_disconnecting)
             {
                 if (SafeReceive(out byte[] data, out EndPoint source))
-                    RaiseReceivedEvent(Crypto.DecryptData(data), source);
+                    RaiseReceivedEvent(data, source);
             }
 
             Receiving = false;
