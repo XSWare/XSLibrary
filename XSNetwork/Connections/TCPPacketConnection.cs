@@ -1,7 +1,6 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
 using XSLibrary.Utility;
 
 namespace XSLibrary.Network.Connections
@@ -11,11 +10,8 @@ namespace XSLibrary.Network.Connections
         // this includes any cryptographic overhead as well so consider this while deciding its value
         public int MaxPacketReceiveSize { get; set; } = 2048;
 
-        const byte Header_ID_Packet = 0x00;
-        const byte Header_ID_KeepAlive = 0x01;
-        const int Header_Size_ID = 1;
         const int Header_Size_PacketLength = 4;
-        const int Header_Size_Total = Header_Size_ID + Header_Size_PacketLength;
+        const int Header_Size_Total = Header_Size_PacketLength;
 
         public override Logger Logger
         {
@@ -37,39 +33,13 @@ namespace XSLibrary.Network.Connections
             ConnectionSocket.Send(data);
         }
 
-        private byte[] CreateHeader(int length)
+        private byte[] CreateHeader(int contentSize)
         {
-            byte[] header = new byte[Header_Size_ID + Header_Size_PacketLength];
-            byte[] lengthHeader = BitConverter.GetBytes(length);
+            byte[] header = new byte[Header_Size_Total];
+            byte[] contentSizeBytes = BitConverter.GetBytes(contentSize);
 
-            header[0] = Header_ID_Packet;
-            Array.Copy(lengthHeader, 0, header, Header_Size_ID, Header_Size_PacketLength);
+            Array.Copy(contentSizeBytes, 0, header, 0, Header_Size_PacketLength);
             return header;
-        }
-
-        public void SendKeepAlive()
-        {
-            if (SafeSend(() => ConnectionSocket.Send(new byte[] { Header_ID_KeepAlive, 0, 0, 0, 0 })))
-                Logger.Log(LogLevel.Detail, "Sent keep alive.");
-        }
-
-        public void StartKeepAliveLoop(int loopInterval, int checkInterval)
-        {
-            DebugTools.ThreadpoolStarter("Keep alive loop", () =>
-            {
-                int currentWaitTime = 0;
-                while (Connected)
-                {
-                    Thread.Sleep(checkInterval);
-
-                    currentWaitTime += checkInterval;
-                    if (currentWaitTime >= loopInterval)
-                    {
-                        currentWaitTime = 0;
-                        SendKeepAlive();
-                    }
-                }
-            });
         }
 
         protected override bool ReceiveSpecialized(out byte[] data, out EndPoint source)
@@ -104,20 +74,7 @@ namespace XSLibrary.Network.Connections
 
         private byte[] GetPacketHeader()
         {
-            byte[] header;
-            header = Parser.GetPacket(Header_Size_Total, TimedReceive);
-            while (IsKeepAlive(header))   // consume keep alives
-            {
-                Logger.Log(LogLevel.Detail, "Received keep alive.");
-                header = Parser.GetPacket(Header_Size_Total, TimedReceive);
-            }
-
-            return header;
-        }
-
-        private bool IsKeepAlive(byte[] header)
-        {
-            return IsHeader(header) && header[0] == Header_ID_KeepAlive; 
+            return Parser.GetPacket(Header_Size_Total, TimedReceive);
         }
 
         private int GetPacketSize(byte[] header)
@@ -125,10 +82,7 @@ namespace XSLibrary.Network.Connections
             if (!IsHeader(header))
                 throw new ConnectionException("Failed to parse header data!");
 
-            if (header[0] != Header_ID_Packet)
-                throw new ConnectionException("Packet flag in header is invalid!");
-
-            return ReadSize(header, 1);
+            return ReadSize(header, 0);
         }
 
         private bool IsHeader(byte[] data)
