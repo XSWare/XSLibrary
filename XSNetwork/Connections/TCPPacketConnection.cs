@@ -6,7 +6,7 @@ using XSLibrary.Utility;
 
 namespace XSLibrary.Network.Connections
 {
-    public partial class TCPPacketConnection : TCPConnection
+    public class TCPPacketConnection : TCPConnection
     {
         // this includes any cryptographic overhead as well so consider this while deciding its value
         public int MaxPacketReceiveSize { get; set; } = 2048;
@@ -23,7 +23,8 @@ namespace XSLibrary.Network.Connections
             set { Parser.Logger = value; }
         }
 
-        PackageParser Parser = new PackageParser();
+        PacketParser Parser = new PacketParser();
+        OneShotTimer TimeoutTimer = null;
 
         public TCPPacketConnection(Socket socket)
             : base(socket)
@@ -76,32 +77,42 @@ namespace XSLibrary.Network.Connections
             data = null;
             source = Remote;
 
-            OneShotTimer timeoutTimer = null;
+            StartTimeoutTimer();
+
+            try
+            {
+                byte[] header = GetPacketHeader();
+
+                int packetSize = GetPacketSize(header);
+                if (packetSize > MaxPacketReceiveSize)
+                    throw new ConnectionException(String.Format("Packet size exceeded from {0}!", Remote));
+
+                data = Parser.GetPacket(packetSize, TimedReceive);
+            }
+            catch (PacketParser.PacketException ex) { throw new ConnectionException(ex.Message); }
+
+            return true;
+        }
+
+        private void StartTimeoutTimer()
+        {
+            TimeoutTimer = null;
             int receiveTimeout = ReceiveTimeout;   // copy to avoid race condition
             if (receiveTimeout > 0)
-                timeoutTimer = new OneShotTimer(receiveTimeout * 1000);
+                TimeoutTimer = new OneShotTimer(receiveTimeout * 1000);
+        }
 
-            Parser.MaxPackageSize = MaxPacketReceiveSize;
-
-            Func<byte[]> receive = () =>
-            {
-                byte[] receivedChunk;
-                if (!TimedReceive(out receivedChunk, timeoutTimer))
-                    throw new ConnectionException(String.Format("Receive from {0} failed!", Remote));
-
-                return receivedChunk;
-            };
-
+        private byte[] GetPacketHeader()
+        {
             byte[] header;
-            header = Parser.GetPacket(Header_Size_Total, receive);
+            header = Parser.GetPacket(Header_Size_Total, TimedReceive);
             while (IsKeepAlive(header))   // consume keep alives
             {
                 Logger.Log(LogLevel.Detail, "Received keep alive.");
-                header = Parser.GetPacket(Header_Size_Total, receive);
+                header = Parser.GetPacket(Header_Size_Total, TimedReceive);
             }
 
-            data = Parser.GetPacket(GetPacketSize(header), receive);
-            return true;
+            return header;
         }
 
         private bool IsKeepAlive(byte[] header)
@@ -133,25 +144,30 @@ namespace XSLibrary.Network.Connections
                 + (header[offset + 3] << 24);
         }
 
-        private bool TimedReceive(out byte[] data, OneShotTimer timeoutTimer)
+        private byte[] TimedReceive()
         {
-            data = null;
-            if (timeoutTimer == null) // no timeout
+            int size;
+            byte[] data = null;
+            if (TimeoutTimer != null)   // with timeout
             {
-                if (!AsyncReceive(out data, 0))
-                    return false;
-            }
-            else                // with timeout
-            {
-                int timeLeft = (int)timeoutTimer.TimeLeft.TotalMilliseconds;
-                if (timeLeft <= 0 || !AsyncReceive(out data, timeLeft))
-                    return false;
-            }
+                int timeLeft = (int)TimeoutTimer.TimeLeft.TotalMilliseconds;
+                if (timeLeft <= 0)
+                    throw new ConnectionException(String.Format("Timeout while receiving from {0}!", Remote));
 
-            return true;
+                size = AsyncReceive(out data, timeLeft);
+            }
+            else                        // no timeout
+                size = AsyncReceive(out data, 0);
+
+            if(size == 0)
+                throw new DisconnectedGracefullyException();
+            else if(size < 0)
+                throw new ConnectionException(String.Format("Receive from {0} failed!", Remote));
+
+            return data;
         }
 
-        private bool AsyncReceive(out byte[] data, int timeout)
+        private int AsyncReceive(out byte[] data, int timeout)
         {
             data = new byte[ReceiveBufferSize];
 
@@ -164,18 +180,20 @@ namespace XSLibrary.Network.Connections
                 success = receiveResult.AsyncWaitHandle.WaitOne();
 
             if (!success)
+            {
+                data = null;
                 ConnectionSocket.Dispose();
+                return -1;
+            }
 
             int size = ConnectionSocket.EndReceive(receiveResult);
-            if (size <= 0)
-                throw new DisconnectedGracefullyException();
 
-            if (success)
+            if (size > 0)
                 TrimData(ref data, size);
             else
                 data = null;
 
-            return success;
+            return size;
         }
     }
 }
