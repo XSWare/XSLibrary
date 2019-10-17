@@ -49,7 +49,7 @@ namespace XSLibrary.Network.Connections
 
         private void HandleHandshakeFailure()
         {
-            Logger.Log(LogLevel.Error, "Crypto handshake failed from {0}", Remote);
+            Logger.Log(LogLevel.Error, "Crypto handshake with {0} failed!", Remote);
             Kill();   // in case it is not already disconnected
         }
     }
