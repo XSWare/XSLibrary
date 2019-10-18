@@ -45,7 +45,7 @@ namespace XSLibrary.Utility
         }
     }
 
-    class NoLog : Logger
+    public class NoLog : Logger
     {
         protected override void LogMessage(string text)
         {
