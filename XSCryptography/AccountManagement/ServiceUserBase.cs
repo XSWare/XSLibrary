@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.Linq;
 using System.Data.SqlClient;
+using System.IO;
 using System.Security.Cryptography;
 using XSLibrary.Cryptography.PasswordHashes;
 using XSLibrary.DataBase;
@@ -13,9 +14,84 @@ namespace XSLibrary.Cryptography.AccountManagement
     {
         SQLExecutor sqlExecutor;
 
-        public ServiceUserBase(string connectionString)
+        public string DatabaseName { get; private set; }
+        public string DatabasePath { get; private set; }
+        public string ServerConnectionString { get; private set; }
+        public string ConnectionString { get; private set; }
+
+        public ServiceUserBase(string databasePath, string serverString)
         {
-            sqlExecutor = new SQLExecutor(connectionString);
+            DatabasePath = databasePath;
+            DatabaseName = Path.GetFileNameWithoutExtension(DatabasePath);
+            ConnectionString = "Data Source=" + serverString + ";AttachDbFilename=" + databasePath + ";Integrated Security=True";
+            ServerConnectionString = "Data Source=" + serverString + ";Initial Catalog=master; Integrated Security=true";
+
+            sqlExecutor = new SQLExecutor(ConnectionString);
+
+            InitializeDatabase();
+        }
+
+        private bool InitializeDatabase()
+        {
+            if (File.Exists(DatabasePath))
+                return false;
+
+            if (DatabaseExists())
+                return false;
+
+            CreateDatabase();
+            return true;
+        }
+
+        private void CreateDatabase()
+        {
+            using (var connection = new SqlConnection(ServerConnectionString))
+            {
+                connection.Open();
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = String.Format("CREATE DATABASE {0} ON PRIMARY (NAME={0}, FILENAME='{1}')", DatabaseName, DatabasePath);
+                    command.ExecuteNonQuery();
+
+                    command.CommandText = String.Format("EXEC sp_detach_db '{0}', 'true'", DatabaseName);
+                    command.ExecuteNonQuery();
+                }
+            }
+
+            using (var connection = new SqlConnection(ConnectionString))
+            {
+                connection.Open();
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = GetTableString();
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        private bool DatabaseExists()
+        {
+            using (var connection = new SqlConnection(ServerConnectionString))
+            using (var command = new SqlCommand(string.Format("SELECT db_id(\'{0}\')", DatabaseName), connection))
+            {
+                connection.Open();
+                return command.ExecuteScalar() != DBNull.Value;
+            }
+        }
+
+        private string GetTableString()
+        {
+            return "CREATE TABLE [dbo].[Accounts] (" +
+                "[id] INT IDENTITY(1, 1) NOT NULL," +
+                "[username] VARCHAR(255) NOT NULL," +
+                "[passwordhash] VARBINARY(MAX) NOT NULL," +
+                "[salt] VARBINARY(MAX) NOT NULL," +
+                "[difficulty] INT NOT NULL," +
+                "[accesslevel] INT NOT NULL," +
+                "[contact] VARCHAR(255)   NOT NULL," +
+                "PRIMARY KEY CLUSTERED([id] ASC)," +
+                "UNIQUE NONCLUSTERED([username] ASC)," +
+                "UNIQUE NONCLUSTERED([contact] ASC));";
         }
 
         protected override bool AddUserData(AccountData userData)
