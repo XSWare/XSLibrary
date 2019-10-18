@@ -24,15 +24,13 @@ namespace XSLibrary.Utility
 
         private void CheckFile()
         {
-            if(!Directory.Exists(Path.GetDirectoryName(FilePath)))
-            {
-                Directory.CreateDirectory(FilePath);
-            }
+            string directory = Path.GetDirectoryName(FilePath);
 
-            if(!File.Exists(FilePath))
-            {
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
+
+            if (!File.Exists(FilePath))
                 File.Create(FilePath).Close();
-            }
         }
     }
 }
