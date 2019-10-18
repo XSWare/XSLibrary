@@ -134,7 +134,7 @@ namespace XSLibrary.Cryptography.AccountManagement
 
         protected override void EraseAllAccountsUnsafe()
         {
-            using (SqlCommand command = new SqlCommand("DROP TABLE Accounts", sqlExecutor.Connection))
+            using (SqlCommand command = new SqlCommand("DELETE FROM Accounts", sqlExecutor.Connection))
             {
                 sqlExecutor.Execute(command.ExecuteNonQuery);
             }
