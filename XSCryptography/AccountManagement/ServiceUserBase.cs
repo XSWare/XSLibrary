@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data;
 using System.Data.Linq;
 using System.Data.SqlClient;
@@ -11,7 +11,6 @@ namespace XSLibrary.Cryptography.AccountManagement
 {
     public class ServiceUserBase : IUserDataBase
     {
-        public Logger Logger { get; set; } = new NoLog();
 
         SQLExecutor sqlExecutor;
 
