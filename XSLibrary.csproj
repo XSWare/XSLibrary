@@ -46,7 +46,7 @@
   <ItemGroup>
     <Compile Include="XSCryptography\AccountManagement\FileUserBase.cs" />
     <Compile Include="XSCryptography\AccountManagement\IUserDataBase.cs" />
-    <Compile Include="XSCryptography\AccountManagement\ServiceUserBase.cs" />
+    <Compile Include="XSCryptography\AccountManagement\LocalSQLUserBase.cs" />
     <Compile Include="XSCryptography\AccountManagement\AccountData.cs" />
     <Compile Include="XSCryptography\Algorithms\Curve25519.cs" />
     <Compile Include="XSCryptography\BitManipulation\BitManipulation.cs" />

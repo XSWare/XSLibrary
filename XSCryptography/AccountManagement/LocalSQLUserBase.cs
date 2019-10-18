@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Data;
-using System.Data.Linq;
 using System.Data.SqlClient;
 using System.IO;
 using System.Security.Cryptography;
@@ -10,7 +9,7 @@ using XSLibrary.Utility;
 
 namespace XSLibrary.Cryptography.AccountManagement
 {
-    public class ServiceUserBase : IUserDataBase
+    public class LocalSQLUserBase : IUserDataBase
     {
         SQLExecutor sqlExecutor;
 
@@ -19,7 +18,7 @@ namespace XSLibrary.Cryptography.AccountManagement
         public string ServerConnectionString { get; private set; }
         public string ConnectionString { get; private set; }
 
-        public ServiceUserBase(string databasePath, string serverString)
+        public LocalSQLUserBase(string databasePath, string serverString)
         {
             DatabasePath = databasePath;
             DatabaseName = Path.GetFileNameWithoutExtension(DatabasePath);
