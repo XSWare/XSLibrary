@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Data;
 using System.Data.Linq;
 using System.Data.SqlClient;
@@ -11,7 +11,6 @@ namespace XSLibrary.Cryptography.AccountManagement
 {
     public class ServiceUserBase : IUserDataBase
     {
-
         SQLExecutor sqlExecutor;
 
         public ServiceUserBase(string connectionString)
@@ -133,7 +132,7 @@ namespace XSLibrary.Cryptography.AccountManagement
 
         protected override bool IsStringAllowed(string str)
         {
-            return base.IsStringAllowed(str) && str.Length > 0 & str.Length <= 256;
+            return base.IsStringAllowed(str) && str.Length > 0 & str.Length <= 255;
         }
     }
 }
