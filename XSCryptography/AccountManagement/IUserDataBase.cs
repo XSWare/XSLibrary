@@ -138,6 +138,8 @@ namespace XSLibrary.Cryptography.AccountManagement
             if (hash1.Length != hash2.Length)
                 return false;
 
+            // a non-constant compare time is okay here, guessing the hash does not reveal anything about
+            // the original password if it is salted -> effectiveness of any other bruteforce approach
             for (int i = 0; i < hash1.Length; i++)
             {
                 if (hash1[i] != hash2[i])
