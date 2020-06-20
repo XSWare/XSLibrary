@@ -12,7 +12,7 @@ namespace XSLibrary.MultithreadingPatterns.Actor
         SafeQueue<MessageType> m_queue = new SafeQueue<MessageType>();
         Semaphore m_limit;
         Thread m_thread;
-        bool m_abort;
+        volatile bool m_abort;
         Semaphore m_creationLock = new Semaphore(1,1);
 
         public Actor(string threadName = "Actor") : this(Logger.NoLog, threadName) { }

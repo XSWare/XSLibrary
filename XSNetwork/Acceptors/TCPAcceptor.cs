@@ -15,7 +15,13 @@ namespace XSLibrary.Network.Acceptors
 
         private bool m_running;
         public bool Running { get { return m_running && !Abort; } }
-        protected bool Abort { get; private set; }
+
+        volatile bool m_abort;
+        protected bool Abort
+        {
+            get { return m_abort; }
+            private set { m_abort = value; }
+        }
 
         Socket m_listeningSocket;
         Thread m_acceptThread;
