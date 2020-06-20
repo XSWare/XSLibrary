@@ -1,10 +1,13 @@
 ﻿using XSLibrary.Cryptography.PasswordHashes;
 using XSLibrary.ThreadSafety.Executors;
+using XSLibrary.Utility;
 
 namespace XSLibrary.Cryptography.AccountManagement
 {
     public abstract class IUserDataBase
     {
+        public Logger Logger { get; set; } = new NoLog();
+
         public int SaltLength { get; set; } = 64;
         public int Difficulty { get; set; } = 10000;
 

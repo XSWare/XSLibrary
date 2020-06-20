@@ -34,6 +34,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data.Linq" />
     <Reference Include="System.Security" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -45,7 +46,8 @@
   <ItemGroup>
     <Compile Include="XSCryptography\AccountManagement\FileUserBase.cs" />
     <Compile Include="XSCryptography\AccountManagement\IUserDataBase.cs" />
-    <Compile Include="XSCryptography\AccountManagement\UserData.cs" />
+    <Compile Include="XSCryptography\AccountManagement\LocalSQLUserBase.cs" />
+    <Compile Include="XSCryptography\AccountManagement\AccountData.cs" />
     <Compile Include="XSCryptography\Algorithms\Curve25519.cs" />
     <Compile Include="XSCryptography\BitManipulation\BitManipulation.cs" />
     <Compile Include="XSCryptography\BitManipulation\BitPosition.cs" />
@@ -63,6 +65,7 @@
     <Compile Include="XSCryptography\PasswordHashes\PasswordHash.cs" />
     <Compile Include="XSCryptography\PasswordHashes\SlowHashPBKDF2.cs" />
     <Compile Include="XSCryptography\PasswordStorage\PasswordStorage.cs" />
+    <Compile Include="XSDataBase\SQLExecutor.cs" />
     <Compile Include="XSMultithreadingPatterns\Actor.cs" />
     <Compile Include="XSMultithreadingPatterns\UniquePair\CalculationNodes\ActorNode.cs" />
     <Compile Include="XSMultithreadingPatterns\UniquePair\CalculationNodes\ActorPool.cs" />
